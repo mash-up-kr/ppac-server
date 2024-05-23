@@ -1,5 +1,7 @@
 import express, { Application, Request, Response, json, urlencoded } from 'express';
 
+import { logger, loggerMiddleware } from './util/logger';
+
 async function startServer() {
   const app: Application = express();
 
@@ -9,9 +11,10 @@ async function startServer() {
   app.get('/', (_req: Request, res: Response) => {
     res.send('Hello PPAC');
   });
+  app.use(loggerMiddleware);
 
   app.listen(3000, () => {
-    console.log('Ready to start server');
+    logger.info('Ready to start server');
   });
 }
 
