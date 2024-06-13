@@ -1,10 +1,12 @@
+import { randomUUID } from 'crypto';
+
 import { Request, Response, NextFunction } from 'express';
 import pino from 'pino';
 
 const transport = pino.transport({
   targets: [
     {
-      level: 'info',
+      level: 'trace',
       target: 'pino-pretty',
       options: { colorize: true },
     },
@@ -12,6 +14,11 @@ const transport = pino.transport({
 });
 
 const logger = pino(transport);
+
+const attachRequestId = (req: Request, res: Response, next: NextFunction) => {
+  req.id = randomUUID();
+  next();
+};
 
 const loggerMiddleware = (req: Request, res: Response, next: NextFunction) => {
   const start = Date.now();
@@ -39,4 +46,4 @@ const loggerMiddleware = (req: Request, res: Response, next: NextFunction) => {
 
 logger.info('Logger Initialized!');
 
-export { logger, loggerMiddleware };
+export { logger, loggerMiddleware, attachRequestId };

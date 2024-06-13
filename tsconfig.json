@@ -1,5 +1,7 @@
 {
-  "include": ["src/**/*.ts"],
+  "include": ["src/custom.d.ts", "src/**/*.ts"],
+  "exclude": ["node_modules", "dist", "test", "**/*.spec.ts"],
+  "files": ["src/custom.d.ts"],
   "compilerOptions": {
     "module": "commonjs",
     "declaration": true,
@@ -13,5 +15,5 @@
     "outDir": "./dist",
     "baseUrl": "./",
     "skipLibCheck": true,
-  },
+  }
 }
