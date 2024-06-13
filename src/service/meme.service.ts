@@ -10,7 +10,7 @@ async function getMeme(memeId: string): Promise<IMeme> {
     const meme = await MemeModel.findOne({ _id: memeId, isDeleted: false });
     return meme.toObject();
   } catch (err) {
-    logger.debug(`Failed to get a meme(${memeId})`);
+    logger.info(`Failed to get a meme(${memeId})`);
   }
 }
 
@@ -19,8 +19,28 @@ async function getTodayMemeList(limit: number = 5): Promise<IMeme[]> {
     .limit(limit)
     .lean();
 
-  logger.debug(`Get all today meme list(${todayMemeList}), limit(${limit})`);
+  logger.info(`Get all today meme list(${todayMemeList}), limit(${limit})`);
   return todayMemeList;
+}
+
+async function getAllMemeList(
+  page: number,
+  size: number,
+): Promise<{ total: number; page: number; totalPages: number; data: IMeme[] }> {
+  const totalMemes = await MemeModel.countDocuments();
+
+  const memeList = await MemeModel.find({ isDeleted: false })
+    .skip((page - 1) * size)
+    .limit(size)
+    .sort({ createdAt: -1 });
+  logger.info(`Get all meme list(${memeList}), page(${page}), size(${size}), total(${totalMemes})`);
+
+  return {
+    total: totalMemes,
+    page,
+    totalPages: Math.ceil(totalMemes / size),
+    data: memeList,
+  };
 }
 
 async function createMeme(info: IMemeCreatePayload): Promise<IMeme> {
@@ -29,7 +49,7 @@ async function createMeme(info: IMemeCreatePayload): Promise<IMeme> {
   });
 
   await meme.save();
-  logger.debug(`Created meme - meme(${JSON.stringify(meme.toObject())}})`);
+  logger.info(`Created meme - meme(${JSON.stringify(meme.toObject())}})`);
   return meme.toObject();
 }
 
@@ -44,7 +64,7 @@ async function updateMeme(memeId: string, updateInfo: any): Promise<IMeme> {
     throw new CustomError(`Failed to update a meme(${memeId})`, HttpCode.NOT_FOUND);
   }
 
-  logger.debug(`Update meme - meme(${memeId})`);
+  logger.info(`Update meme - meme(${memeId})`);
   return meme;
 }
 
@@ -58,8 +78,8 @@ async function deleteMeme(memeId: string): Promise<boolean> {
     throw new CustomError(`Failed to delete a meme(${memeId})`, HttpCode.NOT_FOUND);
   }
 
-  logger.debug(`Delete Meme - meme(${memeId})`);
+  logger.info(`Delete Meme - meme(${memeId})`);
   return true;
 }
 
-export { getMeme, createMeme, updateMeme, deleteMeme, getTodayMemeList };
+export { getMeme, createMeme, updateMeme, deleteMeme, getTodayMemeList, getAllMemeList };

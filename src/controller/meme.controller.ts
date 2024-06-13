@@ -12,7 +12,7 @@ const getMeme = async (req: Request, res: Response, next: NextFunction) => {
   const memeId = req.params?.memeId || req.body?.memeId || null;
 
   const meme = await MemeService.getMeme(memeId);
-  logger.debug(`Get meme - ${memeId})`);
+  logger.info(`Get meme - ${memeId})`);
   return res.json({ ...meme });
 };
 
@@ -60,6 +60,18 @@ const deleteMeme = async (req: CustomMemeRequest, res: Response, next: NextFunct
   }
 };
 
+const getAllMemeList = async (req: Request, res: Response, next: NextFunction) => {
+  const page = parseInt(req?.params.page) || 1;
+  const size = parseInt(req?.params.size) || 10;
+
+  try {
+    const memeList = await MemeService.getAllMemeList(page, size);
+    return res.json(memeList);
+  } catch (err) {
+    return next(new CustomError(err.message, err.status));
+  }
+};
+
 const getTodayMemeList = async (req: Request, res: Response, next: NextFunction) => {
   const limit = _.get(req.body, 'limit', 5);
   try {
@@ -70,4 +82,4 @@ const getTodayMemeList = async (req: Request, res: Response, next: NextFunction)
   }
 };
 
-export { getMeme, getTodayMemeList, createMeme, deleteMeme, updateMeme };
+export { getMeme, getTodayMemeList, getAllMemeList, createMeme, deleteMeme, updateMeme };
