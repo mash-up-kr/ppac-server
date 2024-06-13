@@ -7,7 +7,7 @@ import {
   createMeme,
   getTodayMemeList,
 } from '../controller/meme.controller';
-import { getRequestedMemeInfo } from '../middleware/memeValidator';
+import { getRequestedMemeInfo } from '../middleware/requestedInfo';
 
 const router = express.Router();
 
