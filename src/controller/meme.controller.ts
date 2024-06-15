@@ -29,9 +29,8 @@ const createMeme = async (req: Request, res: Response, next: NextFunction) => {
     return next(new CustomError(`'source' field should be provided`, HttpCode.BAD_REQUEST));
   }
 
-  let meme = null;
   try {
-    meme = await MemeService.createMeme(req.body);
+    const meme = await MemeService.createMeme(req.body);
     return res.json({ ...meme });
   } catch (err) {
     return next(new CustomError(err.message, err.status));

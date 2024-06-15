@@ -1,7 +1,7 @@
 import mongoose, { Schema } from 'mongoose';
 
 export interface IUser {
-  deviceId: string;
+  deviceID: string;
   createdAt: Date;
   updatedAt: Date;
   isDeleted: boolean;
@@ -9,7 +9,7 @@ export interface IUser {
 
 const UserSchema: Schema = new Schema(
   {
-    deviceId: { type: String, required: true },
+    deviceID: { type: String, required: true },
     isDeleted: { type: Boolean, required: true, default: false },
   },
   {
