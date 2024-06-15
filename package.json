@@ -1,7 +1,7 @@
 {
-  "name": "ppac-server",
+  "name": "farmeme",
   "version": "1.0.0",
-  "description": "ppac server team",
+  "description": "ppac server team - farmeme",
   "main": "src/index.ts",
   "scripts": {
     "start": "nodemon --exec ts-node --project tsconfig.json src/index.ts",
