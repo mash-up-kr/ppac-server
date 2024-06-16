@@ -5,7 +5,7 @@ import mongoose from 'mongoose';
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
 import { CustomMemeRequest } from '../middleware/requestedInfo';
-import { IMeme, IMemeCreatePayload } from '../model/meme';
+import { IMemeCreatePayload } from '../model/meme';
 import * as MemeService from '../service/meme.service';
 import { logger } from '../util/logger';
 
@@ -59,7 +59,7 @@ const updateMeme = async (req: CustomMemeRequest, res: Response, next: NextFunct
   const updateInfo: IMemeCreatePayload = req.body;
 
   try {
-    const updatedMeme = await MemeService.updateMeme(meme._id, updateInfo);
+    const updatedMeme = await MemeService.updateMeme(meme._id as string, updateInfo);
     return res.json({ ...updatedMeme });
   } catch (err) {
     return next(new CustomError(err.message, err.status));
@@ -69,7 +69,7 @@ const updateMeme = async (req: CustomMemeRequest, res: Response, next: NextFunct
 const deleteMeme = async (req: CustomMemeRequest, res: Response, next: NextFunction) => {
   const meme = req.requestedMeme;
   try {
-    const deletedMeme = await MemeService.deleteMeme(meme._id);
+    const deletedMeme = await MemeService.deleteMeme(meme._id as string);
     return res.json({ result: deletedMeme });
   } catch (err) {
     return next(new CustomError(err.message, err.status));
