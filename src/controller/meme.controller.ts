@@ -60,8 +60,15 @@ const deleteMeme = async (req: CustomMemeRequest, res: Response, next: NextFunct
 };
 
 const getAllMemeList = async (req: Request, res: Response, next: NextFunction) => {
-  const page = parseInt(req?.params.page) || 1;
-  const size = parseInt(req?.params.size) || 10;
+  const page = parseInt(req.query.page as string) || 1;
+  if (page < 1) {
+    return next(new CustomError(`Invalid 'page' parameter`, HttpCode.BAD_REQUEST));
+  }
+
+  const size = parseInt(req.query.size as string) || 10;
+  if (size < 1) {
+    return next(new CustomError(`Invalid 'size' parameter`, HttpCode.BAD_REQUEST));
+  }
 
   try {
     const memeList = await MemeService.getAllMemeList(page, size);
