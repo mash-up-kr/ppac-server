@@ -72,10 +72,17 @@ const getAllMemeList = async (req: Request, res: Response, next: NextFunction) =
 };
 
 const getTodayMemeList = async (req: Request, res: Response, next: NextFunction) => {
-  const limit = _.get(req.body, 'limit', 5);
+  const size = parseInt(req.query.size as string) || 5;
+
+  if (size > 5) {
+    return next(
+      new CustomError(`Invalid 'size' parameter. Today Meme max size is 5.`, HttpCode.BAD_REQUEST),
+    );
+  }
+
   try {
-    const todayMemeList = await MemeService.getTodayMemeList(limit);
-    return res.json(todayMemeList);
+    const todayMemeList = await MemeService.getTodayMemeList(size);
+    return res.json({ data: todayMemeList });
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
