@@ -4,7 +4,7 @@ import _ from 'lodash';
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
 import { CustomMemeRequest } from '../middleware/requestedInfo';
-import { IMeme, IMemeCreatePayload } from '../model/meme';
+import { IMemeCreatePayload } from '../model/meme';
 import * as MemeService from '../service/meme.service';
 import { logger } from '../util/logger';
 
