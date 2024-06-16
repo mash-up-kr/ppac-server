@@ -6,6 +6,7 @@ import { HttpCode } from '../errors/HttpCode';
 import { IMeme, MemeModel } from 'src/model/meme';
 import { MemeReactionModel } from 'src/model/memeReaction';
 import { MemeSaveModel } from 'src/model/memeSave';
+import { MemeShareModel } from 'src/model/memeShare';
 
 async function createUser(deviceID: string): Promise<IUser> {
   try {
@@ -114,6 +115,32 @@ async function createMemeSave(deviceID: string, memeID: string): Promise<Boolean
     }
     const newMemeSave = await MemeSaveModel.create({ memeID, deviceID });
     await newMemeSave.save();
+
+    return true;
+  } catch (err) {
+    logger.error(`Failed create memeSave`, err.message);
+  }
+}
+
+async function createMemeShare(deviceID: string, memeID: string): Promise<Boolean> {
+  try {
+    const meme = await MemeModel.findOne({ memeID, isDeleted: false });
+    const user = await UserModel.findOne({ deviceID, isDeleted: false });
+
+    if (_.isNull(meme)) {
+      throw new CustomError(`Failed to get Meme - memeID(${memeID})`, HttpCode.NOT_FOUND);
+    }
+    if (_.isNull(user)) {
+      throw new CustomError(`Failed to get User - deviceID(${deviceID})`, HttpCode.NOT_FOUND);
+    }
+
+    const memeShare = await MemeShareModel.findOne({ deviceID, memeID, isDeleted: false });
+    if (!_.isNull(memeShare)) {
+      logger.info(`Already share meme - deviceID(${deviceID}), memeID(${memeID}`);
+      return false;
+    }
+    const newMemeShare = await MemeShareModel.create({ memeID, deviceID });
+    await newMemeShare.save();
 
     return true;
   } catch (err) {
