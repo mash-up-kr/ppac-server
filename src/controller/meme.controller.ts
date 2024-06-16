@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import _ from 'lodash';
+import mongoose from 'mongoose';
 
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
@@ -9,11 +10,11 @@ import * as MemeService from '../service/meme.service';
 import { logger } from '../util/logger';
 
 const getMeme = async (req: Request, res: Response, next: NextFunction) => {
-  const memeId = req.params?.memeId || req.body?.memeId || null;
 
-  const meme = await MemeService.getMeme(memeId);
-  logger.info(`Get meme - ${memeId})`);
-  return res.json({ ...meme });
+  if (!mongoose.Types.ObjectId.isValid(memeId)) {
+    return next(new CustomError(`'memeId' is not a valid ObjectId`, HttpCode.BAD_REQUEST));
+  }
+
 };
 
 const createMeme = async (req: Request, res: Response, next: NextFunction) => {
