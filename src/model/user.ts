@@ -8,6 +8,12 @@ export interface IUser {
   isDeleted: boolean;
 }
 
+export interface IUserInfos extends IUser {
+  memeShareCount: number;
+  memeReactionCount: number;
+  memeSaveCount: number;
+}
+
 const UserSchema: Schema = new Schema(
   {
     deviceID: { type: String, required: true },
