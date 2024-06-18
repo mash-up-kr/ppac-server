@@ -17,7 +17,7 @@ export interface IUserInfos extends IUser {
 const UserSchema: Schema = new Schema(
   {
     deviceID: { type: String, required: true },
-    lastSeenMeme: { type: [String], default: [] },
+    lastSeenMeme: { type: Schema.Types.ObjectId, ref: 'Meme' },
     isDeleted: { type: Boolean, required: true, default: false },
   },
   {
