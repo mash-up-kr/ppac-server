@@ -29,6 +29,7 @@ async function createUser(deviceID: string): Promise<IUserInfos> {
     return { ...user.toObject(), memeShareCount: 0, memeReactionCount: 0, memeSaveCount: 0 };
   } catch (err) {
     logger.info(`Failed to create User`);
+    throw new CustomError(`Failed to create a User`, HttpCode.INTERNAL_SERVER_ERROR);
   }
 }
 
