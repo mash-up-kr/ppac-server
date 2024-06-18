@@ -4,7 +4,7 @@ import mongoose from 'mongoose';
 
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
-import { CustomMemeRequest } from '../middleware/requestedInfo';
+import { CustomRequest } from '../middleware/requestedInfo';
 import { IMemeCreatePayload } from '../model/meme';
 import * as MemeService from '../service/meme.service';
 import { logger } from '../util/logger';
@@ -54,7 +54,7 @@ const createMeme = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-const updateMeme = async (req: CustomMemeRequest, res: Response, next: NextFunction) => {
+const updateMeme = async (req: CustomRequest, res: Response, next: NextFunction) => {
   const meme = req.requestedMeme;
   const updateInfo: IMemeCreatePayload = req.body;
 
@@ -66,7 +66,7 @@ const updateMeme = async (req: CustomMemeRequest, res: Response, next: NextFunct
   }
 };
 
-const deleteMeme = async (req: CustomMemeRequest, res: Response, next: NextFunction) => {
+const deleteMeme = async (req: CustomRequest, res: Response, next: NextFunction) => {
   const meme = req.requestedMeme;
   try {
     const deletedMeme = await MemeService.deleteMeme(meme._id as string);

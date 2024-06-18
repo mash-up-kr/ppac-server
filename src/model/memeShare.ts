@@ -1,8 +1,8 @@
 import mongoose, { Schema } from 'mongoose';
 
 export interface IMemeShare {
-  deviceID: string;
-  memeID: string;
+  deviceId: string;
+  memeId: string;
   createdAt: Date;
   updatedAt: Date;
   isDeleted: boolean;
@@ -10,8 +10,8 @@ export interface IMemeShare {
 
 const MemeShareSchema: Schema = new Schema(
   {
-    deviceID: { type: String, required: true },
-    memeID: { type: String, required: true },
+    deviceId: { type: String, required: true },
+    memeId: { type: String, required: true },
     isDeleted: { type: Boolean, required: true, default: false },
   },
   {

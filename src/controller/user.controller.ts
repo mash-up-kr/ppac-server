@@ -3,10 +3,11 @@ import _ from 'lodash';
 import * as UserService from '../service/user.service';
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
+import { CustomRequest } from 'src/middleware/requestedInfo';
 
 const createUser = async (req: Request, res: Response, next: NextFunction) => {
-  if (!_.has(req.body, 'deviceID')) {
-    return next(new CustomError(`'deviceID' field should be provided`, HttpCode.BAD_REQUEST));
+  if (!_.has(req.body, 'deviceId')) {
+    return next(new CustomError(`'deviceId' field should be provided`, HttpCode.BAD_REQUEST));
   }
 
   try {
@@ -17,133 +18,99 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-const updateLastSeenMeme = async (req: Request, res: Response, next: NextFunction) => {
-  if (!_.has(req.body, 'deviceID')) {
-    return next(new CustomError(`'deviceID' field should be provided`, HttpCode.BAD_REQUEST));
-  }
-
-  if (!_.has(req.body, 'memeID')) {
-    return next(new CustomError(`'memeID' field should be provided`, HttpCode.BAD_REQUEST));
-  }
+const updateLastSeenMeme = async (req: CustomRequest, res: Response, next: NextFunction) => {
+  const user = req.requestedUser;
+  const meme = req.requestedMeme;
 
   try {
-    const user = await UserService.updateLastSeenMeme(req.body.deviceID, req.body.memeID);
-    return res.json({ ...user });
+    const updatedUser = await UserService.updateLastSeenMeme(user.deviceId, meme._id as string);
+    return res.json({ ...updatedUser });
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
-}
+};
 
-const createMemeReaction = async (req: Request, res: Response, next: NextFunction) => {
-  if (!_.has(req.body, 'deviceID')) {
-    return next(new CustomError(`'deviceID' field should be provided`, HttpCode.BAD_REQUEST));
-  }
-
-  if (!_.has(req.body, 'memeID')) {
-    return next(new CustomError(`'memeID' field should be provided`, HttpCode.BAD_REQUEST));
-  }
+const createMemeReaction = async (req: CustomRequest, res: Response, next: NextFunction) => {
+  const user = req.requestedUser;
+  const meme = req.requestedMeme;
 
   try {
-    const meme = await UserService.createMemeReaction(req.body.deviceID, req.body.memeID);
-    return res.json({ ...meme });
+    const updatedMeme = await UserService.createMemeReaction(user.deviceId, meme._id as string);
+    return res.json({ ...updatedMeme });
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
-}
+};
 
-const createMemeSave = async (req: Request, res: Response, next: NextFunction) => {
-  if (!_.has(req.body, 'deviceID')) {
-    return next(new CustomError(`'deviceID' field should be provided`, HttpCode.BAD_REQUEST));
-  }
-
-  if (!_.has(req.body, 'memeID')) {
-    return next(new CustomError(`'memeID' field should be provided`, HttpCode.BAD_REQUEST));
-  }
+const createMemeSave = async (req: CustomRequest, res: Response, next: NextFunction) => {
+  const user = req.requestedUser;
+  const meme = req.requestedMeme;
 
   try {
-    const meme = await UserService.createMemeSave(req.body.deviceID, req.body.memeID);
-    return res.json({ ...meme });
+    const ret = await UserService.createMemeSave(user.deviceId, meme._id as string);
+    return res.json({ ret });
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
-}
+};
 
-const createMemeShare = async (req: Request, res: Response, next: NextFunction) => {
-  if (!_.has(req.body, 'deviceID')) {
-    return next(new CustomError(`'deviceID' field should be provided`, HttpCode.BAD_REQUEST));
-  }
-
-  if (!_.has(req.body, 'memeID')) {
-    return next(new CustomError(`'memeID' field should be provided`, HttpCode.BAD_REQUEST));
-  }
+const createMemeShare = async (req: CustomRequest, res: Response, next: NextFunction) => {
+  const user = req.requestedUser;
+  const meme = req.requestedMeme;
 
   try {
-    const meme = await UserService.createMemeShare(req.body.deviceID, req.body.memeID);
-    return res.json({ ...meme });
+    const ret = await UserService.createMemeShare(user.deviceId, meme._id as string);
+    return res.json({ ret });
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
-}
+};
 
-const deleteMemeReaction = async (req: Request, res: Response, next: NextFunction) => {
-  if (!_.has(req.body, 'deviceID')) {
-    return next(new CustomError(`'deviceID' field should be provided`, HttpCode.BAD_REQUEST));
-  }
-
-  if (!_.has(req.body, 'memeID')) {
-    return next(new CustomError(`'memeID' field should be provided`, HttpCode.BAD_REQUEST));
-  }
+const deleteMemeReaction = async (req: CustomRequest, res: Response, next: NextFunction) => {
+  const user = req.requestedUser;
+  const meme = req.requestedMeme;
 
   try {
-    const meme = await UserService.deleteMemeReaction(req.body.deviceID, req.body.memeID);
-    return res.json({ ...meme });
+    const ret = await UserService.deleteMemeReaction(user.deviceId, meme._id as string);
+    return res.json({ ret });
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
-}
+};
 
-const deleteMemeSave = async (req: Request, res: Response, next: NextFunction) => {
-  if (!_.has(req.body, 'deviceID')) {
-    return next(new CustomError(`'deviceID' field should be provided`, HttpCode.BAD_REQUEST));
-  }
-
-  if (!_.has(req.body, 'memeID')) {
-    return next(new CustomError(`'memeID' field should be provided`, HttpCode.BAD_REQUEST));
-  }
+const deleteMemeSave = async (req: CustomRequest, res: Response, next: NextFunction) => {
+  const user = req.requestedUser;
+  const meme = req.requestedMeme;
 
   try {
-    const result = await UserService.deleteMemeSave(req.body.deviceID, req.body.memeID);
+    const result = await UserService.deleteMemeSave(user.deviceId, meme._id as string);
     return res.json({ result });
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
-}
+};
 
-const getLastSeenMeme = async (req: Request, res: Response, next: NextFunction) => {
-  if (!_.has(req.params, 'deviceID')) {
-    return next(new CustomError(`'deviceID' field should be provided`, HttpCode.BAD_REQUEST));
-  }
+const getLastSeenMeme = async (req: CustomRequest, res: Response, next: NextFunction) => {
+  const user = req.requestedUser;
 
   try {
-    const memeList = await UserService.getLastSeenMeme(req.params.deviceID);
+    const memeList = await UserService.getLastSeenMeme(user.deviceId);
     return res.json({ memeList });
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
-}
+};
 
-const getSavedMeme = async (req: Request, res: Response, next: NextFunction) => {
-  if (!_.has(req.params, 'deviceID')) {
-    return next(new CustomError(`'deviceID' field should be provided`, HttpCode.BAD_REQUEST));
-  }
+const getSavedMeme = async (req: CustomRequest, res: Response, next: NextFunction) => {
+  const user = req.requestedUser;
 
   try {
-    const memeList = await UserService.getSavedMeme(req.params.deviceID);
+    const memeList = await UserService.getSavedMeme(user.deviceId);
     return res.json({ memeList });
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
-}
+};
 
 export {
   createUser,
@@ -156,5 +123,3 @@ export {
   getLastSeenMeme,
   getSavedMeme,
 };
-
-

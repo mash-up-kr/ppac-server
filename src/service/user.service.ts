@@ -1,5 +1,5 @@
 import { logger } from '../util/logger';
-import { IUser, IUserInfos, UserModel } from '../model/user';
+import { IUser, IUserDocument, IUserInfos, UserModel } from '../model/user';
 import _ from 'lodash';
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
@@ -8,45 +8,70 @@ import { MemeReactionModel } from '../model/memeReaction';
 import { MemeSaveModel } from '../model/memeSave';
 import { MemeShareModel } from '../model/memeShare';
 
-async function createUser(deviceID: string): Promise<IUserInfos> {
+async function getUser(deviceId: string): Promise<IUserDocument | null> {
   try {
-    const existedUser = await UserModel.findOne(
-      { deviceID, isDeleted: false },
+    const user = await UserModel.findOne({ deviceId, isDeleted: false });
+    return user.toObject();
+  } catch (err) {
+    logger.error(`Failed to getUser - deviceId${deviceId}`);
+    throw new CustomError(
+      'Failed to getUser - deviceId${deviceId}`',
+      HttpCode.INTERNAL_SERVER_ERROR,
+    );
+  }
+}
+
+async function createUser(deviceId: string): Promise<IUserInfos> {
+  try {
+    const foundUser = await UserModel.findOne(
+      { deviceId, isDeleted: false },
       { _id: 0, createdAt: 0, updatedAt: 0 },
     );
-    if (existedUser) {
-      const memeShareCount = await MemeShareModel.countDocuments({ deviceID, isDeleted: false });
-      const memeReactionCount = await MemeReactionModel.countDocuments({ deviceID, isDeleted: false });
-      const memeSaveCount = await MemeSaveModel.countDocuments({ deviceID, isDeleted: false });
-      return { ...existedUser.toObject(), memeShareCount, memeReactionCount, memeSaveCount };
+    if (foundUser) {
+      const [memeShareCount, memeReactionCount, memeSaveCount] = await Promise.all([
+        MemeShareModel.countDocuments({ deviceId, isDeleted: false }),
+        MemeReactionModel.countDocuments({ deviceId, isDeleted: false }),
+        MemeSaveModel.countDocuments({ deviceId, isDeleted: false }),
+      ]);
+
+      return { ...foundUser.toObject(), memeShareCount, memeReactionCount, memeSaveCount };
     }
     const user = await UserModel.create({
-      deviceID,
+      deviceId,
     });
 
     await user.save();
-    logger.info(`Created user - deviceID(${JSON.stringify(user.toObject())})`);
+    logger.info(`Created user - deviceId(${JSON.stringify(user.toObject())})`);
     return { ...user.toObject(), memeShareCount: 0, memeReactionCount: 0, memeSaveCount: 0 };
   } catch (err) {
-    logger.info(`Failed to create User`);
+    logger.error(`Failed to create User`);
     throw new CustomError(`Failed to create a User`, HttpCode.INTERNAL_SERVER_ERROR);
   }
 }
 
-async function updateLastSeenMeme(deviceID: string, memeID: string): Promise<IUser> {
+async function updateLastSeenMeme(deviceId: string, memeId: string): Promise<IUser> {
   try {
-    const user = await UserModel.findOne({ deviceID, isDeleted: false });
+    const user = await UserModel.findOne({ deviceId, isDeleted: false });
     if (_.isNull(user)) {
       throw new CustomError(`Cannot find User`, HttpCode.NOT_FOUND);
     }
 
-    const newLastSeenMeme = [...user.lastSeenMeme, memeID];
+    const newLastSeenMeme = [...user.lastSeenMeme];
+
+    const index = newLastSeenMeme.indexOf(memeId);
+    // 새 값이 존재하면 해당 값을 배열에서 제거합니다.
+    if (index !== -1) {
+      newLastSeenMeme.splice(index, 1);
+    }
+    // 새 값을 배열의 첫 번째 위치에 추가합니다.
+    newLastSeenMeme.unshift(memeId);
+
     if (newLastSeenMeme.length > 10) {
-      newLastSeenMeme.shift();
+      newLastSeenMeme.pop();
     }
 
     const updatedUser = await UserModel.findOneAndUpdate(
-      { deviceID },
+      { deviceId },
       {
         lastSeenMeme: newLastSeenMeme,
       },
@@ -55,36 +80,40 @@ async function updateLastSeenMeme(deviceID: string, memeID: string): Promise<IUs
         returnDocument: 'after',
       },
     ).lean();
-    logger.info(`Updated user lastSeenMeme - deviceID(${deviceID}), memeList(${newLastSeenMeme})`);
+    logger.info(`Updated user lastSeenMeme - deviceId(${deviceId}), memeList(${newLastSeenMeme})`);
     return updatedUser;
   } catch (err) {
-    logger.error(`Failed Update user LastSeenMeme`, err.message);
+    logger.error(`Failed Update user lastSeenMeme`, err.message);
+    throw new CustomError(
+      `Failed Update user lastSeenMeme(${err.message})`,
+      HttpCode.INTERNAL_SERVER_ERROR,
+    );
   }
 }
 
-async function createMemeReaction(deviceID: string, memeID: string): Promise<IMeme> {
+async function createMemeReaction(deviceId: string, memeId: string): Promise<IMeme> {
   try {
-    const meme = await MemeModel.findOne({ memeID, isDeleted: false });
-    const user = await UserModel.findOne({ deviceID, isDeleted: false });
+    const meme = await MemeModel.findOne({ memeId, isDeleted: false });
+    const user = await UserModel.findOne({ deviceId, isDeleted: false });
 
     if (_.isNull(meme)) {
-      throw new CustomError(`Failed to get Meme - memeID(${memeID})`, HttpCode.NOT_FOUND);
+      throw new CustomError(`Failed to get Meme - memeId(${memeId})`, HttpCode.NOT_FOUND);
     }
     if (_.isNull(user)) {
-      throw new CustomError(`Failed to get User - deviceID(${deviceID})`, HttpCode.NOT_FOUND);
+      throw new CustomError(`Failed to get User - deviceId(${deviceId})`, HttpCode.NOT_FOUND);
     }
 
-    const memeReaction = await MemeReactionModel.findOne({ deviceID, memeID, isDeleted: false });
+    const memeReaction = await MemeReactionModel.findOne({ deviceId, memeId, isDeleted: false });
     if (!_.isNull(memeReaction)) {
-      logger.info(`Already reaction meme - deviceID(${deviceID}), memeID(${memeID}`);
+      logger.info(`Already reaction meme - deviceId(${deviceId}), memeId(${memeId}`);
       return meme;
     }
-    const newMemeReaction = await MemeReactionModel.create({ memeID, deviceID });
+    const newMemeReaction = await MemeReactionModel.create({ memeId, deviceId });
     await newMemeReaction.save();
 
     const newReactionCount = meme.reaction + 1;
     const updatedMeme = await MemeModel.findOneAndUpdate(
-      { memeID },
+      { memeId },
       {
         reaction: newReactionCount,
       },
@@ -97,81 +126,87 @@ async function createMemeReaction(deviceID: string, memeID: string): Promise<IMe
     return updatedMeme;
   } catch (err) {
     logger.error(`Failed create memeReaction`, err.message);
+    throw new CustomError(
+      `Failed create memeReaction(${err.message})`,
+      HttpCode.INTERNAL_SERVER_ERROR,
+    );
   }
 }
 
-async function createMemeSave(deviceID: string, memeID: string): Promise<Boolean> {
+async function createMemeSave(deviceId: string, memeId: string): Promise<boolean> {
   try {
-    const meme = await MemeModel.findOne({ memeID, isDeleted: false });
-    const user = await UserModel.findOne({ deviceID, isDeleted: false });
+    const meme = await MemeModel.findOne({ memeId, isDeleted: false });
+    const user = await UserModel.findOne({ deviceId, isDeleted: false });
 
     if (_.isNull(meme)) {
-      throw new CustomError(`Failed to get Meme - memeID(${memeID})`, HttpCode.NOT_FOUND);
+      throw new CustomError(`Failed to get Meme - memeId(${memeId})`, HttpCode.NOT_FOUND);
     }
     if (_.isNull(user)) {
-      throw new CustomError(`Failed to get User - deviceID(${deviceID})`, HttpCode.NOT_FOUND);
+      throw new CustomError(`Failed to get User - deviceId(${deviceId})`, HttpCode.NOT_FOUND);
     }
 
-    const memeSave = await MemeSaveModel.findOne({ deviceID, memeID, isDeleted: false });
+    const memeSave = await MemeSaveModel.findOne({ deviceId, memeId, isDeleted: false });
     if (!_.isNull(memeSave)) {
-      logger.info(`Already save meme - deviceID(${deviceID}), memeID(${memeID}`);
+      logger.info(`Already save meme - deviceId(${deviceId}), memeId(${memeId}`);
       return false;
     }
-    const newMemeSave = await MemeSaveModel.create({ memeID, deviceID });
+    const newMemeSave = await MemeSaveModel.create({ memeId, deviceId });
     await newMemeSave.save();
 
     return true;
   } catch (err) {
     logger.error(`Failed create memeSave`, err.message);
+    throw new CustomError(`Failed create memeSave(${err.message})`, HttpCode.INTERNAL_SERVER_ERROR);
   }
 }
 
-async function createMemeShare(deviceID: string, memeID: string): Promise<Boolean> {
+async function createMemeShare(deviceId: string, memeId: string): Promise<boolean> {
   try {
-    const meme = await MemeModel.findOne({ memeID, isDeleted: false });
-    const user = await UserModel.findOne({ deviceID, isDeleted: false });
+    const meme = await MemeModel.findOne({ memeId, isDeleted: false });
+    const user = await UserModel.findOne({ deviceId, isDeleted: false });
 
     if (_.isNull(meme)) {
-      throw new CustomError(`Failed to get Meme - memeID(${memeID})`, HttpCode.NOT_FOUND);
+      throw new CustomError(`Failed to get Meme - memeId(${memeId})`, HttpCode.NOT_FOUND);
     }
     if (_.isNull(user)) {
-      throw new CustomError(`Failed to get User - deviceID(${deviceID})`, HttpCode.NOT_FOUND);
+      throw new CustomError(`Failed to get User - deviceId(${deviceId})`, HttpCode.NOT_FOUND);
     }
 
-    const memeShare = await MemeShareModel.findOne({ deviceID, memeID, isDeleted: false });
+    const memeShare = await MemeShareModel.findOne({ deviceId, memeId, isDeleted: false });
     if (!_.isNull(memeShare)) {
-      logger.info(`Already share meme - deviceID(${deviceID}), memeID(${memeID}`);
+      logger.info(`Already share meme - deviceId(${deviceId}), memeId(${memeId}`);
       return false;
     }
-    const newMemeShare = await MemeShareModel.create({ memeID, deviceID });
+    const newMemeShare = await MemeShareModel.create({ memeId, deviceId });
     await newMemeShare.save();
 
     return true;
   } catch (err) {
     logger.error(`Failed create memeSave`, err.message);
+    throw new CustomError(`Failed create memeSave(${err.message})`, HttpCode.INTERNAL_SERVER_ERROR);
   }
 }
 
-async function deleteMemeReaction(deviceID: string, memeID: string): Promise<IMeme> {
+async function deleteMemeReaction(deviceId: string, memeId: string): Promise<IMeme> {
   try {
-    const meme = await MemeModel.findOne({ memeID, isDeleted: false });
-    const user = await UserModel.findOne({ deviceID, isDeleted: false });
+    const meme = await MemeModel.findOne({ memeId, isDeleted: false });
+    const user = await UserModel.findOne({ deviceId, isDeleted: false });
 
     if (_.isNull(meme)) {
-      throw new CustomError(`Failed to get Meme - memeID(${memeID})`, HttpCode.NOT_FOUND);
+      throw new CustomError(`Failed to get Meme - memeId(${memeId})`, HttpCode.NOT_FOUND);
     }
 
     if (_.isNull(user)) {
-      throw new CustomError(`Failed to get User - deviceID(${deviceID})`, HttpCode.NOT_FOUND);
+      throw new CustomError(`Failed to get User - deviceId(${deviceId})`, HttpCode.NOT_FOUND);
     }
 
-    const memeReaction = await MemeReactionModel.findOne({ deviceID, memeID, isDeleted: false });
+    const memeReaction = await MemeReactionModel.findOne({ deviceId, memeId, isDeleted: false });
     if (_.isNull(memeReaction)) {
-      logger.info(`Already delete memeReaction - deviceID(${deviceID}), memeID(${memeID}`);
+      logger.info(`Already delete memeReaction - deviceId(${deviceId}), memeId(${memeId}`);
       return meme;
     }
     await MemeReactionModel.findOneAndUpdate(
-      { deviceID, memeID },
+      { deviceId, memeId },
       {
         isDeleted: true,
       },
@@ -180,7 +215,7 @@ async function deleteMemeReaction(deviceID: string, memeID: string): Promise<IMe
     const newReactionCount = meme.reaction - 1;
 
     const updatedMeme = await MemeModel.findOneAndUpdate(
-      { memeID },
+      { memeId },
       {
         reaction: newReactionCount,
       },
@@ -193,76 +228,88 @@ async function deleteMemeReaction(deviceID: string, memeID: string): Promise<IMe
     return updatedMeme;
   } catch (err) {
     logger.error(`Failed delete memeReaction`, err.message);
+    throw new CustomError(
+      `Failed delete memeReaction(${err.message})`,
+      HttpCode.INTERNAL_SERVER_ERROR,
+    );
   }
 }
 
-async function deleteMemeSave(deviceID: string, memeID: string): Promise<Boolean> {
+async function deleteMemeSave(deviceId: string, memeId: string): Promise<boolean> {
   try {
-    const meme = await MemeModel.findOne({ memeID, isDeleted: false });
-    const user = await UserModel.findOne({ deviceID, isDeleted: false });
+    const meme = await MemeModel.findOne({ memeId, isDeleted: false });
+    const user = await UserModel.findOne({ deviceId, isDeleted: false });
 
     if (_.isNull(meme)) {
-      throw new CustomError(`Failed to get Meme - memeID(${memeID})`, HttpCode.NOT_FOUND);
+      throw new CustomError(`Failed to get Meme - memeId(${memeId})`, HttpCode.NOT_FOUND);
     }
 
     if (_.isNull(user)) {
-      throw new CustomError(`Failed to get User - deviceID(${deviceID})`, HttpCode.NOT_FOUND);
+      throw new CustomError(`Failed to get User - deviceId(${deviceId})`, HttpCode.NOT_FOUND);
     }
 
-    const memeSave = await MemeSaveModel.findOne({ deviceID, memeID, isDeleted: false });
+    const memeSave = await MemeSaveModel.findOne({ deviceId, memeId, isDeleted: false });
 
     if (_.isNull(memeSave)) {
-      logger.info(`Already delete memeSave - deviceID(${deviceID}), memeID(${memeID}`);
+      logger.info(`Already delete memeSave - deviceId(${deviceId}), memeId(${memeId}`);
       return false;
     }
     await MemeSaveModel.findOneAndUpdate(
-      { deviceID, memeID },
+      { deviceId, memeId },
       {
         isDeleted: true,
       },
     ).lean();
 
     return true;
-  }
-  catch (err) {
+  } catch (err) {
     logger.error(`Failed delete memeSave`, err.message);
+    throw new CustomError(`Failed delete memeSave(${err.message})`, HttpCode.INTERNAL_SERVER_ERROR);
   }
 }
 
-async function getLastSeenMeme(deviceID: string): Promise<IMeme[]> {
+async function getLastSeenMeme(deviceId: string): Promise<IMeme[]> {
   try {
-    const user = await UserModel.findOne({ deviceID, isDeleted: false });
+    const user = await UserModel.findOne({ deviceId, isDeleted: false });
     if (_.isNull(user)) {
       throw new CustomError(`Cannot find User`, HttpCode.NOT_FOUND);
     }
 
     const lastSeenMeme = user.lastSeenMeme;
-    const memeList = await MemeModel.find({ memeID: { $in: lastSeenMeme } }).lean();
+    const memeList = await MemeModel.find({ memeId: { $in: lastSeenMeme } }).lean();
 
     return memeList;
   } catch (err) {
     logger.error(`Failed get lastSeenMeme`, err.message);
+    throw new CustomError(
+      `Failed get lastSeenMeme(${err.message})`,
+      HttpCode.INTERNAL_SERVER_ERROR,
+    );
   }
 }
 
-async function getSavedMeme(deviceID: string): Promise<IMeme[]> {
+async function getSavedMeme(deviceId: string): Promise<IMeme[]> {
   try {
-    const user = await UserModel.findOne({ deviceID, isDeleted: false });
+    const user = await UserModel.findOne({ deviceId, isDeleted: false });
     if (_.isNull(user)) {
       throw new CustomError(`Cannot find User`, HttpCode.NOT_FOUND);
     }
 
-    const savedMeme = await MemeSaveModel.find({ deviceID, isDeleted: false }).lean();
+    const savedMeme = await MemeSaveModel.find({ deviceId, isDeleted: false }).lean();
 
-    const memeList = await MemeModel.find({ memeID: { $in: savedMeme.map((meme) => meme.memeID) } }).lean();
+    const memeList = await MemeModel.find({
+      memeId: { $in: savedMeme.map((meme) => meme.memeId) },
+    }).lean();
 
     return memeList;
   } catch (err) {
     logger.error(`Failed get savedMeme`, err.message);
+    throw new CustomError(`Failed get savedMeme(${err.message})`, HttpCode.INTERNAL_SERVER_ERROR);
   }
 }
 
 export {
+  getUser,
   createUser,
   updateLastSeenMeme,
   createMemeReaction,
