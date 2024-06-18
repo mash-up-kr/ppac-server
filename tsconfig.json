@@ -1,9 +1,9 @@
 {
-  "include": ["src/custom.d.ts", "src/**/*.ts"],
-  "exclude": ["node_modules", "dist", "test", "**/*.spec.ts"],
+  "include": ["src/custom.d.ts", "src/**/*.ts", "test/**/*.ts"],
+  "exclude": ["node_modules", "dist", "**/*.spec.ts"],
   "files": ["src/custom.d.ts"],
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "CommonJS",
     "declaration": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,
@@ -14,6 +14,6 @@
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
-    "skipLibCheck": true,
+    "skipLibCheck": true
   }
 }
