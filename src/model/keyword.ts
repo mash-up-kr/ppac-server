@@ -2,7 +2,6 @@ import mongoose, { Schema } from 'mongoose';
 
 export interface IKeywordCreatePayload {
   name: string;
-  memeIDs: mongoose.Types.ObjectId[];
 }
 
 export interface IKeyword {
