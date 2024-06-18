@@ -25,7 +25,7 @@ async function createUser(deviceID: string): Promise<IUserInfos> {
     });
 
     await user.save();
-    logger.info(`Created user - deviceID(${JSON.stringify(user.toObject)})`);
+    logger.info(`Created user - deviceID(${JSON.stringify(user.toObject())})`);
     return { ...user.toObject(), memeShareCount: 0, memeReactionCount: 0, memeSaveCount: 0 };
   } catch (err) {
     logger.info(`Failed to create User`);
