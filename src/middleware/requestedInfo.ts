@@ -1,13 +1,14 @@
 import { NextFunction, Request, Response } from 'express';
 import _ from 'lodash';
+import mongoose from 'mongoose';
 
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
-import { IMeme } from '../model/meme';
+import { IMemeDocument } from '../model/meme';
 import { getMeme } from '../service/meme.service';
 
 export interface CustomMemeRequest extends Request {
-  requestedMeme?: IMeme;
+  requestedMeme?: IMemeDocument;
 }
 
 export const getRequestedMemeInfo = async (
@@ -21,8 +22,11 @@ export const getRequestedMemeInfo = async (
     return next(new CustomError(`'memeId' should be provided`, HttpCode.BAD_REQUEST));
   }
 
-  const meme = await getMeme(memeId);
+  if (!mongoose.Types.ObjectId.isValid(memeId)) {
+    return next(new CustomError(`'memeId' is not a valid ObjectId`, HttpCode.BAD_REQUEST));
+  }
 
+  const meme = await getMeme(memeId);
   if (_.isNull(meme)) {
     return next(new CustomError(`Meme(${memeId}) does not exist`, HttpCode.NOT_FOUND));
   }

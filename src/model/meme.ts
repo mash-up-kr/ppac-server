@@ -1,14 +1,21 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IMemeCreatePayload {
   keywords: string[];
   image: string;
-  source?: string;
+  source: string;
   isTodayMeme: boolean;
 }
 
 export interface IMeme {
-  _id: string;
+  keywords: string[];
+  image: string;
+  reaction: number;
+  source: string;
+  isTodayMeme: boolean;
+}
+
+export interface IMemeDocument extends Document {
   keywords: string[];
   image: string;
   reaction: number;
@@ -35,4 +42,4 @@ const MemeSchema: Schema = new Schema(
   },
 );
 
-export const MemeModel = mongoose.model<IMeme>('Meme', MemeSchema);
+export const MemeModel = mongoose.model<IMemeDocument>('Meme', MemeSchema);
