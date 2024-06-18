@@ -30,4 +30,22 @@ async function getTopKeywords(limit: number = 6): Promise<IKeyword[]> {
   }
 }
 
-export { createKeyword, getTopKeywords };
+async function incrementSearchCount(keywordId: string): Promise<IKeyword> {
+  try {
+    const updatedKeyword = await KeywordModel.findByIdAndUpdate(
+      keywordId,
+      { $inc: { searchCount: 1 } },
+      { new: true },
+    );
+    if (!updatedKeyword) {
+      throw new CustomError('Keyword not found', HttpCode.NOT_FOUND);
+    }
+    logger.info(`Incremented searchCount for keyword: ${JSON.stringify(updatedKeyword)}`);
+    return updatedKeyword;
+  } catch (err) {
+    logger.error(`Failed to increment searchCount for keyword ${keywordId}: ${err.message}`);
+    throw new CustomError('Failed to increment searchCount', HttpCode.INTERNAL_SERVER_ERROR);
+  }
+}
+
+export { createKeyword, getTopKeywords, incrementSearchCount };

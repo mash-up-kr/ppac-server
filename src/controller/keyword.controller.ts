@@ -31,4 +31,16 @@ const getTopKeywords = async (req: Request, res: Response, next: NextFunction) =
   }
 };
 
-export { createKeyword, getTopKeywords };
+const incrementSearchCount = async (req: Request, res: Response, next: NextFunction) => {
+  const keywordId = req.params.keywordId;
+
+  try {
+    const updatedKeyword = await KeywordService.incrementSearchCount(keywordId);
+    logger.info(`Incremented searchCount for keyword: ${JSON.stringify(updatedKeyword)}`);
+    return res.json(updatedKeyword);
+  } catch (err) {
+    return next(new CustomError(err.message, err.status || HttpCode.INTERNAL_SERVER_ERROR));
+  }
+};
+
+export { createKeyword, getTopKeywords, incrementSearchCount };
