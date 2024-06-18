@@ -6,7 +6,6 @@ import { HttpCode } from '../errors/HttpCode';
 async function getTopKeywords(limit: number = 6): Promise<IKeyword[]> {
   try {
     const topKeywords = await KeywordModel.find().sort({ searchCount: -1 }).limit(limit).lean();
-    logger.info(`Get top ${limit} keywords`);
     return topKeywords;
   } catch (err) {
     logger.error(`Failed to get top keywords: ${err.message}`);

@@ -7,9 +7,10 @@ import * as KeywordService from '../service/keyword.service';
 import { logger } from '../util/logger';
 
 const getTopKeywords = async (req: Request, res: Response, next: NextFunction) => {
+  const limit = 6;
   try {
-    const topKeywords = await KeywordService.getTopKeywords(6);
-    logger.info('Get top 6 keywords');
+    const topKeywords = await KeywordService.getTopKeywords(limit);
+    logger.info(`Get top ${limit} keywords: ${JSON.stringify(topKeywords)}`);
     return res.json(topKeywords);
   } catch (err) {
     return next(new CustomError(err.message, err.status || HttpCode.INTERNAL_SERVER_ERROR));
