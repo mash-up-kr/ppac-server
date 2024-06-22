@@ -5,12 +5,6 @@ import { getRequestedMemeInfo, getRequestedUserInfo } from '../middleware/reques
 const router = express.Router();
 
 router.post('/', UserController.createUser); // user 생성
-router.put(
-  '/lastSeenMeme',
-  getRequestedMemeInfo,
-  getRequestedUserInfo,
-  UserController.updateLastSeenMeme,
-); // user가 본 meme 업데이트
 
 router.post(
   '/reaction',
@@ -20,6 +14,7 @@ router.post(
 ); // user의 reaction 생성
 router.post('/save', getRequestedMemeInfo, getRequestedUserInfo, UserController.createMemeSave); // user의 save 생성
 router.post('/share', getRequestedMemeInfo, getRequestedUserInfo, UserController.createMemeShare); // user의 share 생성
+router.post('/watch', getRequestedMemeInfo, getRequestedUserInfo, UserController.createMemeWatch); // user의 watch 생성
 
 router.delete(
   '/reaction',

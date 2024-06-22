@@ -7,6 +7,7 @@ import { IMeme, MemeModel } from '../model/meme';
 import { MemeReactionModel } from '../model/memeReaction';
 import { MemeSaveModel } from '../model/memeSave';
 import { MemeShareModel } from '../model/memeShare';
+import { MemeWatchModel } from '../model/memeWatch';
 
 async function getUser(deviceId: string): Promise<IUserDocument | null> {
   try {
@@ -187,6 +188,33 @@ async function createMemeShare(deviceId: string, memeId: string): Promise<boolea
   }
 }
 
+async function createMemeWatch(deviceId: string, memeId: string): Promise<boolean> {
+  try {
+    const meme = await MemeModel.findOne({ memeId, isDeleted: false });
+    const user = await UserModel.findOne({ deviceId, isDeleted: false });
+
+    if (_.isNull(meme)) {
+      throw new CustomError(`Failed to get Meme - memeId(${memeId})`, HttpCode.NOT_FOUND);
+    }
+    if (_.isNull(user)) {
+      throw new CustomError(`Failed to get User - deviceId(${deviceId})`, HttpCode.NOT_FOUND);
+    }
+
+    const memeWatch = await MemeWatchModel.findOne({ deviceId, memeId, isDeleted: false });
+    if (!_.isNull(memeWatch)) {
+      logger.info(`Already watch meme - deviceId(${deviceId}), memeId(${memeId}`);
+      return false;
+    }
+    const newMemeWatch = await MemeWatchModel.create({ memeId, deviceId });
+    await newMemeWatch.save();
+
+    return true;
+  } catch (err) {
+    logger.error(`Failed create memeSave`, err.message);
+    throw new CustomError(`Failed create memeSave(${err.message})`, HttpCode.INTERNAL_SERVER_ERROR);
+  }
+}
+
 async function deleteMemeReaction(deviceId: string, memeId: string): Promise<IMeme> {
   try {
     const meme = await MemeModel.findOne({ memeId, isDeleted: false });
@@ -315,6 +343,7 @@ export {
   createMemeReaction,
   createMemeSave,
   createMemeShare,
+  createMemeWatch,
   deleteMemeReaction,
   deleteMemeSave,
   getLastSeenMeme,
