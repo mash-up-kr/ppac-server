@@ -209,7 +209,7 @@ async function createMemeWatch(deviceId: string, memeId: string): Promise<boolea
     await newMemeWatch.save();
 
     const newWatchCount = meme.watch + 1;
-    const updatedMeme = await MemeModel.findOneAndUpdate(
+    await MemeModel.findOneAndUpdate(
       { memeId },
       {
         watch: newWatchCount,
