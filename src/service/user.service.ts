@@ -203,10 +203,22 @@ async function createMemeWatch(deviceId: string, memeId: string): Promise<boolea
     const memeWatch = await MemeWatchModel.findOne({ deviceId, memeId, isDeleted: false });
     if (!_.isNull(memeWatch)) {
       logger.info(`Already watch meme - deviceId(${deviceId}), memeId(${memeId}`);
-      return false;
+      return true;
     }
     const newMemeWatch = await MemeWatchModel.create({ memeId, deviceId });
     await newMemeWatch.save();
+
+    const newWatchCount = meme.watch + 1;
+    const updatedMeme = await MemeModel.findOneAndUpdate(
+      { memeId },
+      {
+        watch: newWatchCount,
+      },
+      {
+        projection: { _id: 0, createdAt: 0, updatedAt: 0 },
+        returnDocument: 'after',
+      },
+    ).lean();
 
     return true;
   } catch (err) {
