@@ -2,6 +2,7 @@ import { IKeywordCreatePayload, KeywordModel, IKeyword } from '../model/keyword'
 import { logger } from '../util/logger';
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
+import mongoose from 'mongoose';
 
 async function createKeyword(payload: IKeywordCreatePayload): Promise<IKeyword> {
   try {
@@ -48,4 +49,25 @@ async function incrementSearchCount(keywordId: string): Promise<IKeyword> {
   }
 }
 
-export { createKeyword, getTopKeywords, incrementSearchCount };
+async function addMemeToKeyword(
+  keywordId: string,
+  memeId: mongoose.Types.ObjectId,
+): Promise<IKeyword> {
+  try {
+    const updatedKeyword = await KeywordModel.findByIdAndUpdate(
+      keywordId,
+      { $addToSet: { memeIDs: memeId } }, // $addToSet를 사용하여 중복 추가 방지
+      { new: true },
+    );
+    if (!updatedKeyword) {
+      throw new CustomError('Keyword not found', HttpCode.NOT_FOUND);
+    }
+    logger.info(`Added meme ${memeId} to keyword ${keywordId}`);
+    return updatedKeyword;
+  } catch (err) {
+    logger.error(`Failed to add meme ${memeId} to keyword ${keywordId}: ${err.message}`);
+    throw new CustomError('Failed to add meme to keyword', HttpCode.INTERNAL_SERVER_ERROR);
+  }
+}
+
+export { createKeyword, getTopKeywords, incrementSearchCount, addMemeToKeyword };

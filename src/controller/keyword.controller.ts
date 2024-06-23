@@ -43,4 +43,24 @@ const incrementSearchCount = async (req: Request, res: Response, next: NextFunct
   }
 };
 
-export { createKeyword, getTopKeywords, incrementSearchCount };
+const addMemeToKeyword = async (req: Request, res: Response, next: NextFunction) => {
+  const { keywordId } = req.params;
+  const { memeId } = req.body;
+
+  if (!mongoose.Types.ObjectId.isValid(keywordId)) {
+    return next(new CustomError('Invalid keyword ID', HttpCode.BAD_REQUEST));
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(memeId)) {
+    return next(new CustomError('Invalid meme ID', HttpCode.BAD_REQUEST));
+  }
+
+  try {
+    const updatedKeyword = await KeywordService.addMemeToKeyword(keywordId, memeId);
+    return res.status(200).json(updatedKeyword);
+  } catch (err) {
+    return next(new CustomError(err.message, err.status || HttpCode.INTERNAL_SERVER_ERROR));
+  }
+};
+
+export { createKeyword, getTopKeywords, incrementSearchCount, addMemeToKeyword };
