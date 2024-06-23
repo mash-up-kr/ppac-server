@@ -4,6 +4,7 @@ import _ from 'lodash';
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
 import * as KeywordService from '../service/keyword.service';
+import { CustomKeywordRequest } from '../middleware/requestedInfo';
 import { logger } from '../util/logger';
 
 const createKeyword = async (req: Request, res: Response, next: NextFunction) => {
@@ -51,4 +52,19 @@ const updateKeyword = async (req: Request, res: Response, next: NextFunction) =>
   }
 };
 
-export { createKeyword, updateKeyword, deleteKeyword, getTopKeywords };
+const increaseSearchCount = async (
+  req: CustomKeywordRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  const keyword = req.requestedKeyword;
+  try {
+    const updatedKeyword = await KeywordService.increaseSearchCount(keyword._id);
+    logger.info(`increaseed searchCount for keyword: ${JSON.stringify(updatedKeyword)}`);
+    return res.json(updatedKeyword);
+  } catch (err) {
+    return next(new CustomError(err.message, err.status || HttpCode.INTERNAL_SERVER_ERROR));
+  }
+};
+
+export { createKeyword, updateKeyword, deleteKeyword, getTopKeywords, increaseSearchCount };

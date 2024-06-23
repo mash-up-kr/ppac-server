@@ -45,4 +45,37 @@ async function getTopKeywords(limit: number = 6): Promise<IKeyword[]> {
   }
 }
 
-export { createKeyword, updateKeyword, deleteKeyword, getTopKeywords };
+async function increaseSearchCount(keywordId: string): Promise<IKeyword> {
+  try {
+    const updatedKeyword = await KeywordModel.findOneAndUpdate(
+      { _id: keywordId },
+      { $inc: { searchCount: 1 } },
+      { new: true },
+    );
+    if (!updatedKeyword) {
+      throw new CustomError(`KeywordId ${keywordId} not found`, HttpCode.NOT_FOUND);
+    }
+    return updatedKeyword;
+  } catch (err) {
+    logger.error(`Failed to increase searchCount for keywordId ${keywordId}: ${err.message}`);
+    throw new CustomError('Failed to increase searchCount', HttpCode.INTERNAL_SERVER_ERROR);
+  }
+}
+
+async function getKeyword(keywordName: string): Promise<IKeyword> {
+  try {
+    const keyword = await KeywordModel.findOne({ name: keywordName, isDeleted: false });
+    return keyword.toObject();
+  } catch (err) {
+    logger.info(`Failed to get a Keyword Info(${keywordName})`);
+  }
+}
+
+export {
+  createKeyword,
+  updateKeyword,
+  deleteKeyword,
+  getTopKeywords,
+  increaseSearchCount,
+  getKeyword,
+};
