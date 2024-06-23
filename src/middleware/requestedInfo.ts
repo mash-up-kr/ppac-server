@@ -1,19 +1,23 @@
 import { NextFunction, Request, Response } from 'express';
 import _ from 'lodash';
+import mongoose from 'mongoose';
 
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
-import { IMeme } from '../model/meme';
+import { IMemeDocument } from '../model/meme';
 import { getMeme } from '../service/meme.service';
 import { getKeyword } from '../service/keyword.service';
 import { IKeyword } from 'src/model/keyword';
+import { getUser } from '../service/user.service';
+import { IUserDocument } from '../model/user';
 
-export interface CustomMemeRequest extends Request {
-  requestedMeme?: IMeme;
+export interface CustomRequest extends Request {
+  requestedMeme?: IMemeDocument;
+  requestedUser?: IUserDocument;
 }
 
 export const getRequestedMemeInfo = async (
-  req: CustomMemeRequest,
+  req: CustomRequest,
   res: Response,
   next: NextFunction,
 ) => {
@@ -23,8 +27,11 @@ export const getRequestedMemeInfo = async (
     return next(new CustomError(`'memeId' should be provided`, HttpCode.BAD_REQUEST));
   }
 
-  const meme = await getMeme(memeId);
+  if (!mongoose.Types.ObjectId.isValid(memeId)) {
+    return next(new CustomError(`'memeId' is not a valid ObjectId`, HttpCode.BAD_REQUEST));
+  }
 
+  const meme = await getMeme(memeId);
   if (_.isNull(meme)) {
     return next(new CustomError(`Meme(${memeId}) does not exist`, HttpCode.NOT_FOUND));
   }
@@ -57,5 +64,25 @@ export const getKeywordInfoByName = async (
   }
 
   req.requestedKeyword = keyword;
+
+export const getRequestedUserInfo = async (
+  req: CustomRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  const deviceId = req.params?.deviceId || req.body?.deviceId || null;
+
+  if (_.isNull(deviceId)) {
+    return next(new CustomError(`'deviceId' should be provided`, HttpCode.BAD_REQUEST));
+  }
+
+  const user = await getUser(deviceId);
+
+  if (_.isNull(user)) {
+    return next(new CustomError(`user(${deviceId}) does not exist`, HttpCode.NOT_FOUND));
+  }
+
+  req.requestedUser = user;
+
   next();
 };

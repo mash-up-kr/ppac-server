@@ -2,38 +2,47 @@ import _ from 'lodash';
 
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
-import { IMeme, IMemeCreatePayload, MemeModel } from '../model/meme';
+import { IMemeCreatePayload, IMemeDocument, MemeModel } from '../model/meme';
 import { logger } from '../util/logger';
 
-async function getMeme(memeId: string): Promise<IMeme> {
+async function getMeme(memeId: string): Promise<IMemeDocument | null> {
   try {
     const meme = await MemeModel.findOne({ _id: memeId, isDeleted: false });
-    return meme.toObject();
+    if (!meme) {
+      logger.info(`Meme(${memeId}) not found.`);
+      return null;
+    }
+
+    return meme.toObject() as IMemeDocument;
   } catch (err) {
-    logger.info(`Failed to get a meme(${memeId})`);
+    logger.error(`Failed to get a meme(${memeId}): ${err.message}`);
+    throw new CustomError(`Failed to get a meme(${memeId})`, HttpCode.INTERNAL_SERVER_ERROR);
   }
 }
 
-async function getTodayMemeList(limit: number = 5): Promise<IMeme[]> {
+async function getTodayMemeList(limit: number = 5): Promise<IMemeDocument[]> {
   const todayMemeList = await MemeModel.find({ isTodayMeme: true, isDeleted: false })
     .limit(limit)
     .lean();
 
-  logger.info(`Get all today meme list(${todayMemeList}), limit(${limit})`);
+  const memeIds = todayMemeList.map((meme) => meme._id);
+  logger.info(
+    `Get all today meme list(${todayMemeList.length}) - memeIds(${memeIds}), limit(${limit})`,
+  );
   return todayMemeList;
 }
 
 async function getAllMemeList(
   page: number,
   size: number,
-): Promise<{ total: number; page: number; totalPages: number; data: IMeme[] }> {
+): Promise<{ total: number; page: number; totalPages: number; data: IMemeDocument[] }> {
   const totalMemes = await MemeModel.countDocuments();
 
   const memeList = await MemeModel.find({ isDeleted: false })
     .skip((page - 1) * size)
     .limit(size)
     .sort({ createdAt: -1 });
-  logger.info(`Get all meme list(${memeList}), page(${page}), size(${size}), total(${totalMemes})`);
+  logger.info(`Get all meme list - page(${page}), size(${size}), total(${totalMemes})`);
 
   return {
     total: totalMemes,
@@ -43,7 +52,7 @@ async function getAllMemeList(
   };
 }
 
-async function createMeme(info: IMemeCreatePayload): Promise<IMeme> {
+async function createMeme(info: IMemeCreatePayload): Promise<IMemeDocument> {
   const meme = await MemeModel.create({
     ...info,
   });
@@ -53,7 +62,7 @@ async function createMeme(info: IMemeCreatePayload): Promise<IMeme> {
   return meme.toObject();
 }
 
-async function updateMeme(memeId: string, updateInfo: any): Promise<IMeme> {
+async function updateMeme(memeId: string, updateInfo: any): Promise<IMemeDocument> {
   const meme = await MemeModel.findOneAndUpdate(
     { _id: memeId, isDeleted: false },
     { $set: updateInfo },

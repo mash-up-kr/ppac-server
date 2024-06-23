@@ -1,19 +1,36 @@
 import { Request, Response, NextFunction } from 'express';
 import _ from 'lodash';
+import mongoose from 'mongoose';
 
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
-import { CustomMemeRequest } from '../middleware/requestedInfo';
-import { IMeme, IMemeCreatePayload } from '../model/meme';
+import { CustomRequest } from '../middleware/requestedInfo';
+import { IMemeCreatePayload } from '../model/meme';
 import * as MemeService from '../service/meme.service';
 import { logger } from '../util/logger';
 
 const getMeme = async (req: Request, res: Response, next: NextFunction) => {
-  const memeId = req.params?.memeId || req.body?.memeId || null;
+  const memeId = req.params?.memeId || null;
 
-  const meme = await MemeService.getMeme(memeId);
-  logger.info(`Get meme - ${memeId})`);
-  return res.json({ ...meme });
+  if (_.isNull(memeId)) {
+    return next(new CustomError(`'memeId' field should be provided`, HttpCode.BAD_REQUEST));
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(memeId)) {
+    return next(new CustomError(`'memeId' is not a valid ObjectId`, HttpCode.BAD_REQUEST));
+  }
+
+  try {
+    const meme = await MemeService.getMeme(memeId);
+    if (_.isNull(meme)) {
+      return next(new CustomError(`Meme(${memeId}) not found.`, HttpCode.NOT_FOUND));
+    }
+
+    logger.info(`Get meme - ${memeId})`);
+    return res.json({ ...meme });
+  } catch (err) {
+    return next(new CustomError(err.message, err.status));
+  }
 };
 
 const createMeme = async (req: Request, res: Response, next: NextFunction) => {
@@ -37,22 +54,22 @@ const createMeme = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-const updateMeme = async (req: CustomMemeRequest, res: Response, next: NextFunction) => {
+const updateMeme = async (req: CustomRequest, res: Response, next: NextFunction) => {
   const meme = req.requestedMeme;
   const updateInfo: IMemeCreatePayload = req.body;
 
   try {
-    const updatedMeme = await MemeService.updateMeme(meme._id, updateInfo);
+    const updatedMeme = await MemeService.updateMeme(meme._id as string, updateInfo);
     return res.json({ ...updatedMeme });
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
 };
 
-const deleteMeme = async (req: CustomMemeRequest, res: Response, next: NextFunction) => {
+const deleteMeme = async (req: CustomRequest, res: Response, next: NextFunction) => {
   const meme = req.requestedMeme;
   try {
-    const deletedMeme = await MemeService.deleteMeme(meme._id);
+    const deletedMeme = await MemeService.deleteMeme(meme._id as string);
     return res.json({ result: deletedMeme });
   } catch (err) {
     return next(new CustomError(err.message, err.status));
@@ -60,8 +77,15 @@ const deleteMeme = async (req: CustomMemeRequest, res: Response, next: NextFunct
 };
 
 const getAllMemeList = async (req: Request, res: Response, next: NextFunction) => {
-  const page = parseInt(req?.params.page) || 1;
-  const size = parseInt(req?.params.size) || 10;
+  const page = parseInt(req.query.page as string) || 1;
+  if (page < 1) {
+    return next(new CustomError(`Invalid 'page' parameter`, HttpCode.BAD_REQUEST));
+  }
+
+  const size = parseInt(req.query.size as string) || 10;
+  if (size < 1) {
+    return next(new CustomError(`Invalid 'size' parameter`, HttpCode.BAD_REQUEST));
+  }
 
   try {
     const memeList = await MemeService.getAllMemeList(page, size);
@@ -72,10 +96,17 @@ const getAllMemeList = async (req: Request, res: Response, next: NextFunction) =
 };
 
 const getTodayMemeList = async (req: Request, res: Response, next: NextFunction) => {
-  const limit = _.get(req.body, 'limit', 5);
+  const size = parseInt(req.query.size as string) || 5;
+
+  if (size > 5) {
+    return next(
+      new CustomError(`Invalid 'size' parameter. Today Meme max size is 5.`, HttpCode.BAD_REQUEST),
+    );
+  }
+
   try {
-    const todayMemeList = await MemeService.getTodayMemeList(limit);
-    return res.json(todayMemeList);
+    const todayMemeList = await MemeService.getTodayMemeList(size);
+    return res.json({ data: todayMemeList });
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
