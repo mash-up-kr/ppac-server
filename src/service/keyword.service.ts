@@ -6,10 +6,7 @@ import { HttpCode } from '../errors/HttpCode';
 async function createKeyword(payload: IKeywordCreatePayload): Promise<IKeyword> {
   try {
     const newKeyword = new KeywordModel({
-      name: payload.name,
-      memeIDs: [],
-      searchCount: 0,
-      isDeleted: false,
+      ...payload,
     });
     await newKeyword.save();
     logger.info(`Created new keyword: ${JSON.stringify(newKeyword)}`);
