@@ -64,7 +64,8 @@ export const getKeywordInfoByName = async (
   }
 
   req.requestedKeyword = keyword;
-
+  next();
+};
 export const getRequestedUserInfo = async (
   req: CustomRequest,
   res: Response,
