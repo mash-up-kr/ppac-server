@@ -1,5 +1,10 @@
 import express from 'express';
-import { createKeyword, getTopKeywords, deleteKeyword } from '../controller/keyword.controller';
+import {
+  createKeyword,
+  getTopKeywords,
+  deleteKeyword,
+  updateKeyword,
+} from '../controller/keyword.controller';
 import { loggerMiddleware } from '../util/logger';
 
 const router = express.Router();
@@ -7,7 +12,9 @@ const router = express.Router();
 router.use(loggerMiddleware);
 
 router.post('/', createKeyword);
-router.get('/top', getTopKeywords);
+router.put('/:keywordId', updateKeyword);
 router.delete('/:keywordId', deleteKeyword);
+
+router.get('/top', getTopKeywords);
 
 export default router;

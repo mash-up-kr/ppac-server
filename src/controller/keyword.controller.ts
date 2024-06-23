@@ -20,6 +20,16 @@ const createKeyword = async (req: Request, res: Response, next: NextFunction) =>
   }
 };
 
+const deleteKeyword = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const deletedKeyword = await KeywordService.deleteKeyword(req.params.keywordId);
+    logger.info(`Deleted keyword with ID ${req.params.keywordId}`);
+    return res.json({ success: true, deletedKeyword });
+  } catch (err) {
+    return next(new CustomError(err.message, err.status || HttpCode.INTERNAL_SERVER_ERROR));
+  }
+};
+
 const getTopKeywords = async (req: Request, res: Response, next: NextFunction) => {
   const limit = 6;
   try {
@@ -31,14 +41,14 @@ const getTopKeywords = async (req: Request, res: Response, next: NextFunction) =
   }
 };
 
-const deleteKeyword = async (req: Request, res: Response, next: NextFunction) => {
+const updateKeyword = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const deletedKeyword = await KeywordService.deleteKeyword(req.params.keywordId);
-    logger.info(`Deleted keyword with ID ${req.params.keywordId}`);
-    return res.json({ success: true, deletedKeyword });
+    const updatedKeyword = await KeywordService.updateKeyword(req.params.keywordId, req.body);
+    logger.info(`Updated keyword with ID ${req.params.keywordId}`);
+    return res.json({ success: true, updatedKeyword });
   } catch (err) {
     return next(new CustomError(err.message, err.status || HttpCode.INTERNAL_SERVER_ERROR));
   }
 };
 
-export { createKeyword, getTopKeywords, deleteKeyword };
+export { createKeyword, updateKeyword, deleteKeyword, getTopKeywords };
