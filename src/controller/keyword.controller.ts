@@ -31,4 +31,14 @@ const getTopKeywords = async (req: Request, res: Response, next: NextFunction) =
   }
 };
 
-export { createKeyword, getTopKeywords };
+const deleteKeyword = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const deletedKeyword = await KeywordService.deleteKeyword(req.params.keywordId);
+    logger.info(`Deleted keyword with ID ${req.params.keywordId}`);
+    return res.json({ success: true, deletedKeyword });
+  } catch (err) {
+    return next(new CustomError(err.message, err.status || HttpCode.INTERNAL_SERVER_ERROR));
+  }
+};
+
+export { createKeyword, getTopKeywords, deleteKeyword };

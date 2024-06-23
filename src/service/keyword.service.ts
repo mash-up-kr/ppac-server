@@ -27,4 +27,12 @@ async function getTopKeywords(limit: number = 6): Promise<IKeyword[]> {
   }
 }
 
-export { createKeyword, getTopKeywords };
+async function deleteKeyword(keywordId: string): Promise<boolean> {
+  const deletedKeyword = await KeywordModel.findOneAndDelete({ _id: keywordId }).lean();
+  if (!deletedKeyword) {
+    throw new CustomError(`Keyword with ID ${keywordId} not found`, HttpCode.NOT_FOUND);
+  }
+  return true;
+}
+
+export { createKeyword, getTopKeywords, deleteKeyword };
