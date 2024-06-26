@@ -6,7 +6,7 @@ import {
   updateKeyword,
   increaseSearchCount,
 } from '../controller/keyword.controller';
-import { getKeywordInfoByName } from '../middleware/requestedInfo';
+import { getKeywordInfoByName, getKeywordInfoById } from '../middleware/requestedInfo';
 import { loggerMiddleware } from '../util/logger';
 
 const router = express.Router();
@@ -14,8 +14,8 @@ const router = express.Router();
 router.use(loggerMiddleware);
 
 router.post('/', createKeyword);
-router.put('/:keywordId', updateKeyword);
-router.delete('/:keywordId', deleteKeyword);
+router.put('/:keywordId', getKeywordInfoById, updateKeyword);
+router.delete('/:keywordId', getKeywordInfoById, deleteKeyword);
 
 router.get('/top', getTopKeywords);
 router.post('/increaseSearchCount', getKeywordInfoByName, increaseSearchCount);

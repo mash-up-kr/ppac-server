@@ -4,8 +4,9 @@ import _ from 'lodash';
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
 import * as KeywordService from '../service/keyword.service';
-import { CustomKeywordRequest } from '../middleware/requestedInfo';
+import { CustomRequest } from '../middleware/requestedInfo';
 import { logger } from '../util/logger';
+import { IKeywordCreatePayload } from 'src/model/keyword';
 
 const createKeyword = async (req: Request, res: Response, next: NextFunction) => {
   if (!_.has(req.body, 'name')) {
@@ -21,9 +22,10 @@ const createKeyword = async (req: Request, res: Response, next: NextFunction) =>
   }
 };
 
-const deleteKeyword = async (req: Request, res: Response, next: NextFunction) => {
+const deleteKeyword = async (req: CustomRequest, res: Response, next: NextFunction) => {
+  const keyword = req.requestedKeyword;
   try {
-    const deletedKeyword = await KeywordService.deleteKeyword(req.params.keywordId);
+    const deletedKeyword = await KeywordService.deleteKeyword(keyword._id as string);
     logger.info(`Deleted keyword with ID ${req.params.keywordId}`);
     return res.json({ success: true, deletedKeyword });
   } catch (err) {
@@ -42,9 +44,11 @@ const getTopKeywords = async (req: Request, res: Response, next: NextFunction) =
   }
 };
 
-const updateKeyword = async (req: Request, res: Response, next: NextFunction) => {
+const updateKeyword = async (req: CustomRequest, res: Response, next: NextFunction) => {
+  const keyword = req.requestedKeyword;
+  const updateInfo: IKeywordCreatePayload = req.body;
   try {
-    const updatedKeyword = await KeywordService.updateKeyword(req.params.keywordId, req.body);
+    const updatedKeyword = await KeywordService.updateKeyword(keyword._id as string, updateInfo);
     logger.info(`Updated keyword with ID ${req.params.keywordId}`);
     return res.json({ success: true, updatedKeyword });
   } catch (err) {
@@ -52,11 +56,7 @@ const updateKeyword = async (req: Request, res: Response, next: NextFunction) =>
   }
 };
 
-const increaseSearchCount = async (
-  req: CustomKeywordRequest,
-  res: Response,
-  next: NextFunction,
-) => {
+const increaseSearchCount = async (req: CustomRequest, res: Response, next: NextFunction) => {
   const keyword = req.requestedKeyword;
   try {
     const updatedKeyword = await KeywordService.increaseSearchCount(keyword._id);

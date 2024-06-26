@@ -3,16 +3,16 @@ import { logger } from '../util/logger';
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
 
-async function createKeyword(payload: IKeywordCreatePayload): Promise<IKeyword> {
+async function createKeyword(info: IKeywordCreatePayload): Promise<IKeyword> {
   try {
     const newKeyword = new KeywordModel({
-      ...payload,
+      ...info,
     });
     await newKeyword.save();
     logger.info(`Created new keyword: ${JSON.stringify(newKeyword)}`);
-    return newKeyword;
+    return newKeyword.toObject();
   } catch (err) {
-    logger.error(`Failed to create keyword ${payload.name}: ${err.message}`);
+    logger.error(`Failed to create keyword ${info.name}: ${err.message}`);
     throw new CustomError('Failed to create keyword', HttpCode.INTERNAL_SERVER_ERROR);
   }
 }
@@ -62,12 +62,21 @@ async function increaseSearchCount(keywordId: string): Promise<IKeyword> {
   }
 }
 
-async function getKeyword(keywordName: string): Promise<IKeyword> {
+async function getKeywordByName(keywordName: string): Promise<IKeyword> {
   try {
-    const keyword = await KeywordModel.findOne({ name: keywordName, isDeleted: false });
-    return keyword.toObject();
+    const keyword = await KeywordModel.findOne({ name: keywordName, isDeleted: false }).lean();
+    return keyword;
   } catch (err) {
-    logger.info(`Failed to get a Keyword Info(${keywordName})`);
+    logger.info(`Failed to get a Keyword Info By Name(${keywordName})`);
+  }
+}
+
+async function getKeywordById(keywordId: string): Promise<IKeyword> {
+  try {
+    const keyword = await KeywordModel.findOne({ _id: keywordId, isDeleted: false }).lean();
+    return keyword;
+  } catch (err) {
+    logger.info(`Failed to get a Keyword Info By id (${keywordId})`);
   }
 }
 
@@ -77,5 +86,6 @@ export {
   deleteKeyword,
   getTopKeywords,
   increaseSearchCount,
-  getKeyword,
+  getKeywordByName,
+  getKeywordById,
 };
