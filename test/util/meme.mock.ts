@@ -6,6 +6,7 @@ const memeMockData: IMeme = {
   source: 'youtube',
   isTodayMeme: false,
   reaction: 0,
+  watch: 0,
 };
 
 const createMockData = (size: number, todayMemeCount: number): IMeme[] => {

@@ -11,6 +11,7 @@ export interface IMeme {
   keywords: string[];
   image: string;
   reaction: number;
+  watch: number;
   source: string;
   isTodayMeme: boolean;
 }
@@ -19,6 +20,7 @@ export interface IMemeDocument extends Document {
   keywords: string[];
   image: string;
   reaction: number;
+  watch: number;
   source: string;
   isTodayMeme: boolean;
   createdAt: Date;
@@ -31,6 +33,7 @@ const MemeSchema: Schema = new Schema(
     image: { type: String, required: true },
     keywords: { type: [String], requried: true, default: [] },
     reaction: { type: Number, required: true, default: 0 },
+    watch: { type: Number, required: true, default: 0 },
     source: { type: String, required: true },
     isTodayMeme: { type: Boolean },
     isDeleted: { type: Boolean, required: true, default: false },

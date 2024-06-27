@@ -18,24 +18,12 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-const updateLastSeenMeme = async (req: CustomRequest, res: Response, next: NextFunction) => {
-  const user = req.requestedUser;
-  const meme = req.requestedMeme;
-
-  try {
-    const updatedUser = await UserService.updateLastSeenMeme(user.deviceId, meme._id as string);
-    return res.json({ ...updatedUser });
-  } catch (err) {
-    return next(new CustomError(err.message, err.status));
-  }
-};
-
 const createMemeReaction = async (req: CustomRequest, res: Response, next: NextFunction) => {
   const user = req.requestedUser;
   const meme = req.requestedMeme;
 
   try {
-    const updatedMeme = await UserService.createMemeReaction(user.deviceId, meme._id as string);
+    const updatedMeme = await UserService.createMemeReaction(user, meme);
     return res.json({ ...updatedMeme });
   } catch (err) {
     return next(new CustomError(err.message, err.status));
@@ -47,7 +35,7 @@ const createMemeSave = async (req: CustomRequest, res: Response, next: NextFunct
   const meme = req.requestedMeme;
 
   try {
-    const ret = await UserService.createMemeSave(user.deviceId, meme._id as string);
+    const ret = await UserService.createMemeSave(user, meme);
     return res.json({ ret });
   } catch (err) {
     return next(new CustomError(err.message, err.status));
@@ -59,19 +47,20 @@ const createMemeShare = async (req: CustomRequest, res: Response, next: NextFunc
   const meme = req.requestedMeme;
 
   try {
-    const ret = await UserService.createMemeShare(user.deviceId, meme._id as string);
+    const ret = await UserService.createMemeShare(user, meme);
     return res.json({ ret });
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
 };
 
-const deleteMemeReaction = async (req: CustomRequest, res: Response, next: NextFunction) => {
+const createMemeWatch = async (req: CustomRequest, res: Response, next: NextFunction) => {
   const user = req.requestedUser;
   const meme = req.requestedMeme;
 
   try {
-    const ret = await UserService.deleteMemeReaction(user.deviceId, meme._id as string);
+    const ret = await UserService.createMemeWatch(user, meme);
+    await UserService.updateLastSeenMeme(user, meme);
     return res.json({ ret });
   } catch (err) {
     return next(new CustomError(err.message, err.status));
@@ -83,7 +72,7 @@ const deleteMemeSave = async (req: CustomRequest, res: Response, next: NextFunct
   const meme = req.requestedMeme;
 
   try {
-    const result = await UserService.deleteMemeSave(user.deviceId, meme._id as string);
+    const result = await UserService.deleteMemeSave(user, meme);
     return res.json({ result });
   } catch (err) {
     return next(new CustomError(err.message, err.status));
@@ -94,7 +83,7 @@ const getLastSeenMeme = async (req: CustomRequest, res: Response, next: NextFunc
   const user = req.requestedUser;
 
   try {
-    const memeList = await UserService.getLastSeenMeme(user.deviceId);
+    const memeList = await UserService.getLastSeenMeme(user);
     return res.json({ memeList });
   } catch (err) {
     return next(new CustomError(err.message, err.status));
@@ -105,7 +94,7 @@ const getSavedMeme = async (req: CustomRequest, res: Response, next: NextFunctio
   const user = req.requestedUser;
 
   try {
-    const memeList = await UserService.getSavedMeme(user.deviceId);
+    const memeList = await UserService.getSavedMeme(user);
     return res.json({ memeList });
   } catch (err) {
     return next(new CustomError(err.message, err.status));
@@ -114,11 +103,10 @@ const getSavedMeme = async (req: CustomRequest, res: Response, next: NextFunctio
 
 export {
   createUser,
-  updateLastSeenMeme,
   createMemeReaction,
   createMemeSave,
   createMemeShare,
-  deleteMemeReaction,
+  createMemeWatch,
   deleteMemeSave,
   getLastSeenMeme,
   getSavedMeme,
