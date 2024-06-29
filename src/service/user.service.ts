@@ -123,7 +123,7 @@ async function getSavedMeme(user: IUserDocument): Promise<IMemeDocument[]> {
   try {
     const savedMeme = await MemeInteractionModel.find({
       deviceId: user.deviceId,
-      interactionType: 'save',
+      interactionType: InteractionType.SAVE,
       isDeleted: false,
     }).lean();
 
