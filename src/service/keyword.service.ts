@@ -94,50 +94,59 @@ async function getKeywordById(keywordId: Types.ObjectId): Promise<IKeywordDocume
     logger.info(`Failed to get a Keyword Info By id (${keywordId})`);
   }
 }
-async function getKeywordsByCategory(): Promise<{ [categoryName: string]: IKeywordDocument[] }> {
+
+async function getRecommendedKeywords(): Promise<{ [categoryName: string]: string[] }> {
   try {
-    const categories = await KeywordCategoryModel.find({
-      isRecommend: true,
-      isDeleted: false,
-    }).lean();
-
-    const categoryIds = categories.map((category) => category._id);
-
-    const keywords = await KeywordModel.aggregate([
-      { $match: { category: { $in: categoryIds }, isDeleted: false } },
+    const result = await KeywordCategoryModel.aggregate([
       {
-        $group: {
-          _id: '$category',
-          keywords: { $push: '$name' },
+        $match: {
+          isRecommend: true,
+          isDeleted: false,
         },
       },
       {
         $lookup: {
-          from: 'keywordCategories',
-          localField: '_id',
-          foreignField: '_id',
-          as: 'category',
+          from: 'keyword', // The name of the keywords collection
+          localField: 'name',
+          foreignField: 'category',
+          as: 'keywords',
         },
       },
-      { $unwind: '$category' },
       {
         $project: {
           _id: 0,
-          categoryName: '$category.name',
+          category: '$name',
+          keywords: '$keywords.name',
+        },
+      },
+      {
+        $unwind: '$keywords',
+      },
+      {
+        $group: {
+          _id: '$category',
+          keywords: { $push: '$keywords' },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          category: '$_id',
           keywords: 1,
         },
       },
     ]);
 
-    const result: { [categoryName: string]: IKeywordDocument[] } = {};
-    keywords.forEach((keyword) => {
-      result[keyword.categoryName] = keyword.keywords.map((name) => ({ name }));
-    });
+    const keywordList = result.reduce((acc, { category, keywords }) => {
+      acc[category] = keywords;
+      return acc;
+    }, {});
 
-    return result;
+    logger.info('Successfully retrieved recommended keywords');
+    return keywordList;
   } catch (err) {
-    logger.info(`Failed to get Keywords`);
-    throw new CustomError('Failed to get Keywords', HttpCode.INTERNAL_SERVER_ERROR);
+    logger.error(`Failed to get recommended keywords: ${err.message}`);
+    throw new CustomError('Failed to get recommended keywords', HttpCode.INTERNAL_SERVER_ERROR);
   }
 }
 
@@ -149,5 +158,5 @@ export {
   increaseSearchCount,
   getKeywordByName,
   getKeywordById,
-  getKeywordsByCategory,
+  getRecommendedKeywords,
 };

@@ -70,4 +70,23 @@ const increaseSearchCount = async (req: CustomRequest, res: Response, next: Next
   }
 };
 
-export { createKeyword, updateKeyword, deleteKeyword, getTopKeywords, increaseSearchCount };
+const getRecommendedKeywords = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const getRecommendedKeywords = await KeywordService.getRecommendedKeywords();
+    logger.info(`Get recommended keywords by category: ${JSON.stringify(getRecommendedKeywords)}`);
+    return res.json(
+      createSuccessResponse(HttpCode.OK, 'Get Recommended Keywords', getRecommendedKeywords),
+    );
+  } catch (err) {
+    return next(new CustomError(err.message, err.status || HttpCode.INTERNAL_SERVER_ERROR));
+  }
+};
+
+export {
+  createKeyword,
+  updateKeyword,
+  deleteKeyword,
+  getTopKeywords,
+  increaseSearchCount,
+  getRecommendedKeywords,
+};
