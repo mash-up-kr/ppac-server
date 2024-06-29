@@ -1,21 +1,18 @@
-import express, { Application, Request, Response, json, urlencoded } from 'express';
+import app, { connectToDatabase } from './app';
+import config from './util/config';
+import { logger } from './util/logger';
 
-import { logger, loggerMiddleware } from './util/logger';
+const port = config.PORT;
 
-async function startServer() {
-  const app: Application = express();
+const startServer = async () => {
+  try {
+    await connectToDatabase();
+    app.listen(port, () => {
+      logger.info(`Server started on port ${port}`);
+    });
+  } catch (err) {
+    logger.error('Failed to start server', err);
+  }
+};
 
-  app.use(json());
-  app.use(urlencoded({ extended: true }));
-
-  app.get('/', (_req: Request, res: Response) => {
-    res.send('Hello PPAC');
-  });
-  app.use(loggerMiddleware);
-
-  app.listen(3000, () => {
-    logger.info('Ready to start server');
-  });
-}
-
-setImmediate(startServer);
+startServer();
