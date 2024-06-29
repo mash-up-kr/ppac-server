@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
 import _ from 'lodash';
 import mongoose from 'mongoose';
-import { IKeywordDocument } from '../model/keyword';
 
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
+import { IKeywordDocument } from '../model/keyword';
 import { IKeywordCategoryDocument } from '../model/keywordCategory';
 import { IMemeDocument } from '../model/meme';
 import { IUserDocument } from '../model/user';
