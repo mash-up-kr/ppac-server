@@ -228,7 +228,7 @@ async function deleteMemeSave(user: IUserDocument, meme: IMemeDocument): Promise
     const meemSaveInteraction = await MemeInteractionModel.findOne({
       memeId: meme._id,
       deviceId: user.deviceId,
-      interactionType: 'save',
+      interactionType: InteractionType.SAVE,
       isDeleted: false,
     });
 
