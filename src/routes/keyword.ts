@@ -6,6 +6,7 @@ import {
   deleteKeyword,
   updateKeyword,
   increaseSearchCount,
+  getRecommendedKeywords,
 } from '../controller/keyword.controller';
 import { validateKeywordDulication } from '../middleware/duplicateValidator';
 import { getKeywordInfoByName, getKeywordInfoById } from '../middleware/requestedInfo';
@@ -22,4 +23,5 @@ router.delete('/:keywordId', getKeywordInfoById, deleteKeyword);
 router.get('/top', getTopKeywords); // 인기 키워드 조회
 router.patch('/count', getKeywordInfoByName, increaseSearchCount); // 키워드 조회수 업데이트
 
+router.get('/recommend', getRecommendedKeywords);
 export default router;
