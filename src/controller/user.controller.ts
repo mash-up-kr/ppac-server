@@ -76,7 +76,7 @@ const createMemeWatch = async (req: CustomRequest, res: Response, next: NextFunc
         ]);
         break;
       case MemeWatchType.RECOMMEND:
-        updatedMeme = await UserService.createRecommendWatch(user, meme);
+        updatedMeme = await UserService.createMemeRecommendWatch(user, meme);
         break;
 
       default:

@@ -1,24 +1,24 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 
-export interface IRecommendWatchCreatePayload {
+export interface IMemeRecommendWatchCreatePayload {
   deviceId: string;
   startDate: Date;
   memeIds: Types.ObjectId[];
 }
 
-export interface IRecommendWatchUpdatePayload {
+export interface IMemeRecommendWatchUpdatePayload {
   deviceId?: string;
   startDate?: Date;
   memeIds?: Types.ObjectId[];
 }
 
-export interface IRecommendWatch {
+export interface IMemeRecommendWatch {
   deviceId: string;
   startDate: Date;
   memeIds: Types.ObjectId[];
 }
 
-export interface IRecommendWatchDocument extends Document {
+export interface IMemeRecommendWatchDocument extends Document {
   _id: Types.ObjectId;
   deviceId: string;
   startDate: Date;
@@ -27,7 +27,7 @@ export interface IRecommendWatchDocument extends Document {
   updatedAt: Date;
 }
 
-const RecommendWatchSchema: Schema = new Schema(
+const MemeRecommendWatchSchema: Schema = new Schema(
   {
     deviceId: { type: String, required: true },
     startDate: { type: Date, required: true },
@@ -36,11 +36,11 @@ const RecommendWatchSchema: Schema = new Schema(
   {
     timestamps: true,
     versionKey: false,
-    collection: 'recommendWatch',
+    collection: 'MemeRecommendWatch',
   },
 );
 
-export const RecommendWatchModel = mongoose.model<IRecommendWatchDocument>(
-  'RecommendWatch',
-  RecommendWatchSchema,
+export const MemeRecommendWatchModel = mongoose.model<IMemeRecommendWatchDocument>(
+  'MemeRecommendWatch',
+  MemeRecommendWatchSchema,
 );

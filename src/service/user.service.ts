@@ -8,10 +8,10 @@ import { MemeSaveModel } from '../model/memeSave';
 import { MemeShareModel } from '../model/memeShare';
 import { MemeWatchModel } from '../model/memeWatch';
 import {
-  RecommendWatchModel,
-  IRecommendWatchCreatePayload,
-  IRecommendWatchUpdatePayload,
-} from '../model/recommendWatch';
+  MemeRecommendWatchModel,
+  IMemeRecommendWatchCreatePayload,
+  IMemeRecommendWatchUpdatePayload,
+} from '../model/memeRecommendWatch';
 import { IUser, IUserDocument, IUserInfos, UserModel } from '../model/user';
 import { logger } from '../util/logger';
 import { startOfWeek, format } from 'date-fns';
@@ -274,37 +274,40 @@ async function getSavedMeme(user: IUserDocument): Promise<IMemeDocument[]> {
   }
 }
 
-async function createRecommendWatch(user: IUserDocument, meme: IMemeDocument): Promise<boolean> {
+async function createMemeRecommendWatch(
+  user: IUserDocument,
+  meme: IMemeDocument,
+): Promise<boolean> {
   try {
-    const recommendWatch = await RecommendWatchModel.findOne({
+    const memeRecommendWatch = await MemeRecommendWatchModel.findOne({
       deviceId: user.deviceId,
       isDeleted: false,
     });
 
-    if (!_.isNull(recommendWatch)) {
+    if (!_.isNull(memeRecommendWatch)) {
       logger.info(`Already recommend watch - deviceId(${user.deviceId})`);
 
-      const updatePayload: IRecommendWatchUpdatePayload = {
-        memeIds: [...recommendWatch.memeIds, meme._id],
+      const updatePayload: IMemeRecommendWatchUpdatePayload = {
+        memeIds: [...memeRecommendWatch.memeIds, meme._id],
       };
 
-      await RecommendWatchModel.updateOne({ _id: recommendWatch._id }, updatePayload);
+      await MemeRecommendWatchModel.updateOne({ _id: memeRecommendWatch._id }, updatePayload);
       return true;
     }
 
-    const createPayload: IRecommendWatchCreatePayload = {
+    const createPayload: IMemeRecommendWatchCreatePayload = {
       deviceId: user.deviceId,
       startDate: startOfWeek(new Date(), { weekStartsOn: 1 }),
       memeIds: [meme._id],
     };
 
-    await RecommendWatchModel.create(createPayload);
+    await MemeRecommendWatchModel.create(createPayload);
 
     return true;
   } catch (err) {
-    logger.error(`Failed create recommendWatch`, err.message);
+    logger.error(`Failed create memeRecommendWatch`, err.message);
     throw new CustomError(
-      `Failed create recommendWatch(${err.message})`,
+      `Failed create memeRecommendWatch(${err.message})`,
       HttpCode.INTERNAL_SERVER_ERROR,
     );
   }
@@ -320,5 +323,5 @@ export {
   deleteMemeSave,
   getLastSeenMeme,
   getSavedMeme,
-  createRecommendWatch,
+  createMemeRecommendWatch,
 };
