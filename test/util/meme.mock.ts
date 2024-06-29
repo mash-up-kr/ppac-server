@@ -2,11 +2,9 @@ import { Types } from 'mongoose';
 
 import { IMeme } from '../../src/model/meme';
 
-const keywordIdsMockData = [new Types.ObjectId(), new Types.ObjectId(), new Types.ObjectId()];
-
 const memeMockData = {
   title: 'emotion',
-  keywordIds: keywordIdsMockData,
+  keywordIds: [],
   image: 'example.com',
   source: 'youtube',
   isTodayMeme: false,
@@ -14,11 +12,17 @@ const memeMockData = {
   watch: 0,
 };
 
-const createMockData = (size: number, todayMemeCount: number): IMeme[] => {
+const createMockData = (
+  size: number,
+  todayMemeCount: number,
+  keywordIds: Types.ObjectId[] = [],
+): IMeme[] => {
   const result: IMeme[] = [];
 
   for (let i = 0; i < size; i++) {
     const mockData = { ...memeMockData };
+
+    mockData.keywordIds = keywordIds;
 
     if (i < todayMemeCount) {
       mockData.isTodayMeme = true;
@@ -34,4 +38,4 @@ const createMockData = (size: number, todayMemeCount: number): IMeme[] => {
   return result;
 };
 
-export { createMockData, keywordIdsMockData };
+export { createMockData };

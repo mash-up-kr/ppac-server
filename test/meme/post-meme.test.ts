@@ -1,10 +1,21 @@
 import request from 'supertest';
 
 import app from '../../src/app';
+import { KeywordModel } from '../../src/model/keyword';
 import { IMemeCreatePayload, MemeModel } from '../../src/model/meme';
-import { keywordIdsMockData } from '../util/meme.mock';
+import { createMockData as createKeywordMockData } from '../util/keyword.mock';
+
+let keywordIds = [];
+let keywords = [];
 
 describe("[POST] '/api/meme' ", () => {
+  beforeAll(async () => {
+    const keywordMockDatas = createKeywordMockData(5);
+    const createdKeywords = await KeywordModel.insertMany(keywordMockDatas);
+    keywordIds = createdKeywords.map((k) => k._id);
+    keywords = createdKeywords.map((k) => k.name);
+  });
+
   afterAll(async () => {
     await MemeModel.deleteMany({});
   });
@@ -12,7 +23,7 @@ describe("[POST] '/api/meme' ", () => {
   it('should create a meme', async () => {
     const createPayload: IMemeCreatePayload = {
       title: 'emotion',
-      keywordIds: [keywordIdsMockData[0]],
+      keywordIds: [keywordIds[0]],
       image: 'example.com',
       source: 'youtube',
     };
@@ -37,7 +48,7 @@ describe("[POST] '/api/meme' ", () => {
 
   it('should not create a meme if missing required fields - image', async () => {
     const missingPayload = {
-      keywordIds: keywordIdsMockData,
+      keywordIds: keywordIds,
       source: 'youtube',
     };
     const response = await request(app).post('/api/meme').send(missingPayload);
@@ -46,7 +57,7 @@ describe("[POST] '/api/meme' ", () => {
 
   it('should not create a meme if missing required fields - source', async () => {
     const missingPayload = {
-      keywordIds: keywordIdsMockData,
+      keywordIds: keywordIds,
       image: 'example.com',
     };
     const response = await request(app).post('/api/meme').send(missingPayload);

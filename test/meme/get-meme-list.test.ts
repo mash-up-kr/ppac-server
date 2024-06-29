@@ -1,15 +1,24 @@
 import request from 'supertest';
 
 import app from '../../src/app';
+import { KeywordModel } from '../../src/model/keyword';
 import { MemeModel } from '../../src/model/meme';
+import { createMockData as createKeywordMockData } from '../util/keyword.mock';
 import { createMockData } from '../util/meme.mock';
 
 const totalCount = 15;
+let keywordIds = [];
+let keywords = [];
 
 describe("[GET] '/api/meme/list' ", () => {
   beforeAll(async () => {
-    const mockDatas = createMockData(totalCount, 1);
-    await MemeModel.insertMany(mockDatas);
+    const keywordMockDatas = createKeywordMockData(5);
+    const createdKeywords = await KeywordModel.insertMany(keywordMockDatas);
+    keywordIds = createdKeywords.map((k) => k._id);
+    keywords = createdKeywords.map((k) => k.name);
+
+    const memeMockDatas = createMockData(totalCount, 1, keywordIds);
+    await MemeModel.insertMany(memeMockDatas);
   });
 
   afterAll(async () => {
