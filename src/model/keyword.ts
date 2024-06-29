@@ -11,7 +11,6 @@ export interface IKeywordUpdatePayload {
 export interface IKeyword {
   _id: string;
   name: string;
-  memeIDs: mongoose.Types.ObjectId[];
   searchCount: number;
   createdAt: Date;
   updatedAt: Date;
@@ -21,7 +20,6 @@ export interface IKeyword {
 const KeywordSchema: Schema = new Schema(
   {
     name: { type: String, required: true },
-    memeIDs: { type: [mongoose.Types.ObjectId], ref: 'Meme', required: true, default: [] },
     searchCount: { type: Number, required: true, default: 0 },
     isDeleted: { type: Boolean, required: true, default: false },
   },
