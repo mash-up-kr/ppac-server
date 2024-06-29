@@ -148,6 +148,13 @@ async function deleteMeme(memeId: Types.ObjectId): Promise<boolean> {
   return true;
 }
 
+async function deleteKeywordOfMeme(deleteKeywordId: Types.ObjectId) {
+  await MemeModel.updateMany(
+    { keywordIds: deleteKeywordId },
+    { $pull: { keywordIds: deleteKeywordId } },
+  );
+}
+
 export {
   getMeme,
   getMemeWithKeywords,
@@ -156,4 +163,5 @@ export {
   deleteMeme,
   getTodayMemeList,
   getAllMemeList,
+  deleteKeywordOfMeme,
 };
