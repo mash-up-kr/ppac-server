@@ -27,7 +27,7 @@ async function getMeme(memeId: string): Promise<IMemeDocument | null> {
 async function getMemeWithKeywords(memeId: string): Promise<IMemeWithKeywords | null> {
   try {
     const meme = await MemeModel.aggregate([
-      { $match: { _id: memeId, isDeleted: false } },
+      { $match: { _id: new Types.ObjectId(memeId), isDeleted: false } },
       {
         $lookup: {
           from: 'keyword',
@@ -41,9 +41,7 @@ async function getMemeWithKeywords(memeId: string): Promise<IMemeWithKeywords | 
           keywords: '$keywords.name',
         },
       },
-      {
-        $unset: 'keywordIds',
-      },
+      { $project: { keywordIds: 0 } },
     ]);
 
     if (!meme) {
@@ -75,9 +73,7 @@ async function getTodayMemeList(limit: number = 5): Promise<IMemeWithKeywords[]>
         keywords: '$keywords.name',
       },
     },
-    {
-      $unset: 'keywordIds',
-    },
+    { $project: { keywordIds: 0 } },
   ]);
 
   const memeIds = todayMemeList.map((meme) => meme._id);
