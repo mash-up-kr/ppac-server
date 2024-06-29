@@ -1,13 +1,14 @@
-import { logger } from '../util/logger';
-import { IUser, IUserDocument, IUserInfos, UserModel } from '../model/user';
 import _ from 'lodash';
+
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
-import { IMeme, IMemeDocument, MemeModel } from '../model/meme';
+import { IMemeDocument, MemeModel } from '../model/meme';
 import { MemeReactionModel } from '../model/memeReaction';
 import { MemeSaveModel } from '../model/memeSave';
 import { MemeShareModel } from '../model/memeShare';
 import { MemeWatchModel } from '../model/memeWatch';
+import { IUser, IUserDocument, IUserInfos, UserModel } from '../model/user';
+import { logger } from '../util/logger';
 
 async function getUser(deviceId: string): Promise<IUserDocument | null> {
   try {
@@ -54,13 +55,13 @@ async function updateLastSeenMeme(user: IUserDocument, meme: IMemeDocument): Pro
   try {
     const newLastSeenMeme = [...user.lastSeenMeme];
 
-    const index = newLastSeenMeme.indexOf(meme._id as string);
+    const index = newLastSeenMeme.indexOf(meme._id);
     // 새 값이 존재하면 해당 값을 배열에서 제거합니다.
     if (index !== -1) {
       newLastSeenMeme.splice(index, 1);
     }
     // 새 값을 배열의 첫 번째 위치에 추가합니다.
-    newLastSeenMeme.unshift(meme._id as string);
+    newLastSeenMeme.unshift(meme._id);
 
     if (newLastSeenMeme.length > 10) {
       newLastSeenMeme.pop();
@@ -89,7 +90,10 @@ async function updateLastSeenMeme(user: IUserDocument, meme: IMemeDocument): Pro
   }
 }
 
-async function createMemeReaction(user: IUserDocument, meme: IMemeDocument): Promise<IMeme> {
+async function createMemeReaction(
+  user: IUserDocument,
+  meme: IMemeDocument,
+): Promise<IMemeDocument> {
   try {
     const memeReaction = await MemeReactionModel.findOne({
       deviceId: user.deviceId,
@@ -100,6 +104,7 @@ async function createMemeReaction(user: IUserDocument, meme: IMemeDocument): Pro
       logger.info(`Already reaction meme - deviceId(${user.deviceId}), memeId(${meme._id}`);
       return meme;
     }
+
     const newMemeReaction = await MemeReactionModel.create({
       memeId: meme._id,
       deviceId: user.deviceId,
@@ -225,7 +230,7 @@ async function deleteMemeSave(user: IUserDocument, meme: IMemeDocument): Promise
   }
 }
 
-async function getLastSeenMeme(user: IUserDocument): Promise<IMeme[]> {
+async function getLastSeenMeme(user: IUserDocument): Promise<IMemeDocument[]> {
   try {
     const lastSeenMeme = user.lastSeenMeme;
     const memeList = await MemeModel.find({
@@ -243,7 +248,7 @@ async function getLastSeenMeme(user: IUserDocument): Promise<IMeme[]> {
   }
 }
 
-async function getSavedMeme(user: IUserDocument): Promise<IMeme[]> {
+async function getSavedMeme(user: IUserDocument): Promise<IMemeDocument[]> {
   try {
     const savedMeme = await MemeSaveModel.find({
       deviceId: user.deviceId,
