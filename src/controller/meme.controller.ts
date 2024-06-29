@@ -12,6 +12,10 @@ import * as UserService from '../service/user.service';
 import { logger } from '../util/logger';
 import { createSuccessResponse } from '../util/response';
 
+enum MemeWatchType {
+  SEARCH = 'search',
+  RECOMMEND = 'recommend',
+}
 const getMeme = async (req: Request, res: Response, next: NextFunction) => {
   const memeId = req.params?.memeId || null;
 
@@ -217,16 +221,27 @@ const createMemeShare = async (req: CustomRequest, res: Response, next: NextFunc
 const createMemeWatch = async (req: CustomRequest, res: Response, next: NextFunction) => {
   const user = req.requestedUser;
   const meme = req.requestedMeme;
+  const type = req.params.type as MemeWatchType;
 
   try {
     // 밈 조회
     // 최근 본 밈 추가
-    const [result, _]: [boolean, any] = await Promise.all([
-      MemeService.createMemeInteraction(user, meme, InteractionType.WATCH),
-      UserService.updateLastSeenMeme(user, meme),
-    ]);
+    if (type == MemeWatchType.SEARCH) {
+      const [result, _]: [boolean, any] = await Promise.all([
+        MemeService.createMemeInteraction(user, meme, InteractionType.WATCH),
+        UserService.updateLastSeenMeme(user, meme),
+      ]);
 
-    return res.json(createSuccessResponse(HttpCode.CREATED, 'Crate Meme Watch', result));
+      return res.json(createSuccessResponse(HttpCode.CREATED, 'Crate Meme Watch', result));
+    } else if (type == MemeWatchType.RECOMMEND) {
+      const memeRecommendWatch = await UserService.createMemeRecommendWatch(user, meme);
+
+      return res.json(
+        createSuccessResponse(HttpCode.CREATED, `${type} Meme Watch`, memeRecommendWatch),
+      );
+    } else {
+      return next(new CustomError(`Invalid 'type' parameter.`, HttpCode.BAD_REQUEST));
+    }
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }

@@ -32,7 +32,7 @@ router.delete('/:memeId', getRequestedMemeInfo, deleteMeme); // meme 삭제
 // meme 상호작용
 router.post('/:memeId/save', getRequestedMemeInfo, getRequestedUserInfo, createMemeSave);
 router.post('/:memeId/share', getRequestedMemeInfo, getRequestedUserInfo, createMemeShare);
-router.post('/:memeId/watch', getRequestedMemeInfo, getRequestedUserInfo, createMemeWatch);
+router.post('/:memeId/watch/:type', getRequestedMemeInfo, getRequestedUserInfo, createMemeWatch);
 router.post('/:memeId/reaction', getRequestedMemeInfo, getRequestedUserInfo, createMemeReaction);
 
 router.get('/search/:name', getKeywordInfoByName, searchMemeByKeyword);

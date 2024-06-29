@@ -14,7 +14,7 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
   }
 
   try {
-    const user = await UserService.createUser(req.body);
+    const user = await UserService.createUser(req.body.deviceId);
     return res.json(createSuccessResponse(HttpCode.CREATED, 'Create User', user));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
