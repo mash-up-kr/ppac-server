@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import _ from 'lodash';
 import mongoose from 'mongoose';
-import { IKeywordDocument } from 'src/model/keyword';
+import { IKeywordDocument } from '../model/keyword';
 
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';

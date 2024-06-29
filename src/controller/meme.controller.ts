@@ -134,7 +134,7 @@ const searchMemeByKeyword = async (req: CustomRequest, res: Response, next: Next
 
   try {
     const memeList = await MemeService.searchMemeByKeyword(keyword);
-    return res.json(createSuccessResponse(HttpCode.OK, 'Get meme list by keyword', memeList));
+    return res.json(createSuccessResponse(HttpCode.OK, 'Search meme by keyword', memeList));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }

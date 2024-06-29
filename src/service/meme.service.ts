@@ -100,14 +100,14 @@ async function deleteMeme(memeId: Types.ObjectId): Promise<boolean> {
 
 async function searchMemeByKeyword(keyword: IKeywordDocument): Promise<IMemeDocument[]> {
   try {
-    const memes = await MemeModel.find(
+    const memeList = await MemeModel.find(
       { keywordIds: keyword._id },
-      { _id: 0, createdAt: 0, updatedAt: 0 },
+      { createdAt: 0, updatedAt: 0 },
     )
       .populate('keywordIds', 'name')
       .lean();
 
-    return memes;
+    return memeList;
   } catch (err) {
     logger.error(`Failed to search meme by keyword(${keyword})`, err.message);
     throw new CustomError(
