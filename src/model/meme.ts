@@ -5,7 +5,6 @@ export interface IMemeCreatePayload {
   keywordIds: Types.ObjectId[];
   image: string;
   source: string;
-  isTodayMeme: boolean;
 }
 
 export interface IMemeUpdatePayload {

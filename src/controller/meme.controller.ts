@@ -35,7 +35,7 @@ const getMeme = async (req: Request, res: Response, next: NextFunction) => {
 };
 
 const createMeme = async (req: Request, res: Response, next: NextFunction) => {
-  const { title, keywordIds, image, source, isTodayMeme } = req.body as IMemeCreatePayload;
+  const { title, keywordIds, image, source } = req.body as IMemeCreatePayload;
 
   if (!_.has(req.body, 'title')) {
     return next(new CustomError(`'title' field should be provided`, HttpCode.BAD_REQUEST));
@@ -53,12 +53,8 @@ const createMeme = async (req: Request, res: Response, next: NextFunction) => {
     return next(new CustomError(`'keywordIds' field should be provided`, HttpCode.BAD_REQUEST));
   }
 
-  if (!_.has(req.body, 'isTodayMeme')) {
-    return next(new CustomError(`'isTodayMeme' field should be provided`, HttpCode.BAD_REQUEST));
-  }
-
   try {
-    const meme = await MemeService.createMeme({ title, keywordIds, image, source, isTodayMeme });
+    const meme = await MemeService.createMeme({ title, keywordIds, image, source });
     return res.json(createSuccessResponse(HttpCode.CREATED, 'Create Meme', meme));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
