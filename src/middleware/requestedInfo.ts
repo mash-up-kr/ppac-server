@@ -114,15 +114,15 @@ export const getRequestedKeywordCategoryInfo = async (
   res: Response,
   next: NextFunction,
 ) => {
-  const categoryId = req.params?.categoryId || req.body?.categoryId || null;
+  const categoryName = req.params?.categoryName || req.body?.categoryName || null;
 
-  if (_.isNull(categoryId)) {
+  if (_.isNull(categoryName)) {
     return next(new CustomError(`'categoryId' should be provided`, HttpCode.BAD_REQUEST));
   }
-  const category = await getKeywordCategory(categoryId);
+  const category = await getKeywordCategory(categoryName);
   if (_.isNull(category)) {
     return next(
-      new CustomError(`KeywordCategory(${categoryId}) does not exist`, HttpCode.NOT_FOUND),
+      new CustomError(`KeywordCategory(${categoryName}) does not exist`, HttpCode.NOT_FOUND),
     );
   }
   req.requestedKeywordCategory = category;

@@ -24,35 +24,41 @@ async function createKeywordCategory(
 }
 
 async function updateKeywordCategory(
-  categoryId: string,
-  update: Partial<IKeywordCategory>,
+  categoryName: string,
+  updateInfos: Partial<IKeywordCategory>,
 ): Promise<IKeywordCategory> {
-  const updatedCategory = await KeywordCategoryModel.findOneAndUpdate({ _id: categoryId }, update, {
-    new: true,
-  }).lean();
+  const updatedCategory = await KeywordCategoryModel.findOneAndUpdate(
+    { name: categoryName },
+    updateInfos,
+    {
+      new: true,
+    },
+  ).lean();
   if (!updatedCategory) {
     throw new CustomError(`Category with ID ${updatedCategory} not found`, HttpCode.NOT_FOUND);
   }
   return updatedCategory;
 }
 
-async function deleteKeywordCategory(categoryId: string): Promise<boolean> {
-  const deletedCategory = await KeywordCategoryModel.findOneAndDelete({ _id: categoryId }).lean();
+async function deleteKeywordCategory(categoryName: string): Promise<boolean> {
+  const deletedCategory = await KeywordCategoryModel.findOneAndDelete({
+    name: categoryName,
+  }).lean();
   if (!deletedCategory) {
-    throw new CustomError(`Category with ID ${categoryId} not found`, HttpCode.NOT_FOUND);
+    throw new CustomError(`Category with Name ${categoryName} not found`, HttpCode.NOT_FOUND);
   }
   return true;
 }
 
-async function getKeywordCategory(categoryId: string): Promise<IKeywordCategory> {
+async function getKeywordCategory(categoryName: string): Promise<IKeywordCategory> {
   try {
     const keywordCategory = await KeywordCategoryModel.findOne({
-      _id: categoryId,
+      name: categoryName,
       isDeleted: false,
     }).lean();
     return keywordCategory;
   } catch (err) {
-    logger.info(`Failed to get a KeywordCategory Info By id (${categoryId})`);
+    logger.info(`Failed to get a KeywordCategory Info By id (${categoryName})`);
   }
 }
 

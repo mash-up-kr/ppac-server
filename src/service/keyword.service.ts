@@ -1,9 +1,8 @@
 import { IKeywordCreatePayload, KeywordModel, IKeyword } from '../model/keyword';
-import { IKeywordCategory, KeywordCategoryModel } from '../model/keywordCategory';
+import { KeywordCategoryModel } from '../model/keywordCategory';
 import { logger } from '../util/logger';
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
-import { CacheInterceptor } from '@nestjs/common';
 
 async function createKeyword(info: IKeywordCreatePayload): Promise<IKeyword> {
   try {

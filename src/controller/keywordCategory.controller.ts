@@ -5,10 +5,7 @@ import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
 import * as KeywordCategoryService from '../service/keywordCategory.service';
 import { logger } from '../util/logger';
-import {
-  IKeywordCategoryCreatePayload,
-  IKeywordCategoryUpdatePayload,
-} from '../model/keywordCategory';
+import { IKeywordCategoryUpdatePayload } from '../model/keywordCategory';
 import mongoose from 'mongoose';
 import { CustomRequest } from '../middleware/requestedInfo';
 
@@ -31,10 +28,10 @@ const updateKeywordCategory = async (req: CustomRequest, res: Response, next: Ne
   const updateInfo: IKeywordCategoryUpdatePayload = req.body;
   try {
     const updatedCategory = await KeywordCategoryService.updateKeywordCategory(
-      category._id as string,
+      category.name,
       updateInfo,
     );
-    logger.info(`Updated category with ID ${req.params.categoryId}`);
+    logger.info(`Updated category with ID ${req.params.categoryName}`);
     return res.json({ success: true, updatedCategory });
   } catch (err) {
     return next(new CustomError(err.message, err.status || HttpCode.INTERNAL_SERVER_ERROR));
@@ -44,37 +41,17 @@ const updateKeywordCategory = async (req: CustomRequest, res: Response, next: Ne
 const deleteKeywordCategory = async (req: CustomRequest, res: Response, next: NextFunction) => {
   const category = req.requestedKeywordCategory;
   try {
-    const deletedKeyword = await KeywordCategoryService.deleteKeywordCategory(
-      category._id as string,
-    );
+    const deletedKeyword = await KeywordCategoryService.deleteKeywordCategory(category.name);
     return res.json({ success: true, deletedKeyword });
   } catch (err) {
     return next(new CustomError(err.message, err.status || HttpCode.INTERNAL_SERVER_ERROR));
   }
 };
 
-const getKeywordCategory = async (req: Request, res: Response, next: NextFunction) => {
-  const categoryId = req.params?.categoryId || null;
+const getKeywordCategory = async (req: CustomRequest, res: Response, next: NextFunction) => {
+  const category = req.requestedKeywordCategory;
 
-  if (_.isNull(categoryId)) {
-    return next(new CustomError(`'categoryId' field should be provided`, HttpCode.BAD_REQUEST));
-  }
-
-  if (!mongoose.Types.ObjectId.isValid(categoryId)) {
-    return next(new CustomError(`'categoryId' is not a valid ObjectId`, HttpCode.BAD_REQUEST));
-  }
-
-  try {
-    const keywordCategory = await KeywordCategoryService.getKeywordCategory(categoryId);
-    if (_.isNull(keywordCategory)) {
-      return next(new CustomError(`category(${categoryId}) not found.`, HttpCode.NOT_FOUND));
-    }
-
-    logger.info(`Get keywordCategory - ${keywordCategory})`);
-    return res.json({ ...keywordCategory });
-  } catch (err) {
-    return next(new CustomError(err.message, err.status));
-  }
+  return res.json({ ...category });
 };
 
 export { createKeywordCategory, updateKeywordCategory, deleteKeywordCategory, getKeywordCategory };

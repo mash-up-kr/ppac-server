@@ -6,11 +6,12 @@ import {
   deleteKeywordCategory,
 } from '../controller/keywordCategory.controller';
 import { getRequestedKeywordCategoryInfo } from '../middleware/requestedInfo';
+import { categoryDuplicateValid } from 'src/middleware/duplicateValid';
 
 const router = express.Router();
 
-router.post('/', createKeywordCategory);
-router.get('/:categoryId', getKeywordCategory);
+router.post('/', categoryDuplicateValid, createKeywordCategory);
+router.get('/:categoryId', getRequestedKeywordCategoryInfo, getKeywordCategory);
 router.put('/:categoryId', getRequestedKeywordCategoryInfo, updateKeywordCategory);
 router.delete('/:categoryId', getRequestedKeywordCategoryInfo, deleteKeywordCategory);
 
