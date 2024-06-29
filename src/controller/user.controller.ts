@@ -86,6 +86,27 @@ const deleteMemeSave = async (req: CustomRequest, res: Response, next: NextFunct
     return next(new CustomError(err.message, err.status));
   }
 };
+
+const getUser = async (req: CustomRequest, res: Response, next: NextFunction) => {
+  const user = req.requestedUser;
+
+  try {
+    const countInteractionType = (type: InteractionType) =>
+      MemeInteractionModel.countDocuments({
+        deviceId: user.deviceId,
+        interactionType: type,
+      });
+
+    const [watch, reaction, share, save] = await Promise.all([
+      countInteractionType('watch'),
+      countInteractionType('reaction'),
+      countInteractionType('share'),
+      countInteractionType('save'),
+    ]);
+
+    const level = getLevel(watch, reaction, share, save);
+
+    return res.json(createSuccessResponse(HttpCode.OK, 'Get User', { ...user, level }));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
@@ -114,6 +135,7 @@ const getSavedMeme = async (req: CustomRequest, res: Response, next: NextFunctio
 };
 
 export {
+  getUser,
   createUser,
   createMemeReaction,
   createMemeSave,
@@ -123,3 +145,18 @@ export {
   getLastSeenMeme,
   getSavedMeme,
 };
+
+function getLevel(watch: number, reaction: number, share: number, save: number): number {
+  let level = 1;
+  if (watch >= 20 && reaction >= 20 && share >= 20 && save >= 20) {
+    level = 4;
+  } else if (watch >= 20 && reaction >= 20 && share >= 20) {
+    level = 3;
+  } else if (watch >= 20 && reaction >= 20) {
+    level = 2;
+  } else if (watch >= 20) {
+    level = 1;
+  }
+
+  return level;
+}
