@@ -1,12 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 import _ from 'lodash';
+import { IKeywordUpdatePayload } from 'src/model/keyword';
 
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
-import * as KeywordService from '../service/keyword.service';
 import { CustomRequest } from '../middleware/requestedInfo';
+import * as KeywordService from '../service/keyword.service';
 import { logger } from '../util/logger';
-import { IKeywordCreatePayload, IKeywordUpdatePayload } from 'src/model/keyword';
 
 const createKeyword = async (req: Request, res: Response, next: NextFunction) => {
   if (!_.has(req.body, 'name')) {
@@ -25,7 +25,7 @@ const createKeyword = async (req: Request, res: Response, next: NextFunction) =>
 const deleteKeyword = async (req: CustomRequest, res: Response, next: NextFunction) => {
   const keyword = req.requestedKeyword;
   try {
-    const deletedKeyword = await KeywordService.deleteKeyword(keyword._id as string);
+    const deletedKeyword = await KeywordService.deleteKeyword(keyword._id);
     logger.info(`Deleted keyword with ID ${req.params.keywordId}`);
     return res.json({ success: true, deletedKeyword });
   } catch (err) {
@@ -48,7 +48,7 @@ const updateKeyword = async (req: CustomRequest, res: Response, next: NextFuncti
   const keyword = req.requestedKeyword;
   const updateInfo: IKeywordUpdatePayload = req.body;
   try {
-    const updatedKeyword = await KeywordService.updateKeyword(keyword._id as string, updateInfo);
+    const updatedKeyword = await KeywordService.updateKeyword(keyword._id, updateInfo);
     logger.info(`Updated keyword with ID ${req.params.keywordId}`);
     return res.json({ success: true, updatedKeyword });
   } catch (err) {

@@ -5,7 +5,7 @@ import mongoose from 'mongoose';
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
 import { CustomRequest } from '../middleware/requestedInfo';
-import { IMemeCreatePayload } from '../model/meme';
+import { IMemeCreatePayload, IMemeUpdatePayload } from '../model/meme';
 import * as MemeService from '../service/meme.service';
 import { logger } from '../util/logger';
 
@@ -34,8 +34,10 @@ const getMeme = async (req: Request, res: Response, next: NextFunction) => {
 };
 
 const createMeme = async (req: Request, res: Response, next: NextFunction) => {
-  if (!_.has(req.body, 'keywords')) {
-    return next(new CustomError(`'keywords' field should be provided`, HttpCode.BAD_REQUEST));
+  const { title, keywordIds, image, source, isTodayMeme } = req.body as IMemeCreatePayload;
+
+  if (!_.has(req.body, 'title')) {
+    return next(new CustomError(`'title' field should be provided`, HttpCode.BAD_REQUEST));
   }
 
   if (!_.has(req.body, 'image')) {
@@ -46,8 +48,16 @@ const createMeme = async (req: Request, res: Response, next: NextFunction) => {
     return next(new CustomError(`'source' field should be provided`, HttpCode.BAD_REQUEST));
   }
 
+  if (!_.has(req.body, 'keywordIds')) {
+    return next(new CustomError(`'keywordIds' field should be provided`, HttpCode.BAD_REQUEST));
+  }
+
+  if (!_.has(req.body, 'isTodayMeme')) {
+    return next(new CustomError(`'isTodayMeme' field should be provided`, HttpCode.BAD_REQUEST));
+  }
+
   try {
-    const meme = await MemeService.createMeme(req.body);
+    const meme = await MemeService.createMeme({ title, keywordIds, image, source, isTodayMeme });
     return res.json({ ...meme });
   } catch (err) {
     return next(new CustomError(err.message, err.status));
@@ -56,10 +66,10 @@ const createMeme = async (req: Request, res: Response, next: NextFunction) => {
 
 const updateMeme = async (req: CustomRequest, res: Response, next: NextFunction) => {
   const meme = req.requestedMeme;
-  const updateInfo: IMemeCreatePayload = req.body;
+  const updateInfo: IMemeUpdatePayload = req.body;
 
   try {
-    const updatedMeme = await MemeService.updateMeme(meme._id as string, updateInfo);
+    const updatedMeme = await MemeService.updateMeme(meme._id, updateInfo);
     return res.json({ ...updatedMeme });
   } catch (err) {
     return next(new CustomError(err.message, err.status));
@@ -69,7 +79,7 @@ const updateMeme = async (req: CustomRequest, res: Response, next: NextFunction)
 const deleteMeme = async (req: CustomRequest, res: Response, next: NextFunction) => {
   const meme = req.requestedMeme;
   try {
-    const deletedMeme = await MemeService.deleteMeme(meme._id as string);
+    const deletedMeme = await MemeService.deleteMeme(meme._id);
     return res.json({ result: deletedMeme });
   } catch (err) {
     return next(new CustomError(err.message, err.status));
