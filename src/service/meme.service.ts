@@ -192,14 +192,14 @@ async function createMemeInteraction(
       logger.info(
         `Already ${interactionType} meme - deviceId(${user.deviceId}), memeId(${meme._id}`,
       );
+    } else {
+      const newMemeInteraction = await MemeInteractionModel.create({
+        memeId: meme._id,
+        deviceId: user.deviceId,
+        interactionType,
+      });
+      await newMemeInteraction.save();
     }
-
-    const newMemeInteraction = await MemeInteractionModel.create({
-      memeId: meme._id,
-      deviceId: user.deviceId,
-      interactionType,
-    });
-    await newMemeInteraction.save();
 
     // 'reaction'인 경우에만 Meme의 reaction 수를 업데이트한다.
     if (interactionType === 'reaction') {
