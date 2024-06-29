@@ -202,7 +202,7 @@ async function createMemeInteraction(
     }
 
     // 'reaction'인 경우에만 Meme의 reaction 수를 업데이트한다.
-    if (interactionType === 'reaction') {
+    if (interactionType === InteractionType.REACTION) {
       await MemeModel.findOneAndUpdate(
         { memeId: meme._id },
         { $inc: { reaction: 1 } },
@@ -238,7 +238,7 @@ async function deleteMemeSave(user: IUserDocument, meme: IMemeDocument): Promise
     }
 
     await MemeInteractionModel.findOneAndUpdate(
-      { deviceId: user.deviceId, memeId: meme._id, interactionType: 'save' },
+      { deviceId: user.deviceId, memeId: meme._id, interactionType: InteractionType.SAVE },
       {
         isDeleted: true,
       },
