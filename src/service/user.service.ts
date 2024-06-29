@@ -3,10 +3,10 @@ import _ from 'lodash';
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
 import { IMemeDocument, MemeModel } from '../model/meme';
+import { InteractionType, MemeInteractionModel } from '../model/memeInteraction';
 import { MemeReactionModel } from '../model/memeReaction';
 import { MemeSaveModel } from '../model/memeSave';
 import { MemeShareModel } from '../model/memeShare';
-import { MemeWatchModel } from '../model/memeWatch';
 import { IUser, IUserDocument, IUserInfos, UserModel } from '../model/user';
 import { logger } from '../util/logger';
 
@@ -90,117 +90,52 @@ async function updateLastSeenMeme(user: IUserDocument, meme: IMemeDocument): Pro
   }
 }
 
-async function createMemeReaction(
+async function createMemeInteraction(
   user: IUserDocument,
   meme: IMemeDocument,
-): Promise<IMemeDocument> {
+  interactionType: InteractionType,
+): Promise<boolean> {
   try {
-    const memeReaction = await MemeReactionModel.findOne({
-      deviceId: user.deviceId,
+    const memeInteraction = await MemeInteractionModel.findOne({
       memeId: meme._id,
+      deviceId: user.deviceId,
+      interactionType,
       isDeleted: false,
     });
-    if (!_.isNull(memeReaction)) {
-      logger.info(`Already reaction meme - deviceId(${user.deviceId}), memeId(${meme._id}`);
-      return meme;
+
+    // 밈당 interaction은 1회
+    if (!_.isNull(memeInteraction)) {
+      logger.info(
+        `Already ${interactionType} meme - deviceId(${user.deviceId}), memeId(${meme._id}`,
+      );
     }
 
-    const newMemeReaction = await MemeReactionModel.create({
+    const newMemeInteraction = await MemeInteractionModel.create({
       memeId: meme._id,
       deviceId: user.deviceId,
+      interactionType,
     });
-    await newMemeReaction.save();
+    await newMemeInteraction.save();
 
-    const updatedMeme = await MemeModel.findOneAndUpdate(
-      { memeId: meme._id },
-      { $inc: { reaction: 1 } },
-      {
-        projection: { _id: 0, createdAt: 0, updatedAt: 0 },
-        returnDocument: 'after',
-      },
-    ).lean();
+    // 'reaction'인 경우에만 Meme의 reaction 수를 업데이트한다.
+    if (interactionType === 'reaction') {
+      await MemeModel.findOneAndUpdate(
+        { memeId: meme._id },
+        { $inc: { reaction: 1 } },
+        {
+          projection: { _id: 0, createdAt: 0, updatedAt: 0 },
+          returnDocument: 'after',
+        },
+      ).lean();
+    }
 
-    return updatedMeme;
+    return true;
   } catch (err) {
-    logger.error(`Failed create memeReaction`, err.message);
+    logger.error(`Failed to create memeInteraction`, err.message);
     throw new CustomError(
-      `Failed create memeReaction(${err.message})`,
+      `Failed to create memeInteraction(${err.message})`,
       HttpCode.INTERNAL_SERVER_ERROR,
     );
-  }
-}
-
-async function createMemeSave(user: IUserDocument, meme: IMemeDocument): Promise<boolean> {
-  try {
-    const memeSave = await MemeSaveModel.findOne({
-      deviceId: user.deviceId,
-      memeId: meme._id,
-      isDeleted: false,
-    });
-    if (!_.isNull(memeSave)) {
-      logger.info(`Already save meme - user.deviceId(${user.deviceId}), memeId(${meme._id}`);
-      return false;
-    }
-    const newMemeSave = await MemeSaveModel.create({ memeId: meme._id, deviceId: user.deviceId });
-    await newMemeSave.save();
-
-    return true;
-  } catch (err) {
-    logger.error(`Failed create memeSave`, err.message);
-    throw new CustomError(`Failed create memeSave(${err.message})`, HttpCode.INTERNAL_SERVER_ERROR);
-  }
-}
-
-async function createMemeShare(user: IUserDocument, meme: IMemeDocument): Promise<boolean> {
-  try {
-    const memeShare = await MemeShareModel.findOne({
-      deviceId: user.deviceId,
-      memeId: meme._id,
-      isDeleted: false,
-    });
-    if (!_.isNull(memeShare)) {
-      logger.info(`Already share meme - deviceId(${user.deviceId}), memeId(${meme._id}`);
-      return false;
-    }
-    const newMemeShare = await MemeShareModel.create({ memeId: meme._id, deviceId: user.deviceId });
-    await newMemeShare.save();
-
-    return true;
-  } catch (err) {
-    logger.error(`Failed create memeSave`, err.message);
-    throw new CustomError(`Failed create memeSave(${err.message})`, HttpCode.INTERNAL_SERVER_ERROR);
-  }
-}
-
-async function createMemeWatch(user: IUserDocument, meme: IMemeDocument): Promise<boolean> {
-  try {
-    const memeWatch = await MemeWatchModel.findOne({
-      deviceId: user.deviceId,
-      memeId: meme._id,
-      isDeleted: false,
-    });
-    if (!_.isNull(memeWatch)) {
-      logger.info(`Already watch meme - deviceId(${user.deviceId}), memeId(${meme._id}`);
-      return true;
-    }
-    const newMemeWatch = await MemeWatchModel.create({ memeId: meme._id, deviceId: user.deviceId });
-    await newMemeWatch.save();
-
-    await MemeModel.findOneAndUpdate(
-      { memeId: meme._id },
-      {
-        $inc: { watch: 1 },
-      },
-      {
-        projection: { _id: 0, createdAt: 0, updatedAt: 0 },
-        returnDocument: 'after',
-      },
-    ).lean();
-
-    return true;
-  } catch (err) {
-    logger.error(`Failed create memeSave`, err.message);
-    throw new CustomError(`Failed create memeSave(${err.message})`, HttpCode.INTERNAL_SERVER_ERROR);
   }
 }
 
@@ -272,10 +207,7 @@ export {
   getUser,
   createUser,
   updateLastSeenMeme,
-  createMemeReaction,
-  createMemeSave,
-  createMemeShare,
-  createMemeWatch,
+  createMemeInteraction,
   deleteMemeSave,
   getLastSeenMeme,
   getSavedMeme,
