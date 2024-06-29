@@ -32,10 +32,10 @@ const getUser = async (req: CustomRequest, res: Response, next: NextFunction) =>
       });
 
     const [watch, reaction, share, save] = await Promise.all([
-      countInteractionType('watch'),
-      countInteractionType('reaction'),
-      countInteractionType('share'),
-      countInteractionType('save'),
+      countInteractionType(InteractionType.WATCH),
+      countInteractionType(InteractionType.REACTION),
+      countInteractionType(InteractionType.SHARE),
+      countInteractionType(InteractionType.SAVE),
     ]);
 
     const level = getLevel(watch, reaction, share, save);

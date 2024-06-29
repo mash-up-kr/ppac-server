@@ -1,6 +1,11 @@
 import mongoose, { Schema, Types } from 'mongoose';
 
-export type InteractionType = 'watch' | 'reaction' | 'share' | 'save';
+export enum InteractionType {
+  WATCH = 'watch',
+  REACTION = 'reaction',
+  SHARE = 'share',
+  SAVE = 'save',
+}
 
 export interface IMemeInteraction {
   deviceId: Types.ObjectId;

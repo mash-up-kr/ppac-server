@@ -6,6 +6,7 @@ import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
 import { CustomRequest } from '../middleware/requestedInfo';
 import { IMemeCreatePayload, IMemeUpdatePayload } from '../model/meme';
+import { InteractionType } from 'src/model/memeInteraction';
 import * as MemeService from '../service/meme.service';
 import * as UserService from '../service/user.service';
 import { logger } from '../util/logger';
@@ -170,7 +171,7 @@ const createMemeReaction = async (req: CustomRequest, res: Response, next: NextF
   const meme = req.requestedMeme;
 
   try {
-    const result = await MemeService.createMemeInteraction(user, meme, 'reaction');
+    const result = await MemeService.createMemeInteraction(user, meme, InteractionType.REACTION);
     return res.json(createSuccessResponse(HttpCode.CREATED, 'Create Meme Reaction', result));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
@@ -182,7 +183,7 @@ const createMemeSave = async (req: CustomRequest, res: Response, next: NextFunct
   const meme = req.requestedMeme;
 
   try {
-    const result = await MemeService.createMemeInteraction(user, meme, 'save');
+    const result = await MemeService.createMemeInteraction(user, meme, InteractionType.SAVE);
     return res.json(createSuccessResponse(HttpCode.CREATED, 'Crate Meme Save', result));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
@@ -194,7 +195,11 @@ const createMemeShare = async (req: CustomRequest, res: Response, next: NextFunc
   const meme = req.requestedMeme;
 
   try {
-    const result: boolean = await MemeService.createMemeInteraction(user, meme, 'share');
+    const result: boolean = await MemeService.createMemeInteraction(
+      user,
+      meme,
+      InteractionType.SHARE,
+    );
     return res.json(createSuccessResponse(HttpCode.CREATED, 'Crate Meme Share', result));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
@@ -209,7 +214,7 @@ const createMemeWatch = async (req: CustomRequest, res: Response, next: NextFunc
     // 밈 조회
     // 최근 본 밈 추가
     const [result, _]: [boolean, any] = await Promise.all([
-      MemeService.createMemeInteraction(user, meme, 'watch'),
+      MemeService.createMemeInteraction(user, meme, InteractionType.WATCH),
       UserService.updateLastSeenMeme(user, meme),
     ]);
 
