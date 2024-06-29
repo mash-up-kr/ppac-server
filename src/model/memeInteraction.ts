@@ -8,14 +8,14 @@ export enum InteractionType {
 }
 
 export interface IMemeInteraction {
-  deviceId: Types.ObjectId;
+  deviceId: String;
   memeId: Types.ObjectId;
   interactionType: InteractionType;
 }
 
 export interface IMemeInteraction extends Document {
   _id: Types.ObjectId;
-  deviceId: Types.ObjectId;
+  deviceId: String;
   memeId: Types.ObjectId;
   interactionType: InteractionType;
   isDeleted: boolean;
@@ -25,7 +25,7 @@ export interface IMemeInteraction extends Document {
 
 const MemeInteractionSchema: Schema = new Schema(
   {
-    deviceId: { type: Types.ObjectId, ref: 'user', required: true },
+    deviceId: { type: String, ref: 'user', required: true },
     memeId: { type: Types.ObjectId, ref: 'keyword', required: true },
     interactionType: { type: String, enum: InteractionType, required: true },
     isDeleted: { type: Boolean, required: true, default: false },
