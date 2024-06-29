@@ -32,6 +32,7 @@ async function createUser(deviceId: string): Promise<IUserInfos> {
       { deviceId, isDeleted: false },
       { _id: 0, createdAt: 0, updatedAt: 0 },
     );
+
     if (foundUser) {
       const countInteractionType = (type: InteractionType) =>
         MemeInteractionModel.countDocuments({
@@ -55,6 +56,7 @@ async function createUser(deviceId: string): Promise<IUserInfos> {
         level: 1,
       };
     }
+
     const user = await UserModel.create({
       deviceId,
     });
