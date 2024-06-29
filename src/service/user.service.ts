@@ -158,7 +158,9 @@ async function createMemeRecommendWatch(
   meme: IMemeDocument,
 ): Promise<boolean> {
   try {
+    const todayWeekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
     const memeRecommendWatch = await MemeRecommendWatchModel.findOne({
+      startDate: todayWeekStart,
       deviceId: user.deviceId,
       isDeleted: false,
     });
@@ -170,7 +172,10 @@ async function createMemeRecommendWatch(
         memeIds: [...memeRecommendWatch.memeIds, meme._id],
       };
 
-      await MemeRecommendWatchModel.updateOne({ _id: memeRecommendWatch._id }, updatePayload);
+      await MemeRecommendWatchModel.findOneAndUpdate(
+        { _id: memeRecommendWatch._id },
+        { $set: updatePayload },
+      );
       return true;
     }
 
