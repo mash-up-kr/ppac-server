@@ -12,8 +12,10 @@ export const errorHandler = (err: CustomError, req: Request, res: Response, next
   });
 
   if (err instanceof CustomError) {
-    res.json(createErrorResponse(err.status, err.message));
+    return res.status(err.status).json(createErrorResponse(err.status, err.message));
   } else {
-    res.json(createErrorResponse(HttpCode.INTERNAL_SERVER_ERROR, 'Internal Server Error'));
+    return res
+      .status(HttpCode.INTERNAL_SERVER_ERROR)
+      .json(createErrorResponse(HttpCode.INTERNAL_SERVER_ERROR, 'Internal Server Error'));
   }
 };
