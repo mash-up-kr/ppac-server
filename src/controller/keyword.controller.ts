@@ -6,7 +6,7 @@ import { HttpCode } from '../errors/HttpCode';
 import * as KeywordService from '../service/keyword.service';
 import { CustomRequest } from '../middleware/requestedInfo';
 import { logger } from '../util/logger';
-import { IKeywordCreatePayload } from 'src/model/keyword';
+import { IKeywordCreatePayload, IKeywordUpdatePayload } from 'src/model/keyword';
 
 const createKeyword = async (req: Request, res: Response, next: NextFunction) => {
   if (!_.has(req.body, 'name')) {
@@ -46,7 +46,7 @@ const getTopKeywords = async (req: Request, res: Response, next: NextFunction) =
 
 const updateKeyword = async (req: CustomRequest, res: Response, next: NextFunction) => {
   const keyword = req.requestedKeyword;
-  const updateInfo: IKeywordCreatePayload = req.body;
+  const updateInfo: IKeywordUpdatePayload = req.body;
   try {
     const updatedKeyword = await KeywordService.updateKeyword(keyword._id as string, updateInfo);
     logger.info(`Updated keyword with ID ${req.params.keywordId}`);

@@ -4,6 +4,10 @@ export interface IKeywordCreatePayload {
   name: string;
 }
 
+export interface IKeywordUpdatePayload {
+  name?: string;
+}
+
 export interface IKeyword {
   _id: string;
   name: string;
