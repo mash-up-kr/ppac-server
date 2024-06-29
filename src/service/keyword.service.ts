@@ -94,47 +94,26 @@ async function getKeywordById(keywordId: Types.ObjectId): Promise<IKeywordDocume
     logger.info(`Failed to get a Keyword Info By id (${keywordId})`);
   }
 }
-async function getKeywordsByCategory(): Promise<{ [categoryName: string]: IKeywordDocument[] }> {
+async function getRecommendedKeywords(): Promise<{ [categoryName: string]: string[] }> {
   try {
     const categories = await KeywordCategoryModel.find({
       isRecommend: true,
       isDeleted: false,
     }).lean();
 
-    const categoryIds = categories.map((category) => category._id);
+    const categoryNames = categories.map((category) => category.name);
 
-    const keywords = await KeywordModel.aggregate([
-      { $match: { category: { $in: categoryIds }, isDeleted: false } },
-      {
-        $group: {
-          _id: '$category',
-          keywords: { $push: '$name' },
-        },
-      },
-      {
-        $lookup: {
-          from: 'keywordCategories',
-          localField: '_id',
-          foreignField: '_id',
-          as: 'category',
-        },
-      },
-      { $unwind: '$category' },
-      {
-        $project: {
-          _id: 0,
-          categoryName: '$category.name',
-          keywords: 1,
-        },
-      },
-    ]);
+    // Step 3: Initialize the result object
+    const keywordList: { [categoryName: string]: string[] } = {};
 
-    const result: { [categoryName: string]: IKeywordDocument[] } = {};
-    keywords.forEach((keyword) => {
-      result[keyword.categoryName] = keyword.keywords.map((name) => ({ name }));
-    });
+    // Step 4: Find keywords for each category
+    for (const categoryName of categoryNames) {
+      const keywords = await KeywordModel.find({ category: categoryName }).lean();
+      const keywordNames = keywords.map((keyword) => keyword.name);
+      keywordList[categoryName] = keywordNames;
+    }
 
-    return result;
+    return keywordList;
   } catch (err) {
     logger.info(`Failed to get Keywords`);
     throw new CustomError('Failed to get Keywords', HttpCode.INTERNAL_SERVER_ERROR);
@@ -149,5 +128,5 @@ export {
   increaseSearchCount,
   getKeywordByName,
   getKeywordById,
-  getKeywordsByCategory,
+  getRecommendedKeywords,
 };
