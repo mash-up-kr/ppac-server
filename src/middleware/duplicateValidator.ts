@@ -5,13 +5,17 @@ import { HttpCode } from '../errors/HttpCode';
 import { KeywordModel } from '../model/keyword';
 import { KeywordCategoryModel } from '../model/keywordCategory';
 
-export const validateCategoryDuplication = (req: Request, res: Response, next: NextFunction) => {
+export const validateCategoryDuplication = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   const { name } = req.body;
 
   if (!name) {
     return next(new CustomError('name is required', HttpCode.BAD_REQUEST));
   }
-  const category = KeywordCategoryModel.findOne({ name, isDeleted: false }).lean();
+  const category = await KeywordCategoryModel.findOne({ name, isDeleted: false }).lean();
 
   if (category) {
     return next(new CustomError('category already exists', HttpCode.BAD_REQUEST));
@@ -20,14 +24,18 @@ export const validateCategoryDuplication = (req: Request, res: Response, next: N
   next();
 };
 
-export const validateKeywordDulication = (req: Request, res: Response, next: NextFunction) => {
+export const validateKeywordDulication = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   const { name } = req.body;
 
   if (!name) {
     return next(new CustomError('name is required', HttpCode.BAD_REQUEST));
   }
 
-  const keyword = KeywordModel.findOne({ name, isDeleted: false }).lean();
+  const keyword = await KeywordModel.findOne({ name, isDeleted: false }).lean();
   if (keyword) {
     return next(new CustomError('keyword already exists', HttpCode.BAD_REQUEST));
   }
