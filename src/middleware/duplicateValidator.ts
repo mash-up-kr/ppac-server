@@ -25,6 +25,25 @@ export const validateCategoryDuplication = async (
   next();
 };
 
+export const validateCategory = async (req: Request, res: Response, next: NextFunction) => {
+  const { category } = req.body;
+
+  if (!_.has(req.body, 'category')) {
+    return next(new CustomError(`'category' field should be provided`, HttpCode.BAD_REQUEST));
+  }
+
+  const keywordCategory = await KeywordCategoryModel.findOne({
+    name: category,
+    isDeleted: false,
+  }).lean();
+
+  if (_.isNull(keywordCategory)) {
+    return next(new CustomError('category does not exists', HttpCode.NOT_FOUND));
+  }
+
+  next();
+};
+
 export const validateKeywordDulication = async (
   req: Request,
   res: Response,

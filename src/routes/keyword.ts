@@ -8,7 +8,7 @@ import {
   increaseSearchCount,
   getRecommendedKeywords,
 } from '../controller/keyword.controller';
-import { validateKeywordDulication } from '../middleware/duplicateValidator';
+import { validateCategory, validateKeywordDulication } from '../middleware/duplicateValidator';
 import { getKeywordInfoByName, getKeywordInfoById } from '../middleware/requestedInfo';
 import { loggerMiddleware } from '../util/logger';
 
@@ -16,7 +16,7 @@ const router = express.Router();
 
 router.use(loggerMiddleware);
 
-router.post('/', validateKeywordDulication, createKeyword);
+router.post('/', validateCategory, validateKeywordDulication, createKeyword);
 router.put('/:keywordId', getKeywordInfoById, updateKeyword);
 router.delete('/:keywordId', getKeywordInfoById, deleteKeyword);
 
