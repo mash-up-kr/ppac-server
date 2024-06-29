@@ -7,13 +7,15 @@ import {
   increaseSearchCount,
 } from '../controller/keyword.controller';
 import { getKeywordInfoByName, getKeywordInfoById } from '../middleware/requestedInfo';
+
 import { loggerMiddleware } from '../util/logger';
+import { keywordDuplicateValid } from '../middleware/duplicateValid';
 
 const router = express.Router();
 
 router.use(loggerMiddleware);
 
-router.post('/', createKeyword);
+router.post('/', keywordDuplicateValid, createKeyword);
 router.put('/:keywordId', getKeywordInfoById, updateKeyword);
 router.delete('/:keywordId', getKeywordInfoById, deleteKeyword);
 

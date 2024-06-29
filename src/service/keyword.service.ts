@@ -1,4 +1,5 @@
 import { IKeywordCreatePayload, KeywordModel, IKeyword } from '../model/keyword';
+import { KeywordCategoryModel } from '../model/keywordCategory';
 import { logger } from '../util/logger';
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
@@ -79,6 +80,52 @@ async function getKeywordById(keywordId: string): Promise<IKeyword> {
     logger.info(`Failed to get a Keyword Info By id (${keywordId})`);
   }
 }
+async function getKeywordsByCategory(): Promise<{ [categoryName: string]: IKeyword[] }> {
+  try {
+    const categories = await KeywordCategoryModel.find({
+      isRecommend: true,
+      isDeleted: false,
+    }).lean();
+
+    const categoryIds = categories.map((category) => category._id);
+
+    const keywords = await KeywordModel.aggregate([
+      { $match: { category: { $in: categoryIds }, isDeleted: false } },
+      {
+        $group: {
+          _id: '$category',
+          keywords: { $push: '$name' },
+        },
+      },
+      {
+        $lookup: {
+          from: 'keywordCategories',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'category',
+        },
+      },
+      { $unwind: '$category' },
+      {
+        $project: {
+          _id: 0,
+          categoryName: '$category.name',
+          keywords: 1,
+        },
+      },
+    ]);
+
+    const result: { [categoryName: string]: IKeyword[] } = {};
+    keywords.forEach((keyword) => {
+      result[keyword.categoryName] = keyword.keywords.map((name) => ({ name }));
+    });
+
+    return result;
+  } catch (err) {
+    logger.info(`Failed to get Keywords`);
+    throw new CustomError('Failed to get Keywords', HttpCode.INTERNAL_SERVER_ERROR);
+  }
+}
 
 export {
   createKeyword,
@@ -88,4 +135,5 @@ export {
   increaseSearchCount,
   getKeywordByName,
   getKeywordById,
+  getKeywordsByCategory,
 };

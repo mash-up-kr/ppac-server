@@ -7,14 +7,17 @@ import { HttpCode } from '../errors/HttpCode';
 import { IMemeDocument } from '../model/meme';
 import { getMeme } from '../service/meme.service';
 import { getKeywordByName, getKeywordById } from '../service/keyword.service';
+import { getKeywordCategory } from '../service/keywordCategory.service';
 import { IKeyword } from 'src/model/keyword';
 import { getUser } from '../service/user.service';
 import { IUserDocument } from '../model/user';
+import { IKeywordCategoryDocument } from '../model/keywordCategory';
 
 export interface CustomRequest extends Request {
   requestedMeme?: IMemeDocument;
   requestedUser?: IUserDocument;
   requestedKeyword?: IKeyword;
+  requestedKeywordCategory?: IKeywordCategoryDocument;
 }
 
 export const getRequestedMemeInfo = async (
@@ -103,5 +106,25 @@ export const getRequestedUserInfo = async (
 
   req.requestedUser = user;
 
+  next();
+};
+
+export const getRequestedKeywordCategoryInfo = async (
+  req: CustomRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  const categoryName = req.params?.categoryName || req.body?.categoryName || null;
+
+  if (_.isNull(categoryName)) {
+    return next(new CustomError(`'categoryId' should be provided`, HttpCode.BAD_REQUEST));
+  }
+  const category: IKeywordCategoryDocument = await getKeywordCategory(categoryName);
+  if (_.isNull(category)) {
+    return next(
+      new CustomError(`KeywordCategory(${categoryName}) does not exist`, HttpCode.NOT_FOUND),
+    );
+  }
+  req.requestedKeywordCategory = category;
   next();
 };

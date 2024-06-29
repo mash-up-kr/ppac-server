@@ -3,7 +3,7 @@ import _ from 'lodash';
 import * as UserService from '../service/user.service';
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
-import { CustomRequest } from 'src/middleware/requestedInfo';
+import { CustomRequest } from '../middleware/requestedInfo';
 
 const createUser = async (req: Request, res: Response, next: NextFunction) => {
   if (!_.has(req.body, 'deviceId')) {
