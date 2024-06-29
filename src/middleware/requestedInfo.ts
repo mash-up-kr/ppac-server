@@ -6,12 +6,15 @@ import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
 import { IMemeDocument } from '../model/meme';
 import { getMeme } from '../service/meme.service';
+import { getKeywordByName, getKeywordById } from '../service/keyword.service';
+import { IKeyword } from 'src/model/keyword';
 import { getUser } from '../service/user.service';
 import { IUserDocument } from '../model/user';
 
 export interface CustomRequest extends Request {
   requestedMeme?: IMemeDocument;
   requestedUser?: IUserDocument;
+  requestedKeyword?: IKeyword;
 }
 
 export const getRequestedMemeInfo = async (
@@ -38,6 +41,49 @@ export const getRequestedMemeInfo = async (
   next();
 };
 
+export const getKeywordInfoByName = async (
+  req: CustomRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  const keywordName = req.params?.name || req.body?.name || null;
+
+  if (_.isNull(keywordName)) {
+    return next(new CustomError(`'name' should be provided`, HttpCode.BAD_REQUEST));
+  }
+
+  const keyword = await getKeywordByName(keywordName);
+
+  if (!keyword) {
+    return next(
+      new CustomError(`Keyword with name ${keywordName} does not exist`, HttpCode.NOT_FOUND),
+    );
+  }
+
+  req.requestedKeyword = keyword;
+  next();
+};
+
+export const getKeywordInfoById = async (req: CustomRequest, res: Response, next: NextFunction) => {
+  const keywordId = req.params?.keywordId || req.body?.keywordId || null;
+
+  if (_.isNull(keywordId)) {
+    return next(new CustomError(`'keywordId' should be provided`, HttpCode.BAD_REQUEST));
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(keywordId)) {
+    return next(new CustomError(`'keywordId' is not a valid ObjectId`, HttpCode.BAD_REQUEST));
+  }
+
+  const keyword = await getKeywordById(keywordId);
+  if (_.isNull(keyword)) {
+    return next(new CustomError(`Keyword(${keywordId}) does not exist`, HttpCode.NOT_FOUND));
+  }
+
+  req.requestedKeyword = keyword;
+  next();
+};
+
 export const getRequestedUserInfo = async (
   req: CustomRequest,
   res: Response,
@@ -56,5 +102,6 @@ export const getRequestedUserInfo = async (
   }
 
   req.requestedUser = user;
+
   next();
 };

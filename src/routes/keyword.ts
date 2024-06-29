@@ -1,11 +1,23 @@
 import express from 'express';
-import { getTopKeywords } from '../controller/keyword.controller';
+import {
+  createKeyword,
+  getTopKeywords,
+  deleteKeyword,
+  updateKeyword,
+  increaseSearchCount,
+} from '../controller/keyword.controller';
+import { getKeywordInfoByName, getKeywordInfoById } from '../middleware/requestedInfo';
 import { loggerMiddleware } from '../util/logger';
 
 const router = express.Router();
 
 router.use(loggerMiddleware);
 
+router.post('/', createKeyword);
+router.put('/:keywordId', getKeywordInfoById, updateKeyword);
+router.delete('/:keywordId', getKeywordInfoById, deleteKeyword);
+
 router.get('/top', getTopKeywords);
+router.post('/increaseSearchCount', getKeywordInfoByName, increaseSearchCount);
 
 export default router;
