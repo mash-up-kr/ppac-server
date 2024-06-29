@@ -4,7 +4,6 @@ import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
 import { IMemeDocument, MemeModel } from '../model/meme';
 import { InteractionType, MemeInteractionModel } from '../model/memeInteraction';
-import { MemeSaveModel } from '../model/memeSave';
 import { IUser, IUserDocument, IUserInfos, UserModel } from '../model/user';
 import { logger } from '../util/logger';
 
@@ -122,8 +121,9 @@ async function getLastSeenMeme(user: IUserDocument): Promise<IMemeDocument[]> {
 
 async function getSavedMeme(user: IUserDocument): Promise<IMemeDocument[]> {
   try {
-    const savedMeme = await MemeSaveModel.find({
+    const savedMeme = await MemeInteractionModel.find({
       deviceId: user.deviceId,
+      interactionType: 'save',
       isDeleted: false,
     }).lean();
 
