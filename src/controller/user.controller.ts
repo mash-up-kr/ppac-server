@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import _ from 'lodash';
-import { CustomRequest } from 'src/middleware/requestedInfo';
+import { CustomRequest } from '../middleware/requestedInfo';
 
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';

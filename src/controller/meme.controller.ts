@@ -6,7 +6,7 @@ import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
 import { CustomRequest } from '../middleware/requestedInfo';
 import { IMemeCreatePayload, IMemeUpdatePayload } from '../model/meme';
-import { InteractionType } from 'src/model/memeInteraction';
+import { InteractionType } from '../model/memeInteraction';
 import * as MemeService from '../service/meme.service';
 import * as UserService from '../service/user.service';
 import { logger } from '../util/logger';
