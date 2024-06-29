@@ -135,12 +135,17 @@ async function getSavedMeme(user: IUserDocument): Promise<IMemeDocument[]> {
       isDeleted: false,
     }).lean();
 
-    const memeList = await MemeModel.find({
-      memeId: { $in: savedMeme.map((meme) => meme.memeId) },
-      isDeleted: false,
-    }).lean();
+    const memeList = await MemeModel.find(
+      {
+        _id: { $in: savedMeme.map((meme) => meme.memeId) },
+        isDeleted: false,
+      },
+      { createdAt: 0, updatedAt: 0, isDeleted: 0 },
+    ).lean();
 
-    logger.info(`Get savedMeme - deviceId(${user.deviceId}), memeList(${memeList})`);
+    logger.info(
+      `Get savedMeme - deviceId(${user.deviceId}), memeList(${JSON.stringify(memeList)})`,
+    );
     return memeList;
   } catch (err) {
     logger.error(`Failed get savedMeme`, err.message);
