@@ -27,7 +27,7 @@ const MemeInteractionSchema: Schema = new Schema(
   {
     deviceId: { type: Types.ObjectId, ref: 'user', required: true },
     memeId: { type: Types.ObjectId, ref: 'keyword', required: true },
-    interactionType: { type: String, enum: ['watch', 'reaction', 'share', 'save'], required: true },
+    interactionType: { type: String, enum: InteractionType, required: true },
     isDeleted: { type: Boolean, required: true, default: false },
   },
   {
