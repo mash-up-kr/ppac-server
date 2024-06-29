@@ -6,7 +6,25 @@ import { HttpCode } from '../errors/HttpCode';
 import { IMemeCreatePayload, IMemeDocument, MemeModel, IMemeWithKeywords } from '../model/meme';
 import { logger } from '../util/logger';
 
-async function getMeme(memeId: string): Promise<IMemeWithKeywords | null> {
+async function getMeme(memeId: string): Promise<IMemeDocument | null> {
+  try {
+    const meme = await MemeModel.findById(memeId)
+      .and([{ isDeleted: false }])
+      .lean();
+
+    if (!meme) {
+      logger.info(`Meme(${memeId}) not found.`);
+      return null;
+    }
+
+    return meme;
+  } catch (err) {
+    logger.error(`Failed to get a meme(${memeId}): ${err.message}`);
+    throw new CustomError(`Failed to get a meme(${memeId})`, HttpCode.INTERNAL_SERVER_ERROR);
+  }
+}
+
+async function getMemeWithKeywords(memeId: string): Promise<IMemeWithKeywords | null> {
   try {
     const meme = await MemeModel.aggregate([
       { $match: { _id: memeId, isDeleted: false } },
@@ -130,4 +148,12 @@ async function deleteMeme(memeId: Types.ObjectId): Promise<boolean> {
   return true;
 }
 
-export { getMeme, createMeme, updateMeme, deleteMeme, getTodayMemeList, getAllMemeList };
+export {
+  getMeme,
+  getMemeWithKeywords,
+  createMeme,
+  updateMeme,
+  deleteMeme,
+  getTodayMemeList,
+  getAllMemeList,
+};
