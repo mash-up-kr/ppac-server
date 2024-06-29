@@ -1,9 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
 import _ from 'lodash';
-import * as UserService from '../service/user.service';
+import { CustomRequest } from 'src/middleware/requestedInfo';
+
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
-import { CustomRequest } from 'src/middleware/requestedInfo';
+import * as UserService from '../service/user.service';
 
 const createUser = async (req: Request, res: Response, next: NextFunction) => {
   if (!_.has(req.body, 'deviceId')) {
