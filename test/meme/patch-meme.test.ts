@@ -25,11 +25,11 @@ describe("[PATCH] '/api/meme/:memeId' ", () => {
     };
     let response = await request(app).patch(`/api/meme/${testMemeId}`).send(patchPayload);
     expect(response.statusCode).toBe(200);
-    expect(response.body._id).toBe(memeList[0]._id.toString());
+    expect(response.body.data._id).toBe(memeList[0]._id.toString());
 
     response = await request(app).get(`/api/meme/${testMemeId}`);
-    expect(response.body._id).toBe(memeList[0]._id.toString());
-    expect(response.body.keywordIds).toStrictEqual([keywordIdsMockData[1].toString()]);
-    expect(response.body.isTodayMeme).toBeTruthy();
+    expect(response.body.data._id).toBe(memeList[0]._id.toString());
+    expect(response.body.data.keywordIds).toStrictEqual([keywordIdsMockData[1].toString()]);
+    expect(response.body.data.isTodayMeme).toBeTruthy();
   });
 });

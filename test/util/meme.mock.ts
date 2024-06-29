@@ -17,8 +17,6 @@ const memeMockData = {
 const createMockData = (size: number, todayMemeCount: number): IMeme[] => {
   const result: IMeme[] = [];
 
-  console.log(memeMockData);
-
   for (let i = 0; i < size; i++) {
     const mockData = { ...memeMockData };
 

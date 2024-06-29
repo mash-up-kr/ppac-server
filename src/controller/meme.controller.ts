@@ -8,6 +8,7 @@ import { CustomRequest } from '../middleware/requestedInfo';
 import { IMemeCreatePayload, IMemeUpdatePayload } from '../model/meme';
 import * as MemeService from '../service/meme.service';
 import { logger } from '../util/logger';
+import { createSuccessResponse } from '../util/response';
 
 const getMeme = async (req: Request, res: Response, next: NextFunction) => {
   const memeId = req.params?.memeId || null;
@@ -27,7 +28,7 @@ const getMeme = async (req: Request, res: Response, next: NextFunction) => {
     }
 
     logger.info(`Get meme - ${memeId})`);
-    return res.json({ ...meme });
+    return res.json(createSuccessResponse(HttpCode.OK, 'Get Meme', meme));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
@@ -58,7 +59,7 @@ const createMeme = async (req: Request, res: Response, next: NextFunction) => {
 
   try {
     const meme = await MemeService.createMeme({ title, keywordIds, image, source, isTodayMeme });
-    return res.json({ ...meme });
+    return res.json(createSuccessResponse(HttpCode.CREATED, 'Create Meme', meme));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
@@ -70,7 +71,7 @@ const updateMeme = async (req: CustomRequest, res: Response, next: NextFunction)
 
   try {
     const updatedMeme = await MemeService.updateMeme(meme._id, updateInfo);
-    return res.json({ ...updatedMeme });
+    return res.json(createSuccessResponse(HttpCode.OK, 'Updated Meme', updatedMeme));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
@@ -79,8 +80,8 @@ const updateMeme = async (req: CustomRequest, res: Response, next: NextFunction)
 const deleteMeme = async (req: CustomRequest, res: Response, next: NextFunction) => {
   const meme = req.requestedMeme;
   try {
-    const deletedMeme = await MemeService.deleteMeme(meme._id);
-    return res.json({ result: deletedMeme });
+    await MemeService.deleteMeme(meme._id);
+    return res.json(createSuccessResponse(HttpCode.OK, 'Deleted Meme', true));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
@@ -99,7 +100,19 @@ const getAllMemeList = async (req: Request, res: Response, next: NextFunction) =
 
   try {
     const memeList = await MemeService.getAllMemeList(page, size);
-    return res.json(memeList);
+
+    const data = {
+      pagination: {
+        total: memeList.total,
+        page: memeList.page,
+        perPage: size,
+        currentPage: memeList.page,
+        totalPages: memeList.totalPages,
+      },
+      memeList: memeList.data,
+    };
+
+    return res.json(createSuccessResponse(HttpCode.OK, 'Get all meme list', data));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
@@ -116,7 +129,7 @@ const getTodayMemeList = async (req: Request, res: Response, next: NextFunction)
 
   try {
     const todayMemeList = await MemeService.getTodayMemeList(size);
-    return res.json({ data: todayMemeList });
+    return res.json(createSuccessResponse(HttpCode.OK, 'Get today meme list', todayMemeList));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }

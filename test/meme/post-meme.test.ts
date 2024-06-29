@@ -20,11 +20,11 @@ describe("[POST] '/api/meme' ", () => {
     const response = await request(app).post('/api/meme').send(createPayload);
 
     expect(response.statusCode).toBe(200);
-    expect(response.body).toHaveProperty('title');
-    expect(response.body).toHaveProperty('keywordIds');
-    expect(response.body).toHaveProperty('image');
-    expect(response.body).toHaveProperty('source');
-    expect(response.body).toHaveProperty('isTodayMeme');
+    expect(response.body.data).toHaveProperty('title');
+    expect(response.body.data).toHaveProperty('keywordIds');
+    expect(response.body.data).toHaveProperty('image');
+    expect(response.body.data).toHaveProperty('source');
+    expect(response.body.data).toHaveProperty('isTodayMeme');
   });
 
   it('should not create a meme if missing required fields - keywordIds', async () => {
