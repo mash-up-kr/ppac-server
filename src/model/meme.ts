@@ -27,7 +27,7 @@ export interface IMeme {
 export interface IMemeDocument extends Document {
   _id: Types.ObjectId;
   title: string;
-  keywordIds: string[];
+  keywordIds: Types.ObjectId[];
   image: string;
   reaction: number;
   watch: number;
@@ -36,6 +36,11 @@ export interface IMemeDocument extends Document {
   createdAt: Date;
   updatedAt: Date;
   isDeleted: boolean;
+}
+
+// keywordIds로 조회한 keywords로 대체된 Meme 정보
+export interface IMemeWithKeywords extends Omit<IMemeDocument, 'keywordIds'> {
+  keywords: string[];
 }
 
 const MemeSchema: Schema = new Schema(

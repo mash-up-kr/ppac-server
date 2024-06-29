@@ -3,31 +3,64 @@ import { Types } from 'mongoose';
 
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
-import { IMemeCreatePayload, IMemeDocument, MemeModel } from '../model/meme';
+import { IMemeCreatePayload, IMemeDocument, MemeModel, IMemeWithKeywords } from '../model/meme';
 import { logger } from '../util/logger';
 
-async function getMeme(memeId: string): Promise<IMemeDocument | null> {
+async function getMeme(memeId: string): Promise<IMemeWithKeywords | null> {
   try {
-    const meme = await MemeModel.findById(memeId)
-      .and([{ isDeleted: false }])
-      .lean();
+    const meme = await MemeModel.aggregate([
+      { $match: { _id: memeId, isDeleted: false } },
+      {
+        $lookup: {
+          from: 'keywords',
+          localField: 'keywordIds',
+          foreignField: '_id',
+          as: 'keywords',
+        },
+      },
+      {
+        $addFields: {
+          keywords: '$keywords.name',
+        },
+      },
+      {
+        $unset: 'keywordIds',
+      },
+    ]);
 
     if (!meme) {
       logger.info(`Meme(${memeId}) not found.`);
       return null;
     }
 
-    return meme;
+    return meme[0] || null;
   } catch (err) {
     logger.error(`Failed to get a meme(${memeId}): ${err.message}`);
     throw new CustomError(`Failed to get a meme(${memeId})`, HttpCode.INTERNAL_SERVER_ERROR);
   }
 }
 
-async function getTodayMemeList(limit: number = 5): Promise<IMemeDocument[]> {
-  const todayMemeList = await MemeModel.find({ isTodayMeme: true, isDeleted: false })
-    .limit(limit)
-    .lean();
+async function getTodayMemeList(limit: number = 5): Promise<IMemeWithKeywords[]> {
+  const todayMemeList = await MemeModel.aggregate([
+    { $match: { isTodayMeme: true, isDeleted: false } },
+    { $limit: limit },
+    {
+      $lookup: {
+        from: 'keywords',
+        localField: 'keywordIds',
+        foreignField: '_id',
+        as: 'keywords',
+      },
+    },
+    {
+      $addFields: {
+        keywords: '$keywords.name',
+      },
+    },
+    {
+      $unset: 'keywordIds',
+    },
+  ]);
 
   const memeIds = todayMemeList.map((meme) => meme._id);
   logger.info(
