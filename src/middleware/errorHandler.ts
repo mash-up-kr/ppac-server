@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from 'express';
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
 import { logger } from '../util/logger';
+import { createErrorResponse } from '../util/response';
 
 export const errorHandler = (err: CustomError, req: Request, res: Response, next: NextFunction) => {
   logger.error({
@@ -11,13 +12,10 @@ export const errorHandler = (err: CustomError, req: Request, res: Response, next
   });
 
   if (err instanceof CustomError) {
-    res.status(err.status).json({ error: { statusCode: err.status, message: err.message } });
+    return res.status(err.status).json(createErrorResponse(err.status, err.message));
   } else {
-    res.status(HttpCode.INTERNAL_SERVER_ERROR).json({
-      error: {
-        statusCode: HttpCode.INTERNAL_SERVER_ERROR,
-        message: 'Internal Server Error',
-      },
-    });
+    return res
+      .status(HttpCode.INTERNAL_SERVER_ERROR)
+      .json(createErrorResponse(HttpCode.INTERNAL_SERVER_ERROR, 'Internal Server Error'));
   }
 };

@@ -1,22 +1,22 @@
 import { NextFunction, Request, Response } from 'express';
 import _ from 'lodash';
 import mongoose from 'mongoose';
+import { IKeywordDocument } from 'src/model/keyword';
 
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
+import { IKeywordCategoryDocument } from '../model/keywordCategory';
 import { IMemeDocument } from '../model/meme';
-import { getMeme } from '../service/meme.service';
+import { IUserDocument } from '../model/user';
 import { getKeywordByName, getKeywordById } from '../service/keyword.service';
 import { getKeywordCategory } from '../service/keywordCategory.service';
-import { IKeyword } from 'src/model/keyword';
+import { getMeme } from '../service/meme.service';
 import { getUser } from '../service/user.service';
-import { IUserDocument } from '../model/user';
-import { IKeywordCategoryDocument } from '../model/keywordCategory';
 
 export interface CustomRequest extends Request {
   requestedMeme?: IMemeDocument;
   requestedUser?: IUserDocument;
-  requestedKeyword?: IKeyword;
+  requestedKeyword?: IKeywordDocument;
   requestedKeywordCategory?: IKeywordCategoryDocument;
 }
 
@@ -35,7 +35,7 @@ export const getRequestedMemeInfo = async (
     return next(new CustomError(`'memeId' is not a valid ObjectId`, HttpCode.BAD_REQUEST));
   }
 
-  const meme = await getMeme(memeId);
+  const meme: IMemeDocument = await getMeme(memeId);
   if (_.isNull(meme)) {
     return next(new CustomError(`Meme(${memeId}) does not exist`, HttpCode.NOT_FOUND));
   }

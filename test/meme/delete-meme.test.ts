@@ -5,11 +5,12 @@ import { MemeModel } from '../../src/model/meme';
 import { createMockData } from '../util/meme.mock';
 
 let testMemeId = '';
+let memeList = [];
 describe("[DELETE] '/api/meme/:memeId' ", () => {
   beforeAll(async () => {
     const mockDatas = createMockData(2, 0);
     await MemeModel.insertMany(mockDatas);
-    const memeList = await MemeModel.find({});
+    memeList = await MemeModel.find({});
     testMemeId = memeList[0]._id.toString();
   });
 
@@ -20,11 +21,10 @@ describe("[DELETE] '/api/meme/:memeId' ", () => {
   it('should delete a meme', async () => {
     let response = await request(app).delete(`/api/meme/${testMemeId}`);
     expect(response.statusCode).toBe(200);
-    console.log(response.body);
-    expect(response.body.result).toBeTruthy();
+    expect(response.body.data).toBeTruthy();
 
     response = await request(app).get(`/api/meme/list`);
     expect(response.statusCode).toBe(200);
-    expect(response.body.data.length).toBe(1);
+    expect(response.body.data.memeList.length).toBe(1);
   });
 });

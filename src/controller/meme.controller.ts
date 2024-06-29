@@ -5,9 +5,10 @@ import mongoose from 'mongoose';
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
 import { CustomRequest } from '../middleware/requestedInfo';
-import { IMemeCreatePayload } from '../model/meme';
+import { IMemeCreatePayload, IMemeUpdatePayload } from '../model/meme';
 import * as MemeService from '../service/meme.service';
 import { logger } from '../util/logger';
+import { createSuccessResponse } from '../util/response';
 
 const getMeme = async (req: Request, res: Response, next: NextFunction) => {
   const memeId = req.params?.memeId || null;
@@ -27,15 +28,15 @@ const getMeme = async (req: Request, res: Response, next: NextFunction) => {
     }
 
     logger.info(`Get meme - ${memeId})`);
-    return res.json({ ...meme });
+    return res.json(createSuccessResponse(HttpCode.OK, 'Get Meme', meme));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
 };
 
 const createMeme = async (req: Request, res: Response, next: NextFunction) => {
-  if (!_.has(req.body, 'keywords')) {
-    return next(new CustomError(`'keywords' field should be provided`, HttpCode.BAD_REQUEST));
+  if (!_.has(req.body, 'title')) {
+    return next(new CustomError(`'title' field should be provided`, HttpCode.BAD_REQUEST));
   }
 
   if (!_.has(req.body, 'image')) {
@@ -46,9 +47,13 @@ const createMeme = async (req: Request, res: Response, next: NextFunction) => {
     return next(new CustomError(`'source' field should be provided`, HttpCode.BAD_REQUEST));
   }
 
+  if (!_.has(req.body, 'keywordIds')) {
+    return next(new CustomError(`'keywordIds' field should be provided`, HttpCode.BAD_REQUEST));
+  }
+
   try {
     const meme = await MemeService.createMeme(req.body);
-    return res.json({ ...meme });
+    return res.json(createSuccessResponse(HttpCode.CREATED, 'Create Meme', meme));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
@@ -56,11 +61,11 @@ const createMeme = async (req: Request, res: Response, next: NextFunction) => {
 
 const updateMeme = async (req: CustomRequest, res: Response, next: NextFunction) => {
   const meme = req.requestedMeme;
-  const updateInfo: IMemeCreatePayload = req.body;
+  const updateInfo: IMemeUpdatePayload = req.body;
 
   try {
-    const updatedMeme = await MemeService.updateMeme(meme._id as string, updateInfo);
-    return res.json({ ...updatedMeme });
+    const updatedMeme = await MemeService.updateMeme(meme._id, updateInfo);
+    return res.json(createSuccessResponse(HttpCode.OK, 'Updated Meme', updatedMeme));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
@@ -69,8 +74,8 @@ const updateMeme = async (req: CustomRequest, res: Response, next: NextFunction)
 const deleteMeme = async (req: CustomRequest, res: Response, next: NextFunction) => {
   const meme = req.requestedMeme;
   try {
-    const deletedMeme = await MemeService.deleteMeme(meme._id as string);
-    return res.json({ result: deletedMeme });
+    await MemeService.deleteMeme(meme._id);
+    return res.json(createSuccessResponse(HttpCode.OK, 'Deleted Meme', true));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
@@ -89,7 +94,19 @@ const getAllMemeList = async (req: Request, res: Response, next: NextFunction) =
 
   try {
     const memeList = await MemeService.getAllMemeList(page, size);
-    return res.json(memeList);
+
+    const data = {
+      pagination: {
+        total: memeList.total,
+        page: memeList.page,
+        perPage: size,
+        currentPage: memeList.page,
+        totalPages: memeList.totalPages,
+      },
+      memeList: memeList.data,
+    };
+
+    return res.json(createSuccessResponse(HttpCode.OK, 'Get all meme list', data));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
@@ -106,7 +123,7 @@ const getTodayMemeList = async (req: Request, res: Response, next: NextFunction)
 
   try {
     const todayMemeList = await MemeService.getTodayMemeList(size);
-    return res.json({ data: todayMemeList });
+    return res.json(createSuccessResponse(HttpCode.OK, 'Get today meme list', todayMemeList));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }

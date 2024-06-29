@@ -1,34 +1,48 @@
-import { IKeywordCreatePayload, KeywordModel, IKeyword } from '../model/keyword';
-import { KeywordCategoryModel } from '../model/keywordCategory';
-import { logger } from '../util/logger';
+import _ from 'lodash';
+import { Types } from 'mongoose';
+
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
+import { IKeywordCreatePayload, KeywordModel, IKeywordDocument } from '../model/keyword';
+import { KeywordCategoryModel } from '../model/keywordCategory';
+import { logger } from '../util/logger';
 
-async function createKeyword(info: IKeywordCreatePayload): Promise<IKeyword> {
+async function createKeyword(info: IKeywordCreatePayload): Promise<IKeywordDocument> {
   try {
-    const newKeyword = new KeywordModel({
+    const newKeyword = await KeywordModel.create({
       ...info,
     });
+
     await newKeyword.save();
-    logger.info(`Created new keyword: ${JSON.stringify(newKeyword)}`);
-    return newKeyword.toObject();
+
+    const newKeywordObj = newKeyword.toObject();
+    logger.info(`Created new keyword: ${JSON.stringify(newKeywordObj)}`);
+
+    return newKeywordObj;
   } catch (err) {
     logger.error(`Failed to create keyword ${info.name}: ${err.message}`);
     throw new CustomError('Failed to create keyword', HttpCode.INTERNAL_SERVER_ERROR);
   }
 }
 
-async function updateKeyword(keywordId: string, update: Partial<IKeyword>): Promise<IKeyword> {
-  const updatedKeyword = await KeywordModel.findOneAndUpdate({ _id: keywordId }, update, {
-    new: true,
-  }).lean();
-  if (!updatedKeyword) {
+async function updateKeyword(
+  keywordId: Types.ObjectId,
+  updateInfo: any,
+): Promise<IKeywordDocument> {
+  const updatedKeyword = await KeywordModel.findOneAndUpdate(
+    { _id: keywordId, isDeleted: false },
+    { $set: updateInfo },
+    { new: true },
+  ).lean();
+
+  if (_.isNull(updatedKeyword)) {
     throw new CustomError(`Keyword with ID ${keywordId} not found`, HttpCode.NOT_FOUND);
   }
+
+  logger.info(`Update keyword - keyword(${keywordId})`);
   return updatedKeyword;
 }
-
-async function deleteKeyword(keywordId: string): Promise<boolean> {
+async function deleteKeyword(keywordId: Types.ObjectId): Promise<boolean> {
   const deletedKeyword = await KeywordModel.findOneAndDelete({ _id: keywordId }).lean();
   if (!deletedKeyword) {
     throw new CustomError(`Keyword with ID ${keywordId} not found`, HttpCode.NOT_FOUND);
@@ -36,7 +50,7 @@ async function deleteKeyword(keywordId: string): Promise<boolean> {
   return true;
 }
 
-async function getTopKeywords(limit: number = 6): Promise<IKeyword[]> {
+async function getTopKeywords(limit: number = 6): Promise<IKeywordDocument[]> {
   try {
     const topKeywords = await KeywordModel.find().sort({ searchCount: -1 }).limit(limit).lean();
     return topKeywords;
@@ -46,7 +60,7 @@ async function getTopKeywords(limit: number = 6): Promise<IKeyword[]> {
   }
 }
 
-async function increaseSearchCount(keywordId: string): Promise<IKeyword> {
+async function increaseSearchCount(keywordId: Types.ObjectId): Promise<IKeywordDocument> {
   try {
     const updatedKeyword = await KeywordModel.findOneAndUpdate(
       { _id: keywordId },
@@ -63,7 +77,7 @@ async function increaseSearchCount(keywordId: string): Promise<IKeyword> {
   }
 }
 
-async function getKeywordByName(keywordName: string): Promise<IKeyword> {
+async function getKeywordByName(keywordName: string): Promise<IKeywordDocument> {
   try {
     const keyword = await KeywordModel.findOne({ name: keywordName, isDeleted: false }).lean();
     return keyword;
@@ -72,7 +86,7 @@ async function getKeywordByName(keywordName: string): Promise<IKeyword> {
   }
 }
 
-async function getKeywordById(keywordId: string): Promise<IKeyword> {
+async function getKeywordById(keywordId: Types.ObjectId): Promise<IKeywordDocument> {
   try {
     const keyword = await KeywordModel.findOne({ _id: keywordId, isDeleted: false }).lean();
     return keyword;
@@ -80,7 +94,7 @@ async function getKeywordById(keywordId: string): Promise<IKeyword> {
     logger.info(`Failed to get a Keyword Info By id (${keywordId})`);
   }
 }
-async function getKeywordsByCategory(): Promise<{ [categoryName: string]: IKeyword[] }> {
+async function getKeywordsByCategory(): Promise<{ [categoryName: string]: IKeywordDocument[] }> {
   try {
     const categories = await KeywordCategoryModel.find({
       isRecommend: true,
@@ -115,7 +129,7 @@ async function getKeywordsByCategory(): Promise<{ [categoryName: string]: IKeywo
       },
     ]);
 
-    const result: { [categoryName: string]: IKeyword[] } = {};
+    const result: { [categoryName: string]: IKeywordDocument[] } = {};
     keywords.forEach((keyword) => {
       result[keyword.categoryName] = keyword.keywords.map((name) => ({ name }));
     });

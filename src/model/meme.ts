@@ -1,14 +1,22 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Types } from 'mongoose';
 
 export interface IMemeCreatePayload {
-  keywords: string[];
+  title: string;
+  keywordIds: Types.ObjectId[];
   image: string;
   source: string;
-  isTodayMeme: boolean;
+}
+
+export interface IMemeUpdatePayload {
+  title?: string;
+  keywordIds?: Types.ObjectId[];
+  source?: string;
+  isTodayMeme?: boolean;
 }
 
 export interface IMeme {
-  keywords: string[];
+  title: string;
+  keywordIds: Types.ObjectId[];
   image: string;
   reaction: number;
   watch: number;
@@ -17,7 +25,9 @@ export interface IMeme {
 }
 
 export interface IMemeDocument extends Document {
-  keywords: string[];
+  _id: Types.ObjectId;
+  title: string;
+  keywordIds: string[];
   image: string;
   reaction: number;
   watch: number;
@@ -30,12 +40,13 @@ export interface IMemeDocument extends Document {
 
 const MemeSchema: Schema = new Schema(
   {
+    title: { type: String, required: true },
+    keywordIds: { type: [Types.ObjectId], ref: 'Keyword', required: true, default: [] },
     image: { type: String, required: true },
-    keywords: { type: [String], requried: true, default: [] },
     reaction: { type: Number, required: true, default: 0 },
     watch: { type: Number, required: true, default: 0 },
     source: { type: String, required: true },
-    isTodayMeme: { type: Boolean },
+    isTodayMeme: { type: Boolean, requried: true, default: false },
     isDeleted: { type: Boolean, required: true, default: false },
   },
   {

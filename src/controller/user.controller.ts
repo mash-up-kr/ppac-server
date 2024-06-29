@@ -1,9 +1,11 @@
 import { NextFunction, Request, Response } from 'express';
 import _ from 'lodash';
-import * as UserService from '../service/user.service';
+import { CustomRequest } from 'src/middleware/requestedInfo';
+
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
-import { CustomRequest } from '../middleware/requestedInfo';
+import * as UserService from '../service/user.service';
+import { createSuccessResponse } from '../util/response';
 
 const createUser = async (req: Request, res: Response, next: NextFunction) => {
   if (!_.has(req.body, 'deviceId')) {
@@ -12,7 +14,7 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
 
   try {
     const user = await UserService.createUser(req.body);
-    return res.json({ ...user });
+    return res.json(createSuccessResponse(HttpCode.CREATED, 'Create User', user));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
@@ -24,7 +26,7 @@ const createMemeReaction = async (req: CustomRequest, res: Response, next: NextF
 
   try {
     const updatedMeme = await UserService.createMemeReaction(user, meme);
-    return res.json({ ...updatedMeme });
+    return res.json(createSuccessResponse(HttpCode.CREATED, 'Create Meme Reaction', updatedMeme));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
@@ -35,8 +37,8 @@ const createMemeSave = async (req: CustomRequest, res: Response, next: NextFunct
   const meme = req.requestedMeme;
 
   try {
-    const ret = await UserService.createMemeSave(user, meme);
-    return res.json({ ret });
+    const updatedMeme = await UserService.createMemeSave(user, meme);
+    return res.json(createSuccessResponse(HttpCode.CREATED, 'Crate Meme Save', updatedMeme));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
@@ -47,8 +49,8 @@ const createMemeShare = async (req: CustomRequest, res: Response, next: NextFunc
   const meme = req.requestedMeme;
 
   try {
-    const ret = await UserService.createMemeShare(user, meme);
-    return res.json({ ret });
+    const updatedMeme = await UserService.createMemeShare(user, meme);
+    return res.json(createSuccessResponse(HttpCode.CREATED, 'Crate Meme Share', updatedMeme));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
@@ -59,9 +61,12 @@ const createMemeWatch = async (req: CustomRequest, res: Response, next: NextFunc
   const meme = req.requestedMeme;
 
   try {
-    const ret = await UserService.createMemeWatch(user, meme);
-    await UserService.updateLastSeenMeme(user, meme);
-    return res.json({ ret });
+    const [updatedMeme, _] = await Promise.all([
+      UserService.createMemeWatch(user, meme),
+      UserService.updateLastSeenMeme(user, meme),
+    ]);
+
+    return res.json(createSuccessResponse(HttpCode.CREATED, 'Crate Meme Watch', updatedMeme));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
@@ -72,8 +77,8 @@ const deleteMemeSave = async (req: CustomRequest, res: Response, next: NextFunct
   const meme = req.requestedMeme;
 
   try {
-    const result = await UserService.deleteMemeSave(user, meme);
-    return res.json({ result });
+    const updatedMeme = await UserService.deleteMemeSave(user, meme);
+    return res.json(createSuccessResponse(HttpCode.OK, 'Delete Meme Save', updatedMeme));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
@@ -84,7 +89,7 @@ const getLastSeenMeme = async (req: CustomRequest, res: Response, next: NextFunc
 
   try {
     const memeList = await UserService.getLastSeenMeme(user);
-    return res.json({ memeList });
+    return res.json(createSuccessResponse(HttpCode.OK, 'Get Last Seen Meme', memeList));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
@@ -95,7 +100,7 @@ const getSavedMeme = async (req: CustomRequest, res: Response, next: NextFunctio
 
   try {
     const memeList = await UserService.getSavedMeme(user);
-    return res.json({ memeList });
+    return res.json(createSuccessResponse(HttpCode.OK, 'Get saved Meme List', memeList));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
