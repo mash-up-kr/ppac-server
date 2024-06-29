@@ -9,7 +9,7 @@ import {
 import { getKeywordInfoByName, getKeywordInfoById } from '../middleware/requestedInfo';
 
 import { loggerMiddleware } from '../util/logger';
-import { keywordDuplicateValid } from 'src/middleware/duplicateValid';
+import { keywordDuplicateValid } from '../middleware/duplicateValid';
 
 const router = express.Router();
 

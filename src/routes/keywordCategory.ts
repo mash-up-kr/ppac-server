@@ -6,7 +6,7 @@ import {
   deleteKeywordCategory,
 } from '../controller/keywordCategory.controller';
 import { getRequestedKeywordCategoryInfo } from '../middleware/requestedInfo';
-import { categoryDuplicateValid } from 'src/middleware/duplicateValid';
+import { categoryDuplicateValid } from '../middleware/duplicateValid';
 
 const router = express.Router();
 
