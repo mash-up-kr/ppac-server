@@ -1,4 +1,4 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Schema, Document, Types } from 'mongoose';
 
 export interface IKeywordCreatePayload {
   name: string;
@@ -9,9 +9,13 @@ export interface IKeywordUpdatePayload {
 }
 
 export interface IKeyword {
-  _id: string;
   name: string;
-  memeIDs: mongoose.Types.ObjectId[];
+  searchCount: number;
+}
+
+export interface IKeywordDocument extends Document {
+  _id: Types.ObjectId;
+  name: string;
   searchCount: number;
   createdAt: Date;
   updatedAt: Date;
@@ -21,7 +25,6 @@ export interface IKeyword {
 const KeywordSchema: Schema = new Schema(
   {
     name: { type: String, required: true },
-    memeIDs: { type: [mongoose.Types.ObjectId], ref: 'Meme', required: true, default: [] },
     searchCount: { type: Number, required: true, default: 0 },
     isDeleted: { type: Boolean, required: true, default: false },
   },
@@ -32,4 +35,4 @@ const KeywordSchema: Schema = new Schema(
   },
 );
 
-export const KeywordModel = mongoose.model<IKeyword>('Keyword', KeywordSchema);
+export const KeywordModel = mongoose.model<IKeywordDocument>('Keyword', KeywordSchema);

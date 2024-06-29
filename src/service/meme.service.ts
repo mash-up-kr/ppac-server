@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { Types } from 'mongoose';
 
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
@@ -7,13 +8,16 @@ import { logger } from '../util/logger';
 
 async function getMeme(memeId: string): Promise<IMemeDocument | null> {
   try {
-    const meme = await MemeModel.findOne({ _id: memeId, isDeleted: false });
+    const meme = await MemeModel.findById(memeId)
+      .and([{ isDeleted: false }])
+      .lean();
+
     if (!meme) {
       logger.info(`Meme(${memeId}) not found.`);
       return null;
     }
 
-    return meme.toObject() as IMemeDocument;
+    return meme;
   } catch (err) {
     logger.error(`Failed to get a meme(${memeId}): ${err.message}`);
     throw new CustomError(`Failed to get a meme(${memeId})`, HttpCode.INTERNAL_SERVER_ERROR);
@@ -58,11 +62,13 @@ async function createMeme(info: IMemeCreatePayload): Promise<IMemeDocument> {
   });
 
   await meme.save();
-  logger.info(`Created meme - meme(${JSON.stringify(meme.toObject())}})`);
-  return meme.toObject();
+
+  const memeObj = meme.toObject();
+  logger.info(`Created meme - meme(${JSON.stringify(memeObj)}})`);
+  return memeObj;
 }
 
-async function updateMeme(memeId: string, updateInfo: any): Promise<IMemeDocument> {
+async function updateMeme(memeId: Types.ObjectId, updateInfo: any): Promise<IMemeDocument> {
   const meme = await MemeModel.findOneAndUpdate(
     { _id: memeId, isDeleted: false },
     { $set: updateInfo },
@@ -77,13 +83,13 @@ async function updateMeme(memeId: string, updateInfo: any): Promise<IMemeDocumen
   return meme;
 }
 
-async function deleteMeme(memeId: string): Promise<boolean> {
-  const Meme = await MemeModel.findOneAndDelete(
+async function deleteMeme(memeId: Types.ObjectId): Promise<boolean> {
+  const deletedMeme = await MemeModel.findOneAndDelete(
     { _id: memeId },
     { $set: { isDeleted: true } },
   ).lean();
 
-  if (_.isNull(Meme)) {
+  if (_.isNull(deletedMeme)) {
     throw new CustomError(`Failed to delete a meme(${memeId})`, HttpCode.NOT_FOUND);
   }
 
