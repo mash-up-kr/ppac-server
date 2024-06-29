@@ -81,14 +81,12 @@ export { getUser, createUser, getLastSeenMeme, getSavedMeme };
 
 function getLevel(watch: number, reaction: number, share: number, save: number): number {
   let level = 1;
-  if (watch >= 20 && reaction >= 20 && share >= 20 && save >= 20) {
+  if (watch >= 20 && reaction >= 20 && share >= 20) {
     level = 4;
-  } else if (watch >= 20 && reaction >= 20 && share >= 20) {
-    level = 3;
   } else if (watch >= 20 && reaction >= 20) {
-    level = 2;
+    level = 3;
   } else if (watch >= 20) {
-    level = 1;
+    level = 2;
   }
 
   return level;
