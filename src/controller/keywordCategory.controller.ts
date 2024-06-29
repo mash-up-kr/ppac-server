@@ -10,10 +10,6 @@ import { logger } from '../util/logger';
 import { createSuccessResponse } from '../util/response';
 
 const createKeywordCategory = async (req: Request, res: Response, next: NextFunction) => {
-  if (!_.has(req.body, 'name')) {
-    return next(new CustomError(`'name' field should be provided`, HttpCode.BAD_REQUEST));
-  }
-
   try {
     const newCategory = await KeywordCategoryService.createKeywordCategory(req.body);
     logger.info(`category created: ${JSON.stringify(newCategory)}`);
