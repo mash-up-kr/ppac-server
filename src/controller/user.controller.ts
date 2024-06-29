@@ -67,17 +67,16 @@ const createMemeWatch = async (req: CustomRequest, res: Response, next: NextFunc
   const type = req.params.type as MemeWatchType;
   try {
     let updatedMeme;
-
     switch (type) {
       // todo
       case MemeWatchType.SEARCH:
-        [updatedMeme, _] = await Promise.all([
+        [updatedMeme] = await Promise.all([
           UserService.createMemeWatch(user, meme),
           UserService.updateLastSeenMeme(user, meme),
         ]);
         break;
       case MemeWatchType.RECOMMEND:
-        UserService.createRecommendWatch(user, meme);
+        updatedMeme = await UserService.createRecommendWatch(user, meme);
         break;
 
       default:

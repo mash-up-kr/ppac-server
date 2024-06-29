@@ -14,6 +14,7 @@ import {
 } from '../model/recommendWatch';
 import { IUser, IUserDocument, IUserInfos, UserModel } from '../model/user';
 import { logger } from '../util/logger';
+import { startOfWeek, format } from 'date-fns';
 
 async function getUser(deviceId: string): Promise<IUserDocument | null> {
   try {
@@ -293,7 +294,7 @@ async function createRecommendWatch(user: IUserDocument, meme: IMemeDocument): P
 
     const createPayload: IRecommendWatchCreatePayload = {
       deviceId: user.deviceId,
-      startDate: new Date(),
+      startDate: startOfWeek(new Date(), { weekStartsOn: 1 }),
       memeIds: [meme._id],
     };
 
