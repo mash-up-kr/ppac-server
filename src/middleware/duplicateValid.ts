@@ -8,7 +8,7 @@ export const categoryDuplicateValid = (req: Request, res: Response, next: NextFu
   if (!name) {
     return next(new Error('name is required'));
   }
-  const category = KeywordCategoryModel.findOne({ name }).lean();
+  const category = KeywordCategoryModel.findOne({ name, isDeleted: false }).lean();
   if (category) {
     return next(new Error('category already exists'));
   }
@@ -21,7 +21,7 @@ export const keywordDuplicateValid = (req: Request, res: Response, next: NextFun
   if (!name) {
     return next(new Error('name is required'));
   }
-  const keyword = KeywordModel.findOne({ name }).lean();
+  const keyword = KeywordModel.findOne({ name, isDeleted: false }).lean();
   if (keyword) {
     return next(new Error('keyword already exists'));
   }

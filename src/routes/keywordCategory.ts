@@ -11,8 +11,8 @@ import { categoryDuplicateValid } from '../middleware/duplicateValid';
 const router = express.Router();
 
 router.post('/', categoryDuplicateValid, createKeywordCategory);
-router.get('/:categoryId', getRequestedKeywordCategoryInfo, getKeywordCategory);
-router.put('/:categoryId', getRequestedKeywordCategoryInfo, updateKeywordCategory);
-router.delete('/:categoryId', getRequestedKeywordCategoryInfo, deleteKeywordCategory);
+router.get('/:categoryName', getRequestedKeywordCategoryInfo, getKeywordCategory);
+router.put('/:categoryName', getRequestedKeywordCategoryInfo, updateKeywordCategory);
+router.delete('/:categoryName', getRequestedKeywordCategoryInfo, deleteKeywordCategory);
 
 export default router;

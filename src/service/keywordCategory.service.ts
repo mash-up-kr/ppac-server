@@ -44,9 +44,9 @@ async function updateKeywordCategory(
 }
 
 async function deleteKeywordCategory(categoryName: string): Promise<boolean> {
-  const deletedCategory = await KeywordCategoryModel.findOneAndDelete({
+  const deletedCategory = await KeywordCategoryModel.findOneAndUpdate({
     name: categoryName,
-  }).lean();
+  }, { isDeleted: true })
   if (!deletedCategory) {
     throw new CustomError(`Category with Name ${categoryName} not found`, HttpCode.NOT_FOUND);
   }
