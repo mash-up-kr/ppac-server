@@ -6,9 +6,10 @@ export interface IUser {
 }
 
 export interface IUserInfos extends IUser {
-  memeShareCount: number;
-  memeReactionCount: number;
-  memeSaveCount: number;
+  watch: number;
+  share: number;
+  reaction: number;
+  save: number;
 }
 
 export interface IUserDocument extends Document {

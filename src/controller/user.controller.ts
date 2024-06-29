@@ -21,72 +21,6 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-const createMemeReaction = async (req: CustomRequest, res: Response, next: NextFunction) => {
-  const user = req.requestedUser;
-  const meme = req.requestedMeme;
-
-  try {
-    const result = await UserService.createMemeInteraction(user, meme, 'reaction');
-    return res.json(createSuccessResponse(HttpCode.CREATED, 'Create Meme Reaction', result));
-  } catch (err) {
-    return next(new CustomError(err.message, err.status));
-  }
-};
-
-const createMemeSave = async (req: CustomRequest, res: Response, next: NextFunction) => {
-  const user = req.requestedUser;
-  const meme = req.requestedMeme;
-
-  try {
-    const result = await UserService.createMemeInteraction(user, meme, 'save');
-    return res.json(createSuccessResponse(HttpCode.CREATED, 'Crate Meme Save', result));
-  } catch (err) {
-    return next(new CustomError(err.message, err.status));
-  }
-};
-
-const createMemeShare = async (req: CustomRequest, res: Response, next: NextFunction) => {
-  const user = req.requestedUser;
-  const meme = req.requestedMeme;
-
-  try {
-    const result: boolean = await UserService.createMemeInteraction(user, meme, 'share');
-    return res.json(createSuccessResponse(HttpCode.CREATED, 'Crate Meme Share', result));
-  } catch (err) {
-    return next(new CustomError(err.message, err.status));
-  }
-};
-
-const createMemeWatch = async (req: CustomRequest, res: Response, next: NextFunction) => {
-  const user = req.requestedUser;
-  const meme = req.requestedMeme;
-
-  try {
-    // 밈 조회
-    // 최근 본 밈 추가
-    const [result, _]: [boolean, any] = await Promise.all([
-      UserService.createMemeInteraction(user, meme, 'watch'),
-      UserService.updateLastSeenMeme(user, meme),
-    ]);
-
-    return res.json(createSuccessResponse(HttpCode.CREATED, 'Crate Meme Watch', result));
-  } catch (err) {
-    return next(new CustomError(err.message, err.status));
-  }
-};
-
-const deleteMemeSave = async (req: CustomRequest, res: Response, next: NextFunction) => {
-  const user = req.requestedUser;
-  const meme = req.requestedMeme;
-
-  try {
-    const result: boolean = await UserService.deleteMemeSave(user, meme);
-    return res.json(createSuccessResponse(HttpCode.OK, 'Delete Meme Save', result));
-  } catch (err) {
-    return next(new CustomError(err.message, err.status));
-  }
-};
-
 const getUser = async (req: CustomRequest, res: Response, next: NextFunction) => {
   const user = req.requestedUser;
 
@@ -134,17 +68,7 @@ const getSavedMeme = async (req: CustomRequest, res: Response, next: NextFunctio
   }
 };
 
-export {
-  getUser,
-  createUser,
-  createMemeReaction,
-  createMemeSave,
-  createMemeShare,
-  createMemeWatch,
-  deleteMemeSave,
-  getLastSeenMeme,
-  getSavedMeme,
-};
+export { getUser, createUser, getLastSeenMeme, getSavedMeme };
 
 function getLevel(watch: number, reaction: number, share: number, save: number): number {
   let level = 1;
