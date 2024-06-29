@@ -153,12 +153,24 @@ const getTodayMemeList = async (req: Request, res: Response, next: NextFunction)
   }
 };
 
+const searchMemeByKeyword = async (req: CustomRequest, res: Response, next: NextFunction) => {
+  const keyword = req.requestedKeyword;
+
+  try {
+    const memeList = await MemeService.searchMemeByKeyword(keyword);
+    return res.json(createSuccessResponse(HttpCode.OK, 'Search meme by keyword', memeList));
+  } catch (err) {
+    return next(new CustomError(err.message, err.status));
+  }
+};
+
 export {
   getMeme,
-  getMemeWithKeywords,
   getTodayMemeList,
   getAllMemeList,
   createMeme,
   deleteMeme,
   updateMeme,
+  getMemeWithKeywords,
+  searchMemeByKeyword,
 };
