@@ -12,7 +12,6 @@ describe("[DELETE] '/api/meme/:memeId' ", () => {
     await MemeModel.insertMany(mockDatas);
     memeList = await MemeModel.find({});
     testMemeId = memeList[0]._id.toString();
-    console.log(testMemeId);
   });
 
   afterAll(async () => {

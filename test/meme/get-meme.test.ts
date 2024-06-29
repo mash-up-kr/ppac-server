@@ -1,9 +1,7 @@
 import request from 'supertest';
 
 import app from '../../src/app';
-import { KeywordModel } from '../../src/model/keyword';
 import { MemeModel } from '../../src/model/meme';
-import { createMockData as createKeywordMockData } from '../util/keyword.mock';
 import { createMockData as createMemeMockData, keywordIdsMockData } from '../util/meme.mock';
 
 let testMemeId = '';
@@ -11,19 +9,11 @@ const createdKeywordIds = [];
 let memeList = [];
 describe("[GET] '/api/meme/:memeId' ", () => {
   beforeAll(async () => {
-    // const mockKeywordDatas = createKeywordMockData(5);
-    // const createdKeywords = await KeywordModel.insertMany(mockKeywordDatas);
-
-    // createdKeywordIds = createdKeywords.map((k) => k._id);
-
     const mockDatas = createMemeMockData(1, 0);
     await MemeModel.insertMany(mockDatas);
 
     memeList = await MemeModel.find({});
-    console.log(memeList);
-
     testMemeId = memeList[0]._id.toString();
-    console.log(testMemeId, 'hihhi');
   });
 
   afterAll(async () => {
