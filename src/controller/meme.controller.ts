@@ -51,10 +51,6 @@ const createMeme = async (req: Request, res: Response, next: NextFunction) => {
     return next(new CustomError(`'keywordIds' field should be provided`, HttpCode.BAD_REQUEST));
   }
 
-  if (!_.has(req.body, 'isTodayMeme')) {
-    return next(new CustomError(`'isTodayMeme' field should be provided`, HttpCode.BAD_REQUEST));
-  }
-
   try {
     const meme = await MemeService.createMeme(req.body);
     return res.json(createSuccessResponse(HttpCode.CREATED, 'Create Meme', meme));
