@@ -2,14 +2,13 @@ import express from 'express';
 
 import {
   deleteMeme,
-  getMeme,
+  getMemeWithKeywords,
   updateMeme,
   createMeme,
   getTodayMemeList,
   getAllMemeList,
 } from '../controller/meme.controller';
 import { getRequestedMemeInfo } from '../middleware/requestedInfo';
-import { getMemeWithKeywords } from '../service/meme.service';
 
 const router = express.Router();
 
