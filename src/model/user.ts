@@ -10,6 +10,7 @@ export interface IUserInfos extends IUser {
   share: number;
   reaction: number;
   save: number;
+  level: number;
 }
 
 export interface IUserDocument extends Document {
