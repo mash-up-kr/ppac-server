@@ -43,18 +43,17 @@ async function deleteKeywordCategory(categoryId: string): Promise<boolean> {
   }
   return true;
 }
-async function getKeywordCategories(): Promise<IKeywordCategory[]> {
+
+async function getKeywordCategory(categoryId: string): Promise<IKeywordCategory> {
   try {
-    const keywordCategories = await KeywordCategoryModel.find({}).lean();
-    return keywordCategories;
+    const keywordCategory = await KeywordCategoryModel.findOne({
+      _id: categoryId,
+      isDeleted: false,
+    }).lean();
+    return keywordCategory;
   } catch (err) {
-    logger.error(`Failed to get keywordCategories: ${err.message}`);
-    throw new CustomError('Failed to get keywordCategories', HttpCode.INTERNAL_SERVER_ERROR);
+    logger.info(`Failed to get a KeywordCategory Info By id (${categoryId})`);
   }
 }
-export {
-  createKeywordCategory,
-  updateKeywordCategory,
-  deleteKeywordCategory,
-  getKeywordCategories,
-};
+
+export { createKeywordCategory, updateKeywordCategory, deleteKeywordCategory, getKeywordCategory };

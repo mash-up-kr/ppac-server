@@ -9,6 +9,7 @@ import {
   IKeywordCategoryCreatePayload,
   IKeywordCategoryUpdatePayload,
 } from '../model/keywordCategory';
+import mongoose from 'mongoose';
 import { CustomRequest } from '../middleware/requestedInfo';
 
 const createKeywordCategory = async (req: Request, res: Response, next: NextFunction) => {
@@ -52,19 +53,28 @@ const deleteKeywordCategory = async (req: CustomRequest, res: Response, next: Ne
   }
 };
 
-const getKeywordCategories = async (req: Request, res: Response, next: NextFunction) => {
+const getKeywordCategory = async (req: Request, res: Response, next: NextFunction) => {
+  const categoryId = req.params?.categoryId || null;
+
+  if (_.isNull(categoryId)) {
+    return next(new CustomError(`'categoryId' field should be provided`, HttpCode.BAD_REQUEST));
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(categoryId)) {
+    return next(new CustomError(`'categoryId' is not a valid ObjectId`, HttpCode.BAD_REQUEST));
+  }
+
   try {
-    const keywordCategories = await KeywordCategoryService.getKeywordCategories();
-    logger.info(`Get keyword categories: ${JSON.stringify(keywordCategories)}`);
-    return res.json(keywordCategories);
+    const keywordCategory = await KeywordCategoryService.getKeywordCategory(categoryId);
+    if (_.isNull(keywordCategory)) {
+      return next(new CustomError(`category(${categoryId}) not found.`, HttpCode.NOT_FOUND));
+    }
+
+    logger.info(`Get keywordCategory - ${keywordCategory})`);
+    return res.json({ ...keywordCategory });
   } catch (err) {
-    return next(new CustomError(err.message, err.status || HttpCode.INTERNAL_SERVER_ERROR));
+    return next(new CustomError(err.message, err.status));
   }
 };
 
-export {
-  createKeywordCategory,
-  updateKeywordCategory,
-  deleteKeywordCategory,
-  getKeywordCategories,
-};
+export { createKeywordCategory, updateKeywordCategory, deleteKeywordCategory, getKeywordCategory };
