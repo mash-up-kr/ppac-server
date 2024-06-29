@@ -40,7 +40,16 @@ const getUser = async (req: CustomRequest, res: Response, next: NextFunction) =>
 
     const level = getLevel(watch, reaction, share, save);
 
-    return res.json(createSuccessResponse(HttpCode.OK, 'Get User', { ...user, level }));
+    return res.json(
+      createSuccessResponse(HttpCode.OK, 'Get User', {
+        ...user,
+        watch,
+        reaction,
+        share,
+        save,
+        level,
+      }),
+    );
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
