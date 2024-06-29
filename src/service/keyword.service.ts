@@ -1,10 +1,10 @@
 import _ from 'lodash';
-import { KeywordCategoryModel } from '../model/keywordCategory';
 import { Types } from 'mongoose';
 
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
 import { IKeywordCreatePayload, KeywordModel, IKeywordDocument } from '../model/keyword';
+import { KeywordCategoryModel } from '../model/keywordCategory';
 import { logger } from '../util/logger';
 
 async function createKeyword(info: IKeywordCreatePayload): Promise<IKeywordDocument> {
@@ -16,8 +16,8 @@ async function createKeyword(info: IKeywordCreatePayload): Promise<IKeywordDocum
     await newKeyword.save();
 
     const newKeywordObj = newKeyword.toObject();
-
     logger.info(`Created new keyword: ${JSON.stringify(newKeywordObj)}`);
+
     return newKeywordObj;
   } catch (err) {
     logger.error(`Failed to create keyword ${info.name}: ${err.message}`);
@@ -94,7 +94,7 @@ async function getKeywordById(keywordId: Types.ObjectId): Promise<IKeywordDocume
     logger.info(`Failed to get a Keyword Info By id (${keywordId})`);
   }
 }
-async function getKeywordsByCategory(): Promise<{ [categoryName: string]: IKeyword[] }> {
+async function getKeywordsByCategory(): Promise<{ [categoryName: string]: IKeywordDocument[] }> {
   try {
     const categories = await KeywordCategoryModel.find({
       isRecommend: true,
@@ -129,7 +129,7 @@ async function getKeywordsByCategory(): Promise<{ [categoryName: string]: IKeywo
       },
     ]);
 
-    const result: { [categoryName: string]: IKeyword[] } = {};
+    const result: { [categoryName: string]: IKeywordDocument[] } = {};
     keywords.forEach((keyword) => {
       result[keyword.categoryName] = keyword.keywords.map((name) => ({ name }));
     });
