@@ -8,8 +8,8 @@ import * as UserService from '../service/user.service';
 import { createSuccessResponse } from '../util/response';
 
 enum MemeWatchType {
-  SEARCH = 'SEARCH',
-  RECOMMEND = 'RECOMMEND',
+  SEARCH = 'search',
+  RECOMMEND = 'recommend',
 }
 
 const createUser = async (req: Request, res: Response, next: NextFunction) => {
