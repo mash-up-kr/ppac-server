@@ -1,14 +1,11 @@
 import express from 'express';
 
+import keyword from './keyword';
 import meme from './meme';
 import user from './user';
-import keyword from './keyword';
 import { errorHandler } from '../middleware/errorHandler';
-import { loggerMiddleware } from '../util/logger';
 
 const router = express.Router();
-
-router.use(loggerMiddleware);
 
 router.use('/api/meme', meme);
 router.use('/api/user', user);
