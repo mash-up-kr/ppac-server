@@ -80,8 +80,8 @@ const updateMeme = async (req: CustomRequest, res: Response, next: NextFunction)
 const deleteMeme = async (req: CustomRequest, res: Response, next: NextFunction) => {
   const meme = req.requestedMeme;
   try {
-    const deletedMeme = await MemeService.deleteMeme(meme._id);
-    return res.json(createSuccessResponse(HttpCode.OK, 'Deleted Meme', deletedMeme));
+    await MemeService.deleteMeme(meme._id);
+    return res.json(createSuccessResponse(HttpCode.OK, 'Deleted Meme', true));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
@@ -104,7 +104,8 @@ const getAllMemeList = async (req: Request, res: Response, next: NextFunction) =
     const data = {
       pagination: {
         total: memeList.total,
-        perPage: page,
+        page: memeList.page,
+        perPage: size,
         currentPage: memeList.page,
         totalPages: memeList.totalPages,
       },
