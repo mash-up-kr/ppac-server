@@ -285,7 +285,7 @@ async function createMemeRecommendWatch(
     });
 
     if (!_.isNull(memeRecommendWatch)) {
-      logger.info(`Already recommend watch - deviceId(${user.deviceId})`);
+      logger.info(`Already watched recommend meme - deviceId(${user.deviceId})`);
 
       const updatePayload: IMemeRecommendWatchUpdatePayload = {
         memeIds: [...memeRecommendWatch.memeIds, meme._id],
