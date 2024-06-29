@@ -5,6 +5,7 @@ import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
 import { IMemeCreatePayload, IMemeDocument, MemeModel } from '../model/meme';
 import { logger } from '../util/logger';
+import { IKeywordDocument } from 'src/model/keyword';
 
 async function getMeme(memeId: string): Promise<IMemeDocument | null> {
   try {
@@ -97,4 +98,30 @@ async function deleteMeme(memeId: Types.ObjectId): Promise<boolean> {
   return true;
 }
 
-export { getMeme, createMeme, updateMeme, deleteMeme, getTodayMemeList, getAllMemeList };
+async function searchMemeByKeyword(keyword: IKeywordDocument): Promise<IMemeDocument[]> {
+  try {
+    const memes = await MemeModel.find(
+      { keywordIds: keyword._id },
+      { _id: 0, createdAt: 0, updatedAt: 0 },
+    )
+      .populate('keywordIds', 'name')
+      .lean();
+
+    return memes;
+  } catch (err) {
+    logger.error(`Failed to search meme by keyword(${keyword})`, err.message);
+    throw new CustomError(
+      `Failed to search meme by keyword(${keyword})`,
+      HttpCode.INTERNAL_SERVER_ERROR,
+    );
+  }
+}
+export {
+  getMeme,
+  createMeme,
+  updateMeme,
+  deleteMeme,
+  getTodayMemeList,
+  getAllMemeList,
+  searchMemeByKeyword,
+};
