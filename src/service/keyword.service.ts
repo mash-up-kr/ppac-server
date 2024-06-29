@@ -94,40 +94,60 @@ async function getKeywordById(keywordId: Types.ObjectId): Promise<IKeywordDocume
     logger.info(`Failed to get a Keyword Info By id (${keywordId})`);
   }
 }
+
 async function getRecommendedKeywords(): Promise<{ [categoryName: string]: string[] }> {
-  let categories;
   try {
-    categories = await KeywordCategoryModel.find({
-      isRecommend: true,
-      isDeleted: false,
-    }).lean();
-    logger.info(`Found ${categories.length} recommended categories`);
+    const result = await KeywordCategoryModel.aggregate([
+      {
+        $match: {
+          isRecommend: true,
+          isDeleted: false,
+        },
+      },
+      {
+        $lookup: {
+          from: 'keyword', // The name of the keywords collection
+          localField: 'name',
+          foreignField: 'category',
+          as: 'keywords',
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          category: '$name',
+          keywords: '$keywords.name',
+        },
+      },
+      {
+        $unwind: '$keywords',
+      },
+      {
+        $group: {
+          _id: '$category',
+          keywords: { $push: '$keywords' },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          category: '$_id',
+          keywords: 1,
+        },
+      },
+    ]);
+
+    const keywordList = result.reduce((acc, { category, keywords }) => {
+      acc[category] = keywords;
+      return acc;
+    }, {});
+
+    logger.info('Successfully retrieved recommended keywords');
+    return keywordList;
   } catch (err) {
-    logger.error(`Failed to get recommended categories: ${err.message}`);
-    throw new CustomError('Failed to get recommended categories', HttpCode.INTERNAL_SERVER_ERROR);
+    logger.error(`Failed to get recommended keywords: ${err.message}`);
+    throw new CustomError('Failed to get recommended keywords', HttpCode.INTERNAL_SERVER_ERROR);
   }
-
-  const categoryNames = categories.map((category) => category.name);
-
-  const keywordList: { [categoryName: string]: string[] } = {};
-
-  try {
-    for (const categoryName of categoryNames) {
-      const keywords = await KeywordModel.find({
-        category: categoryName,
-      }).lean();
-
-      const keywordNames = keywords.map((keyword) => keyword.name);
-      keywordList[categoryName] = keywordNames;
-
-      logger.info(`Found ${keywordNames.length} keywords for category ${categoryName}`);
-    }
-  } catch (err) {
-    logger.error(`Failed to get keywords for categories: ${err.message}`);
-    throw new CustomError('Failed to get keywords for categories', HttpCode.INTERNAL_SERVER_ERROR);
-  }
-
-  return keywordList;
 }
 
 export {
