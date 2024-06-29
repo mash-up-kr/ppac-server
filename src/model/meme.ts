@@ -19,7 +19,6 @@ export interface IMeme {
   keywordIds: Types.ObjectId[];
   image: string;
   reaction: number;
-  watch: number;
   source: string;
   isTodayMeme: boolean;
 }
