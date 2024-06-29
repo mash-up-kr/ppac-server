@@ -10,11 +10,15 @@ import { logger } from '../util/logger';
 import { createSuccessResponse } from '../util/response';
 
 const createKeyword = async (req: Request, res: Response, next: NextFunction) => {
-  if (!_.has(req.body, 'name')) {
-    return next(new CustomError(`'name' field should be provided`, HttpCode.BAD_REQUEST));
-  }
-
   try {
+    if (!_.has(req.body, 'name')) {
+      return next(new CustomError(`'name' field should be provided`, HttpCode.BAD_REQUEST));
+    }
+
+    if (!_.has(req.body, 'category')) {
+      return next(new CustomError(`'category' field should be provided`, HttpCode.BAD_REQUEST));
+    }
+
     const newKeyword = await KeywordService.createKeyword(req.body);
     logger.info(`Keyword created: ${JSON.stringify(newKeyword)}`);
     return res.json(createSuccessResponse(HttpCode.CREATED, 'Created Keyword', newKeyword));
