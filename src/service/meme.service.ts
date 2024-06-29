@@ -12,7 +12,7 @@ async function getMeme(memeId: string): Promise<IMemeWithKeywords | null> {
       { $match: { _id: memeId, isDeleted: false } },
       {
         $lookup: {
-          from: 'keywords',
+          from: 'keyword',
           localField: 'keywordIds',
           foreignField: '_id',
           as: 'keywords',
@@ -46,7 +46,7 @@ async function getTodayMemeList(limit: number = 5): Promise<IMemeWithKeywords[]>
     { $limit: limit },
     {
       $lookup: {
-        from: 'keywords',
+        from: 'keyword',
         localField: 'keywordIds',
         foreignField: '_id',
         as: 'keywords',
