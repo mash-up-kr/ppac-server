@@ -4,6 +4,7 @@ import { CustomRequest } from 'src/middleware/requestedInfo';
 
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
+import { InteractionType, MemeInteractionModel } from '../model/memeInteraction';
 import * as UserService from '../service/user.service';
 import { createSuccessResponse } from '../util/response';
 
@@ -25,8 +26,8 @@ const createMemeReaction = async (req: CustomRequest, res: Response, next: NextF
   const meme = req.requestedMeme;
 
   try {
-    const updatedMeme = await UserService.createMemeReaction(user, meme);
-    return res.json(createSuccessResponse(HttpCode.CREATED, 'Create Meme Reaction', updatedMeme));
+    const result = await UserService.createMemeInteraction(user, meme, 'reaction');
+    return res.json(createSuccessResponse(HttpCode.CREATED, 'Create Meme Reaction', result));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
@@ -37,8 +38,8 @@ const createMemeSave = async (req: CustomRequest, res: Response, next: NextFunct
   const meme = req.requestedMeme;
 
   try {
-    const updatedMeme = await UserService.createMemeSave(user, meme);
-    return res.json(createSuccessResponse(HttpCode.CREATED, 'Crate Meme Save', updatedMeme));
+    const result = await UserService.createMemeInteraction(user, meme, 'save');
+    return res.json(createSuccessResponse(HttpCode.CREATED, 'Crate Meme Save', result));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
@@ -49,8 +50,8 @@ const createMemeShare = async (req: CustomRequest, res: Response, next: NextFunc
   const meme = req.requestedMeme;
 
   try {
-    const updatedMeme = await UserService.createMemeShare(user, meme);
-    return res.json(createSuccessResponse(HttpCode.CREATED, 'Crate Meme Share', updatedMeme));
+    const result: boolean = await UserService.createMemeInteraction(user, meme, 'share');
+    return res.json(createSuccessResponse(HttpCode.CREATED, 'Crate Meme Share', result));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
@@ -61,12 +62,14 @@ const createMemeWatch = async (req: CustomRequest, res: Response, next: NextFunc
   const meme = req.requestedMeme;
 
   try {
-    const [updatedMeme, _] = await Promise.all([
-      UserService.createMemeWatch(user, meme),
+    // 밈 조회
+    // 최근 본 밈 추가
+    const [result, _]: [boolean, any] = await Promise.all([
+      UserService.createMemeInteraction(user, meme, 'watch'),
       UserService.updateLastSeenMeme(user, meme),
     ]);
 
-    return res.json(createSuccessResponse(HttpCode.CREATED, 'Crate Meme Watch', updatedMeme));
+    return res.json(createSuccessResponse(HttpCode.CREATED, 'Crate Meme Watch', result));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
@@ -77,8 +80,12 @@ const deleteMemeSave = async (req: CustomRequest, res: Response, next: NextFunct
   const meme = req.requestedMeme;
 
   try {
-    const updatedMeme = await UserService.deleteMemeSave(user, meme);
-    return res.json(createSuccessResponse(HttpCode.OK, 'Delete Meme Save', updatedMeme));
+    const result: boolean = await UserService.deleteMemeSave(user, meme);
+    return res.json(createSuccessResponse(HttpCode.OK, 'Delete Meme Save', result));
+  } catch (err) {
+    return next(new CustomError(err.message, err.status));
+  }
+};
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
