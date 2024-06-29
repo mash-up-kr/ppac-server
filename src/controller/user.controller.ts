@@ -7,6 +7,11 @@ import { HttpCode } from '../errors/HttpCode';
 import * as UserService from '../service/user.service';
 import { createSuccessResponse } from '../util/response';
 
+enum MemeWatchType {
+  SEARCH = 'SEARCH',
+  RECOMMEND = 'RECOMMEND',
+}
+
 const createUser = async (req: Request, res: Response, next: NextFunction) => {
   if (!_.has(req.body, 'deviceId')) {
     return next(new CustomError(`'deviceId' field should be provided`, HttpCode.BAD_REQUEST));
@@ -59,14 +64,27 @@ const createMemeShare = async (req: CustomRequest, res: Response, next: NextFunc
 const createMemeWatch = async (req: CustomRequest, res: Response, next: NextFunction) => {
   const user = req.requestedUser;
   const meme = req.requestedMeme;
-
+  const type = req.params.type as MemeWatchType;
   try {
-    const [updatedMeme, _] = await Promise.all([
-      UserService.createMemeWatch(user, meme),
-      UserService.updateLastSeenMeme(user, meme),
-    ]);
+    let updatedMeme;
 
-    return res.json(createSuccessResponse(HttpCode.CREATED, 'Crate Meme Watch', updatedMeme));
+    switch (type) {
+      // todo
+      case MemeWatchType.SEARCH:
+        [updatedMeme, _] = await Promise.all([
+          UserService.createMemeWatch(user, meme),
+          UserService.updateLastSeenMeme(user, meme),
+        ]);
+        break;
+      case MemeWatchType.RECOMMEND:
+        UserService.createRecommendWatch(user, meme);
+        break;
+
+      default:
+        throw new CustomError('Invalid type parameter', 400);
+    }
+
+    return res.json(createSuccessResponse(HttpCode.CREATED, `${type} Meme Watch`, updatedMeme));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }

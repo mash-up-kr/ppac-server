@@ -7,6 +7,11 @@ import { MemeReactionModel } from '../model/memeReaction';
 import { MemeSaveModel } from '../model/memeSave';
 import { MemeShareModel } from '../model/memeShare';
 import { MemeWatchModel } from '../model/memeWatch';
+import {
+  RecommendWatchModel,
+  IRecommendWatchCreatePayload,
+  IRecommendWatchUpdatePayload,
+} from '../model/recommendWatch';
 import { IUser, IUserDocument, IUserInfos, UserModel } from '../model/user';
 import { logger } from '../util/logger';
 
@@ -268,6 +273,41 @@ async function getSavedMeme(user: IUserDocument): Promise<IMemeDocument[]> {
   }
 }
 
+async function createRecommendWatch(user: IUserDocument, meme: IMemeDocument): Promise<boolean> {
+  try {
+    const recommendWatch = await RecommendWatchModel.findOne({
+      deviceId: user.deviceId,
+      isDeleted: false,
+    });
+
+    if (!_.isNull(recommendWatch)) {
+      logger.info(`Already recommend watch - deviceId(${user.deviceId})`);
+
+      const updatePayload: IRecommendWatchUpdatePayload = {
+        memeIds: [...recommendWatch.memeIds, meme._id],
+      };
+
+      await RecommendWatchModel.updateOne({ _id: recommendWatch._id }, updatePayload);
+      return true;
+    }
+
+    const createPayload: IRecommendWatchCreatePayload = {
+      deviceId: user.deviceId,
+      startDate: new Date(),
+      memeIds: [meme._id],
+    };
+
+    await RecommendWatchModel.create(createPayload);
+
+    return true;
+  } catch (err) {
+    logger.error(`Failed create recommendWatch`, err.message);
+    throw new CustomError(
+      `Failed create recommendWatch(${err.message})`,
+      HttpCode.INTERNAL_SERVER_ERROR,
+    );
+  }
+}
 export {
   getUser,
   createUser,
@@ -279,4 +319,5 @@ export {
   deleteMemeSave,
   getLastSeenMeme,
   getSavedMeme,
+  createRecommendWatch,
 };
