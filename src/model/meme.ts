@@ -8,10 +8,10 @@ export interface IMemeCreatePayload {
 }
 
 export interface IMemeUpdatePayload {
-  title: string;
-  keywordIds: Types.ObjectId[];
-  source: string;
-  isTodayMeme: boolean;
+  title?: string;
+  keywordIds?: Types.ObjectId[];
+  source?: string;
+  isTodayMeme?: boolean;
 }
 
 export interface IMeme {
