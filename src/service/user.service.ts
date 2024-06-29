@@ -102,14 +102,13 @@ async function createMemeReaction(
     });
     if (!_.isNull(memeReaction)) {
       logger.info(`Already reaction meme - deviceId(${user.deviceId}), memeId(${meme._id}`);
-      return meme;
+    } else {
+      const newMemeReaction = await MemeReactionModel.create({
+        memeId: meme._id,
+        deviceId: user.deviceId,
+      });
+      await newMemeReaction.save();
     }
-
-    const newMemeReaction = await MemeReactionModel.create({
-      memeId: meme._id,
-      deviceId: user.deviceId,
-    });
-    await newMemeReaction.save();
 
     const updatedMeme = await MemeModel.findOneAndUpdate(
       { memeId: meme._id },
