@@ -6,14 +6,11 @@ import { HttpCode } from '../errors/HttpCode';
 import { CustomRequest } from '../middleware/requestedInfo';
 import { IKeywordUpdatePayload } from '../model/keyword';
 import * as KeywordService from '../service/keyword.service';
+import * as MemeService from '../service/meme.service';
 import { logger } from '../util/logger';
 import { createSuccessResponse } from '../util/response';
 
 const createKeyword = async (req: Request, res: Response, next: NextFunction) => {
-  if (!_.has(req.body, 'name')) {
-    return next(new CustomError(`'name' field should be provided`, HttpCode.BAD_REQUEST));
-  }
-
   try {
     const newKeyword = await KeywordService.createKeyword(req.body);
     logger.info(`Keyword created: ${JSON.stringify(newKeyword)}`);
@@ -26,9 +23,14 @@ const createKeyword = async (req: Request, res: Response, next: NextFunction) =>
 const deleteKeyword = async (req: CustomRequest, res: Response, next: NextFunction) => {
   const keyword = req.requestedKeyword;
   try {
-    const deletedKeyword = await KeywordService.deleteKeyword(keyword._id);
+    // 키워드 삭제
+    // 키워드가 포함된 밈의 keywordIds도 삭제
+    await Promise.all([
+      KeywordService.deleteKeyword(keyword._id),
+      MemeService.deleteKeywordOfMeme(keyword._id),
+    ]);
     logger.info(`Deleted keyword with ID ${req.params.keywordId}`);
-    return res.json(createSuccessResponse(HttpCode.OK, 'Delete Keyword', deletedKeyword));
+    return res.json(createSuccessResponse(HttpCode.OK, 'Deleted Keyword', true));
   } catch (err) {
     return next(new CustomError(err.message, err.status || HttpCode.INTERNAL_SERVER_ERROR));
   }

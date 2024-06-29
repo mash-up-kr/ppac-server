@@ -3,7 +3,7 @@ import { Types } from 'mongoose';
 
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
-import { IMemeCreatePayload, IMemeDocument, MemeModel } from '../model/meme';
+import { IMemeCreatePayload, IMemeDocument, MemeModel, IMemeWithKeywords } from '../model/meme';
 import { logger } from '../util/logger';
 import { IKeywordDocument } from 'src/model/keyword';
 
@@ -25,10 +25,57 @@ async function getMeme(memeId: string): Promise<IMemeDocument | null> {
   }
 }
 
-async function getTodayMemeList(limit: number = 5): Promise<IMemeDocument[]> {
-  const todayMemeList = await MemeModel.find({ isTodayMeme: true, isDeleted: false })
-    .limit(limit)
-    .lean();
+async function getMemeWithKeywords(memeId: string): Promise<IMemeWithKeywords | null> {
+  try {
+    const meme = await MemeModel.aggregate([
+      { $match: { _id: new Types.ObjectId(memeId), isDeleted: false } },
+      {
+        $lookup: {
+          from: 'keyword',
+          localField: 'keywordIds',
+          foreignField: '_id',
+          as: 'keywords',
+        },
+      },
+      {
+        $addFields: {
+          keywords: '$keywords.name',
+        },
+      },
+      { $project: { keywordIds: 0 } },
+    ]);
+
+    if (!meme) {
+      logger.info(`Meme(${memeId}) not found.`);
+      return null;
+    }
+
+    return meme[0] || null;
+  } catch (err) {
+    logger.error(`Failed to get a meme(${memeId}): ${err.message}`);
+    throw new CustomError(`Failed to get a meme(${memeId})`, HttpCode.INTERNAL_SERVER_ERROR);
+  }
+}
+
+async function getTodayMemeList(limit: number = 5): Promise<IMemeWithKeywords[]> {
+  const todayMemeList = await MemeModel.aggregate([
+    { $match: { isTodayMeme: true, isDeleted: false } },
+    { $limit: limit },
+    {
+      $lookup: {
+        from: 'keyword',
+        localField: 'keywordIds',
+        foreignField: '_id',
+        as: 'keywords',
+      },
+    },
+    {
+      $addFields: {
+        keywords: '$keywords.name',
+      },
+    },
+    { $project: { keywordIds: 0 } },
+  ]);
 
   const memeIds = todayMemeList.map((meme) => meme._id);
   logger.info(
@@ -98,6 +145,13 @@ async function deleteMeme(memeId: Types.ObjectId): Promise<boolean> {
   return true;
 }
 
+async function deleteKeywordOfMeme(deleteKeywordId: Types.ObjectId) {
+  await MemeModel.updateMany(
+    { keywordIds: deleteKeywordId },
+    { $pull: { keywordIds: deleteKeywordId } },
+  );
+}
+
 async function searchMemeByKeyword(keyword: IKeywordDocument): Promise<IMemeDocument[]> {
   try {
     const memeList = await MemeModel.find(
@@ -117,6 +171,7 @@ async function searchMemeByKeyword(keyword: IKeywordDocument): Promise<IMemeDocu
     );
   }
 }
+
 export {
   getMeme,
   createMeme,
@@ -124,5 +179,7 @@ export {
   deleteMeme,
   getTodayMemeList,
   getAllMemeList,
+  deleteKeywordOfMeme,
+  getMemeWithKeywords,
   searchMemeByKeyword,
 };

@@ -34,6 +34,30 @@ const getMeme = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const getMemeWithKeywords = async (req: Request, res: Response, next: NextFunction) => {
+  const memeId = req.params?.memeId || null;
+
+  if (_.isNull(memeId)) {
+    return next(new CustomError(`'memeId' field should be provided`, HttpCode.BAD_REQUEST));
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(memeId)) {
+    return next(new CustomError(`'memeId' is not a valid ObjectId`, HttpCode.BAD_REQUEST));
+  }
+
+  try {
+    const meme = await MemeService.getMemeWithKeywords(memeId);
+    if (_.isNull(meme)) {
+      return next(new CustomError(`Meme(${memeId}) not found.`, HttpCode.NOT_FOUND));
+    }
+
+    logger.info(`Get meme with keywords - ${memeId})`);
+    return res.json(createSuccessResponse(HttpCode.OK, 'Get Meme', meme));
+  } catch (err) {
+    return next(new CustomError(err.message, err.status));
+  }
+};
+
 const createMeme = async (req: Request, res: Response, next: NextFunction) => {
   if (!_.has(req.body, 'title')) {
     return next(new CustomError(`'title' field should be provided`, HttpCode.BAD_REQUEST));
@@ -52,7 +76,7 @@ const createMeme = async (req: Request, res: Response, next: NextFunction) => {
   }
 
   try {
-    const meme = await MemeService.createMeme(req.body);
+    const meme = await MemeService.createMeme(req.body as IMemeCreatePayload);
     return res.json(createSuccessResponse(HttpCode.CREATED, 'Create Meme', meme));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
@@ -147,5 +171,6 @@ export {
   createMeme,
   deleteMeme,
   updateMeme,
+  getMemeWithKeywords,
   searchMemeByKeyword,
 };
