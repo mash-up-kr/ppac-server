@@ -52,7 +52,7 @@ const createMeme = async (req: Request, res: Response, next: NextFunction) => {
   }
 
   try {
-    const meme = await MemeService.createMeme(req.body);
+    const meme = await MemeService.createMeme(req.body as IMemeCreatePayload);
     return res.json(createSuccessResponse(HttpCode.CREATED, 'Create Meme', meme));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
