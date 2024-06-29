@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import _ from 'lodash';
-import { IKeywordUpdatePayload } from 'src/model/keyword';
 
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
 import { CustomRequest } from '../middleware/requestedInfo';
+import { IKeywordUpdatePayload } from '../model/keyword';
 import * as KeywordService from '../service/keyword.service';
 import { logger } from '../util/logger';
 import { createSuccessResponse } from '../util/response';

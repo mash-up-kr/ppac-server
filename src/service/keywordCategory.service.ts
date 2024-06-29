@@ -1,10 +1,10 @@
+import CustomError from '../errors/CustomError';
+import { HttpCode } from '../errors/HttpCode';
 import {
   KeywordCategoryModel,
   IKeywordCategoryCreatePayload,
   IKeywordCategoryDocument,
 } from '../model/keywordCategory';
-import CustomError from '../errors/CustomError';
-import { HttpCode } from '../errors/HttpCode';
 import { logger } from '../util/logger';
 
 async function createKeywordCategory(
@@ -44,9 +44,12 @@ async function updateKeywordCategory(
 }
 
 async function deleteKeywordCategory(categoryName: string): Promise<boolean> {
-  const deletedCategory = await KeywordCategoryModel.findOneAndUpdate({
-    name: categoryName,
-  }, { isDeleted: true })
+  const deletedCategory = await KeywordCategoryModel.findOneAndUpdate(
+    {
+      name: categoryName,
+    },
+    { isDeleted: true },
+  );
   if (!deletedCategory) {
     throw new CustomError(`Category with Name ${categoryName} not found`, HttpCode.NOT_FOUND);
   }
