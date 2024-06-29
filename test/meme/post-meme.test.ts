@@ -15,7 +15,6 @@ describe("[POST] '/api/meme' ", () => {
       keywordIds: [keywordIdsMockData[0]],
       image: 'example.com',
       source: 'youtube',
-      isTodayMeme: false,
     };
     const response = await request(app).post('/api/meme').send(createPayload);
 
