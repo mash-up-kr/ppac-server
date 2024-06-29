@@ -31,7 +31,6 @@ describe("[GET] '/api/meme/:memeId' ", () => {
 
   it('should not get a meme with nonexisting id', async () => {
     const response = await request(app).get(`/api/meme/nonexistingId`);
-    console.log(response.statusCode);
     expect(response.statusCode).toBe(400);
   });
 });
