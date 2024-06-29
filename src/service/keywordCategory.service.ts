@@ -1,7 +1,7 @@
 import {
   KeywordCategoryModel,
   IKeywordCategoryCreatePayload,
-  IKeywordCategory,
+  IKeywordCategoryDocument,
 } from '../model/keywordCategory';
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
@@ -9,14 +9,16 @@ import { logger } from '../util/logger';
 
 async function createKeywordCategory(
   info: IKeywordCategoryCreatePayload,
-): Promise<IKeywordCategory> {
+): Promise<IKeywordCategoryDocument> {
   try {
-    const newCategory = new KeywordCategoryModel({
+    const newCategory = await KeywordCategoryModel.create({
       ...info,
     });
     await newCategory.save();
-    logger.info(`Created new keyword category: ${JSON.stringify(newCategory)}`);
-    return newCategory.toObject();
+    const newCategoryObj = newCategory.toObject();
+
+    logger.info(`Created new keyword category: ${JSON.stringify(newCategoryObj)}`);
+    return newCategoryObj;
   } catch (err) {
     logger.error(`Failed to create category ${info.name}: ${err.message}`);
     throw new CustomError('Failed to create category', HttpCode.INTERNAL_SERVER_ERROR);
@@ -25,19 +27,20 @@ async function createKeywordCategory(
 
 async function updateKeywordCategory(
   categoryName: string,
-  updateInfos: Partial<IKeywordCategory>,
-): Promise<IKeywordCategory> {
+  updateInfo: any,
+): Promise<IKeywordCategoryDocument> {
   const updatedCategory = await KeywordCategoryModel.findOneAndUpdate(
-    { name: categoryName },
-    updateInfos,
-    {
-      new: true,
-    },
-  ).lean();
+    { name: categoryName, isDeleted: false },
+    { $set: updateInfo },
+    { new: true },
+  );
+
   if (!updatedCategory) {
     throw new CustomError(`Category with ID ${updatedCategory} not found`, HttpCode.NOT_FOUND);
   }
-  return updatedCategory;
+  logger.info(`Update keyword category - category(${categoryName})`);
+
+  return updatedCategory.toObject();
 }
 
 async function deleteKeywordCategory(categoryName: string): Promise<boolean> {
@@ -50,13 +53,13 @@ async function deleteKeywordCategory(categoryName: string): Promise<boolean> {
   return true;
 }
 
-async function getKeywordCategory(categoryName: string): Promise<IKeywordCategory> {
+async function getKeywordCategory(categoryName: string): Promise<IKeywordCategoryDocument> {
   try {
     const keywordCategory = await KeywordCategoryModel.findOne({
       name: categoryName,
       isDeleted: false,
-    }).lean();
-    return keywordCategory;
+    });
+    return keywordCategory.toObject();
   } catch (err) {
     logger.info(`Failed to get a KeywordCategory Info By id (${categoryName})`);
   }

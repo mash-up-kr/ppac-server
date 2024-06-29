@@ -11,13 +11,13 @@ import { getKeywordCategory } from '../service/keywordCategory.service';
 import { IKeyword } from 'src/model/keyword';
 import { getUser } from '../service/user.service';
 import { IUserDocument } from '../model/user';
-import { IKeywordCategory } from '../model/keywordCategory';
+import { IKeywordCategoryDocument } from '../model/keywordCategory';
 
 export interface CustomRequest extends Request {
   requestedMeme?: IMemeDocument;
   requestedUser?: IUserDocument;
   requestedKeyword?: IKeyword;
-  requestedKeywordCategory?: IKeywordCategory;
+  requestedKeywordCategory?: IKeywordCategoryDocument;
 }
 
 export const getRequestedMemeInfo = async (
@@ -119,7 +119,7 @@ export const getRequestedKeywordCategoryInfo = async (
   if (_.isNull(categoryName)) {
     return next(new CustomError(`'categoryId' should be provided`, HttpCode.BAD_REQUEST));
   }
-  const category = await getKeywordCategory(categoryName);
+  const category: IKeywordCategoryDocument = await getKeywordCategory(categoryName);
   if (_.isNull(category)) {
     return next(
       new CustomError(`KeywordCategory(${categoryName}) does not exist`, HttpCode.NOT_FOUND),

@@ -1,4 +1,4 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Schema, Types } from 'mongoose';
 export interface IKeywordCategoryCreatePayload {
   name: string;
   isRecommend: boolean;
@@ -10,9 +10,16 @@ export interface IKeywordCategoryUpdatePayload {
 }
 
 export interface IKeywordCategory {
-  _id: string;
   name: string;
   isRecommend: boolean;
+}
+
+export interface IKeywordCategoryDocument extends Document {
+  _id: Types.ObjectId;
+  name: string;
+  isRecommend: boolean;
+  createdAt: Date;
+  updatedAt: Date;
   isDeleted: boolean;
 }
 
@@ -29,7 +36,7 @@ const KeywordCategorySchema: Schema = new Schema(
   },
 );
 
-export const KeywordCategoryModel = mongoose.model<IKeywordCategory>(
+export const KeywordCategoryModel = mongoose.model<IKeywordCategoryDocument>(
   'KeywordCategory',
   KeywordCategorySchema,
 );

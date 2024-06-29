@@ -6,7 +6,6 @@ import { HttpCode } from '../errors/HttpCode';
 import * as KeywordCategoryService from '../service/keywordCategory.service';
 import { logger } from '../util/logger';
 import { IKeywordCategoryUpdatePayload } from '../model/keywordCategory';
-import mongoose from 'mongoose';
 import { CustomRequest } from '../middleware/requestedInfo';
 
 const createKeywordCategory = async (req: Request, res: Response, next: NextFunction) => {
