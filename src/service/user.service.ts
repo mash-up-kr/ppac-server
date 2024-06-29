@@ -34,10 +34,10 @@ async function createUser(deviceId: string): Promise<IUserInfos> {
         });
 
       const [watch, reaction, share, save] = await Promise.all([
-        countInteractionType('watch'),
-        countInteractionType('reaction'),
-        countInteractionType('share'),
-        countInteractionType('save'),
+        countInteractionType(InteractionType.WATCH),
+        countInteractionType(InteractionType.REACTION),
+        countInteractionType(InteractionType.SHARE),
+        countInteractionType(InteractionType.SAVE),
       ]);
 
       return {
