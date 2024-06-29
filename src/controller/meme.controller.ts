@@ -171,7 +171,11 @@ const createMemeReaction = async (req: CustomRequest, res: Response, next: NextF
   const meme = req.requestedMeme;
 
   try {
-    const result = await MemeService.createMemeInteraction(user, meme, InteractionType.REACTION);
+    const result: boolean = await MemeService.createMemeInteraction(
+      user,
+      meme,
+      InteractionType.REACTION,
+    );
     return res.json(createSuccessResponse(HttpCode.CREATED, 'Create Meme Reaction', result));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
@@ -183,7 +187,11 @@ const createMemeSave = async (req: CustomRequest, res: Response, next: NextFunct
   const meme = req.requestedMeme;
 
   try {
-    const result = await MemeService.createMemeInteraction(user, meme, InteractionType.SAVE);
+    const result: boolean = await MemeService.createMemeInteraction(
+      user,
+      meme,
+      InteractionType.SAVE,
+    );
     return res.json(createSuccessResponse(HttpCode.CREATED, 'Crate Meme Save', result));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
