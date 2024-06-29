@@ -1,11 +1,13 @@
 import _ from 'lodash';
 import { Types } from 'mongoose';
+import { IKeywordDocument } from '../model/keyword';
 
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
 import { IMemeCreatePayload, IMemeDocument, MemeModel, IMemeWithKeywords } from '../model/meme';
+import { InteractionType, MemeInteractionModel } from '../model/memeInteraction';
+import { IUserDocument } from '../model/user';
 import { logger } from '../util/logger';
-import { IKeywordDocument } from 'src/model/keyword';
 
 async function getMeme(memeId: string): Promise<IMemeDocument | null> {
   try {
@@ -172,11 +174,90 @@ async function searchMemeByKeyword(keyword: IKeywordDocument): Promise<IMemeDocu
   }
 }
 
+async function createMemeInteraction(
+  user: IUserDocument,
+  meme: IMemeDocument,
+  interactionType: InteractionType,
+): Promise<boolean> {
+  try {
+    const memeInteraction = await MemeInteractionModel.findOne({
+      memeId: meme._id,
+      deviceId: user.deviceId,
+      interactionType,
+      isDeleted: false,
+    });
+
+    // 밈당 interaction은 1회
+    if (!_.isNull(memeInteraction)) {
+      logger.info(
+        `Already ${interactionType} meme - deviceId(${user.deviceId}), memeId(${meme._id}`,
+      );
+    } else {
+      const newMemeInteraction = await MemeInteractionModel.create({
+        memeId: meme._id,
+        deviceId: user.deviceId,
+        interactionType,
+      });
+      await newMemeInteraction.save();
+    }
+
+    // 'reaction'인 경우에만 Meme의 reaction 수를 업데이트한다.
+    if (interactionType === InteractionType.REACTION) {
+      await MemeModel.findOneAndUpdate(
+        { memeId: meme._id },
+        { $inc: { reaction: 1 } },
+        {
+          projection: { _id: 0, createdAt: 0, updatedAt: 0 },
+          returnDocument: 'after',
+        },
+      ).lean();
+    }
+
+    return true;
+  } catch (err) {
+    logger.error(`Failed to create memeInteraction`, err.message);
+    throw new CustomError(
+      `Failed to create memeInteraction(${err.message})`,
+      HttpCode.INTERNAL_SERVER_ERROR,
+    );
+  }
+}
+
+async function deleteMemeSave(user: IUserDocument, meme: IMemeDocument): Promise<boolean> {
+  try {
+    const meemSaveInteraction = await MemeInteractionModel.findOne({
+      memeId: meme._id,
+      deviceId: user.deviceId,
+      interactionType: InteractionType.SAVE,
+      isDeleted: false,
+    });
+
+    if (_.isNull(meemSaveInteraction)) {
+      logger.info(`Already delete memeSave - deviceId(${user.deviceId}), memeId(${meme._id}`);
+      return false;
+    }
+
+    await MemeInteractionModel.findOneAndUpdate(
+      { deviceId: user.deviceId, memeId: meme._id, interactionType: InteractionType.SAVE },
+      {
+        isDeleted: true,
+      },
+    ).lean();
+
+    return true;
+  } catch (err) {
+    logger.error(`Failed delete memeSave`, err.message);
+    throw new CustomError(`Failed delete memeSave(${err.message})`, HttpCode.INTERNAL_SERVER_ERROR);
+  }
+}
+
 export {
   getMeme,
   createMeme,
+  createMemeInteraction,
   updateMeme,
   deleteMeme,
+  deleteMemeSave,
   getTodayMemeList,
   getAllMemeList,
   deleteKeywordOfMeme,
