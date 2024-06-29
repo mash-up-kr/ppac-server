@@ -180,5 +180,6 @@ export {
   getTodayMemeList,
   getAllMemeList,
   deleteKeywordOfMeme,
+  getMemeWithKeywords,
   searchMemeByKeyword,
 };
