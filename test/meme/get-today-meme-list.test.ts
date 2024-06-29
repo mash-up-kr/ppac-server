@@ -27,6 +27,8 @@ describe("[GET] '/api/meme/todayMeme' ", () => {
 
     const response = await request(app).get(`/api/meme/todayMeme?size=${customizedTodayMemeCount}`);
 
+    console.log(response.body.data);
+
     expect(response.statusCode).toBe(200);
     expect(response.body.data.length).toBe(customizedTodayMemeCount);
   });

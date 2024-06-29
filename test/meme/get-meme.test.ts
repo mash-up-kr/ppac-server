@@ -22,15 +22,16 @@ describe("[GET] '/api/meme/:memeId' ", () => {
 
   it('should get a meme', async () => {
     const response = await request(app).get(`/api/meme/${testMemeId}`);
-    expect(response.body._id).toBe(testMemeId);
+    expect(response.body.data._id).toBe(testMemeId);
 
     const keywordIdsMockDataString = keywordIdsMockData.map((k) => k.toString());
-    expect(response.body.keywordIds).toStrictEqual(keywordIdsMockDataString);
-    expect(response.body.isTodayMeme).toBeFalsy();
+    expect(response.body.data.keywordIds).toStrictEqual(keywordIdsMockDataString);
+    expect(response.body.data.isTodayMeme).toBeFalsy();
   });
 
   it('should not get a meme with nonexisting id', async () => {
     const response = await request(app).get(`/api/meme/nonexistingId`);
+    console.log(response.statusCode);
     expect(response.statusCode).toBe(400);
   });
 });
