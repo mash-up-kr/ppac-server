@@ -104,6 +104,7 @@ async function searchMemeByKeyword(keyword: IKeywordDocument): Promise<IMemeDocu
       { keywordIds: keyword._id },
       { createdAt: 0, updatedAt: 0 },
     )
+      .sort({ reaction: -1 })
       .populate('keywordIds', 'name')
       .lean();
 
