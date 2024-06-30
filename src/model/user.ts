@@ -1,22 +1,25 @@
 import mongoose, { Schema, Types } from 'mongoose';
 
-export interface IUserDocument extends Document {
-  deviceId: string;
-  lastSeenMeme: Types.ObjectId[];
-  createdAt: Date;
-  updatedAt: Date;
-  isDeleted: boolean;
-}
-
 export interface IUser {
   deviceId: string;
   lastSeenMeme: Types.ObjectId[];
 }
 
 export interface IUserInfos extends IUser {
-  memeShareCount: number;
-  memeReactionCount: number;
-  memeSaveCount: number;
+  watch: number;
+  share: number;
+  reaction: number;
+  save: number;
+  level: number;
+}
+
+export interface IUserDocument extends Document {
+  _id: Types.ObjectId;
+  deviceId: string;
+  lastSeenMeme: Types.ObjectId[];
+  createdAt: Date;
+  updatedAt: Date;
+  isDeleted: boolean;
 }
 
 const UserSchema: Schema = new Schema(
