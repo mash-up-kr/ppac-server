@@ -40,6 +40,18 @@ const getTopKeywords = async (req: Request, res: Response, next: NextFunction) =
   const limit = 6;
   try {
     const topKeywords = await KeywordService.getTopKeywords(limit);
+    // 키워드에 해당하는 밈 이미지 가져오기
+    const promises = topKeywords.map(async (keyword) => {
+      try {
+        const topReactionImage = await MemeService.getTopReactionImage(keyword);
+        keyword["topReactionImage"] = topReactionImage;
+      } catch (error) {
+        console.error(`Error fetching reaction image for keyword "${keyword}":`, error);
+      }
+    });
+
+    await Promise.all(promises);
+
     logger.info(`Get top ${limit} keywords: ${JSON.stringify(topKeywords)}`);
     return res.json(createSuccessResponse(HttpCode.OK, 'Get Top Keywords', topKeywords));
   } catch (err) {

@@ -11,6 +11,7 @@ export interface IUserInfos extends IUser {
   reaction: number;
   save: number;
   level: number;
+  memeRecommendWatchCount: number;
 }
 
 export interface IUserDocument extends Document {

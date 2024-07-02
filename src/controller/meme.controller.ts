@@ -234,10 +234,13 @@ const createMemeWatch = async (req: CustomRequest, res: Response, next: NextFunc
 
       return res.json(createSuccessResponse(HttpCode.CREATED, 'Crate Meme Watch', result));
     } else if (type == MemeWatchType.RECOMMEND) {
-      const memeRecommendWatch = await UserService.createMemeRecommendWatch(user, meme);
+      const [recommendMemeWatchCount, _]: [number, any] = await Promise.all([
+        UserService.createMemeRecommendWatch(user, meme),
+        UserService.updateLastSeenMeme(user, meme),
+      ]);
 
       return res.json(
-        createSuccessResponse(HttpCode.CREATED, `${type} Meme Watch`, memeRecommendWatch),
+        createSuccessResponse(HttpCode.CREATED, `${type} Meme Watch`, recommendMemeWatchCount),
       );
     } else {
       return next(new CustomError(`Invalid 'type' parameter.`, HttpCode.BAD_REQUEST));
