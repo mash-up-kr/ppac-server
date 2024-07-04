@@ -10,6 +10,10 @@ export interface IKeywordUpdatePayload {
   category?: string;
 }
 
+export interface IKeywordWithImage extends IKeyword {
+  topReactionImage: string;
+}
+
 export interface IKeyword {
   name: string;
   category: string;

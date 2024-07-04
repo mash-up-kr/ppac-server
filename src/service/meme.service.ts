@@ -250,6 +250,18 @@ async function deleteMemeSave(user: IUserDocument, meme: IMemeDocument): Promise
     throw new CustomError(`Failed delete memeSave(${err.message})`, HttpCode.INTERNAL_SERVER_ERROR);
   }
 }
+async function getTopReactionImage(keyword: IKeywordDocument): Promise<string> {
+  try {
+    const topReactionMeme = await MemeModel.findOne({ keywordIds: keyword._id }).sort({ reaction: -1 });
+
+    logger.info(`Get top reaction meme - keyword(${keyword.name}), meme(${topReactionMeme._id})`);
+    return topReactionMeme.image;
+  }catch (err) {
+    logger.error(`Failed get top reaction meme`, err.message);
+    throw new CustomError(`Failed get top reaction meme(${err.message})`, HttpCode.INTERNAL_SERVER_ERROR);
+  }
+}
+
 
 export {
   getMeme,
@@ -263,4 +275,6 @@ export {
   deleteKeywordOfMeme,
   getMemeWithKeywords,
   searchMemeByKeyword,
+  getTopReactionImage,
 };
+

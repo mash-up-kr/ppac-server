@@ -11,7 +11,7 @@ import {
   IMemeRecommendWatchCreatePayload,
 } from '../model/memeRecommendWatch';
 import { logger } from '../util/logger';
-import { startOfWeek, format } from 'date-fns';
+import { startOfWeek } from 'date-fns';
 
 async function getUser(deviceId: string): Promise<IUserDocument | null> {
   try {
@@ -47,12 +47,20 @@ async function createUser(deviceId: string): Promise<IUserInfos> {
         countInteractionType(InteractionType.SAVE),
       ]);
 
+      const todayWeekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
+      const memeRecommendWatchCount = await MemeRecommendWatchModel.countDocuments({
+        startDate: todayWeekStart,
+        deviceId: foundUser.deviceId,
+        isDeleted: false,
+      });
+
       return {
         ...foundUser.toObject(),
         watch,
         reaction,
         save,
         share,
+        memeRecommendWatchCount: memeRecommendWatchCount,
         level: 1,
       };
     }
@@ -153,13 +161,11 @@ async function getSavedMeme(user: IUserDocument): Promise<IMemeDocument[]> {
   }
 }
 
-async function createMemeRecommendWatch(
-  user: IUserDocument,
-  meme: IMemeDocument,
-): Promise<boolean> {
+async function createMemeRecommendWatch(user: IUserDocument, meme: IMemeDocument): Promise<number> {
   try {
     const todayWeekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
     const memeRecommendWatch = await MemeRecommendWatchModel.findOne({
+      memeId: meme._id,
       startDate: todayWeekStart,
       deviceId: user.deviceId,
       isDeleted: false,
@@ -176,7 +182,7 @@ async function createMemeRecommendWatch(
         { _id: memeRecommendWatch._id },
         { $set: updatePayload },
       );
-      return true;
+      return updatePayload.memeIds.length;
     }
 
     const createPayload: IMemeRecommendWatchCreatePayload = {
@@ -187,7 +193,7 @@ async function createMemeRecommendWatch(
 
     await MemeRecommendWatchModel.create(createPayload);
 
-    return true;
+    return 1;
   } catch (err) {
     logger.error(`Failed create memeRecommendWatch`, err.message);
     throw new CustomError(

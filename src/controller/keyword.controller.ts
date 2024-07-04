@@ -4,7 +4,7 @@ import _ from 'lodash';
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
 import { CustomRequest } from '../middleware/requestedInfo';
-import { IKeywordUpdatePayload } from '../model/keyword';
+import { IKeywordDocument, IKeywordUpdatePayload, IKeywordWithImage } from '../model/keyword';
 import * as KeywordService from '../service/keyword.service';
 import * as MemeService from '../service/meme.service';
 import { logger } from '../util/logger';
@@ -39,9 +39,22 @@ const deleteKeyword = async (req: CustomRequest, res: Response, next: NextFuncti
 const getTopKeywords = async (req: Request, res: Response, next: NextFunction) => {
   const limit = 6;
   try {
-    const topKeywords = await KeywordService.getTopKeywords(limit);
-    logger.info(`Get top ${limit} keywords: ${JSON.stringify(topKeywords)}`);
-    return res.json(createSuccessResponse(HttpCode.OK, 'Get Top Keywords', topKeywords));
+    const topKeywords: IKeywordDocument[] = await KeywordService.getTopKeywords(limit);
+    // 키워드에 해당하는 밈 이미지 가져오기
+    const promises: Promise<IKeywordWithImage>[] = topKeywords.map(async (keyword: IKeywordDocument) => {
+      try {
+        const topReactionImage: string = await MemeService.getTopReactionImage(keyword);
+        return { ...keyword, topReactionImage } as IKeywordWithImage;
+      } catch (error) {
+        logger.error(`Error retrieving top reaction image for keyword: ${keyword}`, error);
+        throw new CustomError(`Failed to get top reaction image`, HttpCode.INTERNAL_SERVER_ERROR);
+      }
+    });
+
+    const keywordWithImages: IKeywordWithImage[] = await Promise.all(promises);
+
+    logger.info(`Get top ${limit} keywords: ${JSON.stringify(keywordWithImages)}`);
+    return res.json(createSuccessResponse(HttpCode.OK, 'Get Top Keywords', keywordWithImages));
   } catch (err) {
     return next(new CustomError(err.message, err.status || HttpCode.INTERNAL_SERVER_ERROR));
   }
