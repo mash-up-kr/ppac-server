@@ -48,12 +48,11 @@ async function createUser(deviceId: string): Promise<IUserInfos> {
       ]);
 
       const todayWeekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
-      const memeRecommendWatctCount = await MemeRecommendWatchModel.countDocuments({
+      const memeRecommendWatchCount = await MemeRecommendWatchModel.countDocuments({
         startDate: todayWeekStart,
         deviceId: foundUser.deviceId,
         isDeleted: false,
       });
-      
 
       return {
         ...foundUser.toObject(),
@@ -61,7 +60,7 @@ async function createUser(deviceId: string): Promise<IUserInfos> {
         reaction,
         save,
         share,
-        memeRecommendWatchCount: memeRecommendWatctCount,
+        memeRecommendWatchCount: memeRecommendWatchCount,
         level: 1,
       };
     }
@@ -162,10 +161,7 @@ async function getSavedMeme(user: IUserDocument): Promise<IMemeDocument[]> {
   }
 }
 
-async function createMemeRecommendWatch(
-  user: IUserDocument,
-  meme: IMemeDocument,
-): Promise<number> {
+async function createMemeRecommendWatch(user: IUserDocument, meme: IMemeDocument): Promise<number> {
   try {
     const todayWeekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
     const memeRecommendWatch = await MemeRecommendWatchModel.findOne({
