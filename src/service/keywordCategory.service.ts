@@ -56,16 +56,17 @@ async function deleteKeywordCategory(categoryName: string): Promise<boolean> {
   return true;
 }
 
-async function getKeywordCategory(categoryName: string): Promise<IKeywordCategoryDocument> {
-  try {
-    const keywordCategory = await KeywordCategoryModel.findOne({
-      name: categoryName,
-      isDeleted: false,
-    });
-    return keywordCategory.toObject();
-  } catch (err) {
-    logger.info(`Failed to get a KeywordCategory Info By id (${categoryName})`);
+async function getKeywordCategory(categoryName: string): Promise<IKeywordCategoryDocument | null> {
+  const keywordCategory = await KeywordCategoryModel.findOne({
+    name: categoryName,
+    isDeleted: false,
+  });
+
+  if (!keywordCategory) {
+    throw new CustomError(`Category with Name ${categoryName} not found`, HttpCode.NOT_FOUND);
   }
+
+  return keywordCategory.toObject();
 }
 
 export { createKeywordCategory, updateKeywordCategory, deleteKeywordCategory, getKeywordCategory };
