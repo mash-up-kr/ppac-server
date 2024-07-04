@@ -117,14 +117,15 @@ export const getRequestedKeywordCategoryInfo = async (
   const categoryName = req.params?.categoryName || req.body?.categoryName || null;
 
   if (_.isNull(categoryName)) {
-    return next(new CustomError(`'categoryId' should be provided`, HttpCode.BAD_REQUEST));
+    return next(new CustomError(`'categoryName' should be provided`, HttpCode.BAD_REQUEST));
   }
-  const category: IKeywordCategoryDocument = await getKeywordCategory(categoryName);
-  if (_.isNull(category)) {
-    return next(
-      new CustomError(`KeywordCategory(${categoryName}) does not exist`, HttpCode.NOT_FOUND),
-    );
+
+  try {
+    const keywordCategory: IKeywordCategoryDocument = await getKeywordCategory(categoryName);
+
+    req.requestedKeywordCategory = keywordCategory;
+    next();
+  } catch (err) {
+    return next(new CustomError(err.message, err.status || HttpCode.INTERNAL_SERVER_ERROR));
   }
-  req.requestedKeywordCategory = category;
-  next();
 };
