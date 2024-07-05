@@ -345,7 +345,7 @@ router.get('/top', getTopKeywords);
  *                   example: 200
  *                 message:
  *                   type: string
- *                   example: Get Top Keywords
+ *                   example: Increase search Count for keyword
  *                 data:
  *                   type: array
  *                   items:
@@ -359,7 +359,7 @@ router.get('/top', getTopKeywords);
  *                         example: "cute"
  *                       searchCount:
  *                         type: integer
- *                         example: 10
+ *                         example: 11
  *                       topReactionImage:
  *                         type: string
  *                         example: "https://example.com/top-reaction-image.jpg"
@@ -427,7 +427,7 @@ router.patch('/count', getKeywordInfoByName, increaseSearchCount);
  *                   example: 200
  *                 message:
  *                   type: string
- *                   example: Get recommended keywords by category
+ *                   example: Get Recommended Keywords
  *                 data:
  *                   type: object
  *                   properties:
