@@ -41,15 +41,17 @@ const getTopKeywords = async (req: Request, res: Response, next: NextFunction) =
   try {
     const topKeywords: IKeywordDocument[] = await KeywordService.getTopKeywords(limit);
     // 키워드에 해당하는 밈 이미지 가져오기
-    const promises: Promise<IKeywordWithImage>[] = topKeywords.map(async (keyword: IKeywordDocument) => {
-      try {
-        const topReactionImage: string = await MemeService.getTopReactionImage(keyword);
-        return { ...keyword, topReactionImage } as IKeywordWithImage;
-      } catch (error) {
-        logger.error(`Error retrieving top reaction image for keyword: ${keyword}`, error);
-        throw new CustomError(`Failed to get top reaction image`, HttpCode.INTERNAL_SERVER_ERROR);
-      }
-    });
+    const promises: Promise<IKeywordWithImage>[] = topKeywords.map(
+      async (keyword: IKeywordDocument) => {
+        try {
+          const topReactionImage: string = await MemeService.getTopReactionImage(keyword);
+          return { ...keyword, topReactionImage } as IKeywordWithImage;
+        } catch (error) {
+          logger.error(`Error retrieving top reaction image for keyword: ${keyword}`, error);
+          throw new CustomError(`Failed to get top reaction image`, HttpCode.INTERNAL_SERVER_ERROR);
+        }
+      },
+    );
 
     const keywordWithImages: IKeywordWithImage[] = await Promise.all(promises);
 
@@ -76,7 +78,7 @@ const increaseSearchCount = async (req: CustomRequest, res: Response, next: Next
   const keyword = req.requestedKeyword;
   try {
     const updatedKeyword = await KeywordService.increaseSearchCount(keyword._id);
-    logger.info(`increaseed searchCount for keyword: ${JSON.stringify(updatedKeyword)}`);
+    logger.info(`increased searchCount for keyword: ${JSON.stringify(updatedKeyword)}`);
     return res.json(
       createSuccessResponse(HttpCode.OK, 'Increase search Count for keyword', updatedKeyword),
     );
