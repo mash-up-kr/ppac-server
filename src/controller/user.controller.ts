@@ -15,7 +15,8 @@ const createUser = async (req: Request, res: Response, next: NextFunction) => {
 
   try {
     const user = await UserService.createUser(req.body.deviceId);
-    return res.json(createSuccessResponse(HttpCode.CREATED, 'Create User', user));
+    const level = getLevel(user.watch, user.reaction, user.share);
+    return res.json(createSuccessResponse(HttpCode.CREATED, 'Create User', { ...user, level }));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
@@ -38,7 +39,7 @@ const getUser = async (req: CustomRequest, res: Response, next: NextFunction) =>
       countInteractionType(InteractionType.SAVE),
     ]);
 
-    const level = getLevel(watch, reaction, share, save);
+    const level = getLevel(watch, reaction, share);
 
     return res.json(
       createSuccessResponse(HttpCode.OK, 'Get User', {
@@ -79,7 +80,7 @@ const getSavedMeme = async (req: CustomRequest, res: Response, next: NextFunctio
 
 export { getUser, createUser, getLastSeenMeme, getSavedMeme };
 
-function getLevel(watch: number, reaction: number, share: number, save: number): number {
+function getLevel(watch: number, reaction: number, share: number): number {
   let level = 1;
   if (watch >= 20 && reaction >= 20 && share >= 20) {
     level = 4;
