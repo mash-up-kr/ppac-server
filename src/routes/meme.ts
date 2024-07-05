@@ -23,7 +23,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/meme:
+ * /api/meme/list:
  *   get:
  *     tags:
  *       - Meme

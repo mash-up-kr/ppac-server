@@ -27,10 +27,75 @@ const router = express.Router();
  *             properties:
  *               name: { type: string }
  *     responses:
- *       201:
- *         description: 키워드 카테고리를 만들어진다.
- *       400:
- *         description: 키워드 카테고리를 만들어진다.
+ *       '200':
+ *         description: 키워드 카테고리 생성
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 code:
+ *                   type: integer
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: Created KeywordCategory
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                       example: "5f5f5f5f5f5f5f5f5f5f5f5f"
+ *                     name:
+ *                       type: string
+ *                       example: "meme"
+ *                     isRecommend:
+ *                       type: boolean
+ *                       example: true
+ *                     createdAt:
+ *                       type: string
+ *                       example: "2020-09-09T08:48:31.000Z"
+ *                     updatedAt:
+ *                       type: string
+ *                       example: "2020-09-09T08:48:31.000Z"
+ *                     isDeleted:
+ *                       type: boolean
+ *                       example: false
+ *       '400':
+ *         description: Invalid request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: error
+ *                 code:
+ *                   type: integer
+ *                   example: 400
+ *                 message:
+ *                   type: string
+ *                   example: field should be provided
+ *       '500':
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: error
+ *                 code:
+ *                   type: integer
+ *                   example: 500
+ *                 message:
+ *                   type: string
+ *                   example: Internal server error
  */
 router.post('/', validateCategoryDuplication, createKeywordCategory);
 
@@ -41,18 +106,83 @@ router.post('/', validateCategoryDuplication, createKeywordCategory);
  *     tags: [KeywordCategory]
  *     summary: 키워드 카테고리
  *     description: 키워드 카테고리를 반환합니다
+ *     parameters:
+ *       - in: path
+ *         name: categoryName
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: 키워드 카테고리
  *     responses:
  *       200:
  *         description: 키워드 카테고리
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 code:
+ *                   type: integer
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: Found KeywordCategory
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                       example: "5f5f5f5f5f5f5f5f5f5f5f5f"
+ *                     name:
+ *                       type: string
+ *                       example: "meme"
+ *                     isRecommend:
+ *                       type: boolean
+ *                       example: false
+ *                     isDeleted:
+ *                       type: boolean
+ *                       example: false
+ *                     createdAt:
+ *                       type: string
+ *                       example: "2020-09-09T08:48:31.000Z"
+ *                     updatedAt:
+ *                       type: string
+ *                       example: "2020-09-09T08:48:31.000Z"
+ *       400:
+ *         description: Invalid request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: error
+ *                 code:
+ *                   type: integer
+ *                   example: 400
+ *                 message:
+ *                   type: string
+ *                   example: field should be provided
  *       500:
- *         description: 키워드 카테고리
- *   parameters:
- *     - in: path
- *       name: categoryName
- *       required: true
- *       schema:
- *         type: string
- *       description: 키워드 카테고리
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: error
+ *                 code:
+ *                   type: integer
+ *                   example: 500
+ *                 message:
+ *                   type: string
+ *                   example: Internal server error
  *   put:
  *     tags: [KeywordCategory]
  *     summary: 키워드 카테고리 수정
@@ -75,10 +205,73 @@ router.post('/', validateCategoryDuplication, createKeywordCategory);
  *     responses:
  *       200:
  *         description: 키워드 카테고리를 수정해야다.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 code:
+ *                   type: integer
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: Updated KeywordCategory
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                       example: "5f5f5f5f5f5f5f5f5f5f5f5f"
+ *                     name:
+ *                       type: string
+ *                       example: "meme"
+ *                     isRecommend:
+ *                       type: boolean
+ *                       example: false
+ *                     isDeleted:
+ *                       type: boolean
+ *                       example: false
+ *                     createdAt:
+ *                       type: string
+ *                       example: "2020-09-09T08:48:31.000Z"
+ *                     updatedAt:
+ *                       type: string
+ *                       example: "2020-09-09T08:48:31.000Z"
  *       400:
- *         description: 키워드 카테고리를 만들어진다.
- *       404:
- *         description: 키워드 카테고리를 만들어진다.
+ *         description: field should be provided or Cannot find KeywordCategory
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: error
+ *                 code:
+ *                   type: integer
+ *                   example: 400
+ *                 message:
+ *                   type: string
+ *                   example: field should be provided
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: error
+ *                 code:
+ *                   type: integer
+ *                   example: 500
+ *                 message:
+ *                   type: string
+ *                   example: Internal server error
  *   delete:
  *     tags: [KeywordCategory]
  *     summary: 키워드 카테고리 삭제
@@ -92,15 +285,56 @@ router.post('/', validateCategoryDuplication, createKeywordCategory);
  *         description: 키워드 카테고리
  *     responses:
  *       200:
- *         description: 키워드 카테고리를 삭제해야다.
+ *         description: 키워드 카테고리 삭제 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 code:
+ *                   type: integer
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: Deleted KeywordCategory
+ *                 data:
+ *                   type: boolean
+ *                   example: true
  *       400:
- *         description: 키워드 카테고리를 만들어진다.
- *       404:
- *         description: 키워드 카테고리를 만들어진다.
- *       501:
- *         description: 키워드 카테고리를 삭제해야다.
+ *         description: Cannot find KeywordCategory
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: error
+ *                 code:
+ *                   type: integer
+ *                   example: 400
+ *                 message:
+ *                   type: string
+ *                   example: Cannot find KeywordCategory
  *       500:
- *         description: 키워드 카테고리를 삭제해야다.
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: error
+ *                 code:
+ *                   type: integer
+ *                   example: 500
+ *                 message:
+ *                   type: string
+ *                   example: Internal server error
  */
 router.get('/:categoryName', getRequestedKeywordCategoryInfo, getKeywordCategory);
 router.put('/:categoryName', getRequestedKeywordCategoryInfo, updateKeywordCategory);
