@@ -14,8 +14,6 @@ import { loggerMiddleware } from '../util/logger';
 
 const router = express.Router();
 
-router.use(loggerMiddleware);
-
 /**
  * @swagger
  * /api/keyword:
