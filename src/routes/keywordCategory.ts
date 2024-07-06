@@ -16,8 +16,8 @@ const router = express.Router();
  * /api/keywordCategory:
  *   post:
  *     tags: [KeywordCategory]
- *     summary: 키워드 카테고리 생성
- *     description: 키워드 카테고리를 생성합니다
+ *     summary: 키워드 카테고리 생성 (백오피스)
+ *     description: 키워드 카테고리를 생성합니다 (백오피스)
  *     requestBody:
  *       required: true
  *       content:
@@ -25,7 +25,9 @@ const router = express.Router();
  *           schema:
  *             type: object
  *             properties:
- *               name: { type: string }
+ *               name:
+ *                type: string
+ *                example: 대학
  *     responses:
  *       '200':
  *         description: 키워드 카테고리 생성
@@ -48,10 +50,10 @@ const router = express.Router();
  *                   properties:
  *                     _id:
  *                       type: string
- *                       example: "5f5f5f5f5f5f5f5f5f5f5f5f"
+ *                       example: "66898279850f512db15ee832"
  *                     name:
  *                       type: string
- *                       example: "meme"
+ *                       example: "대학"
  *                     isRecommend:
  *                       type: boolean
  *                       example: true
@@ -107,14 +109,15 @@ router.post('/', validateCategoryDuplication, createKeywordCategory);
  * /api/keywordCategory/{categoryName}:
  *   get:
  *     tags: [KeywordCategory]
- *     summary: 키워드 카테고리
- *     description: 키워드 카테고리를 반환합니다
+ *     summary: 키워드 카테고리 조회 (백오피스)
+ *     description: 키워드 카테고리를 조회한다.
  *     parameters:
  *       - in: path
  *         name: categoryName
  *         required: true
  *         schema:
  *           type: string
+ *           example: 대학생
  *         description: 키워드 카테고리
  *     responses:
  *       200:
@@ -138,10 +141,10 @@ router.post('/', validateCategoryDuplication, createKeywordCategory);
  *                   properties:
  *                     _id:
  *                       type: string
- *                       example: "5f5f5f5f5f5f5f5f5f5f5f5f"
+ *                       example: "66898279850f512db15ee832"
  *                     name:
  *                       type: string
- *                       example: "meme"
+ *                       example: "대학생"
  *                     isRecommend:
  *                       type: boolean
  *                       example: false
@@ -191,8 +194,8 @@ router.post('/', validateCategoryDuplication, createKeywordCategory);
  *                   example: Internal server error
  *   put:
  *     tags: [KeywordCategory]
- *     summary: 키워드 카테고리 수정
- *     description: 키워드 카테고리를 수정합니다
+ *     summary: 키워드 카테고리 수정 (백오피스)
+ *     description: 키워드 카테고리를 수정한다. (백오피스)
  *     parameters:
  *       - in: path
  *         name: categoryName
@@ -210,7 +213,7 @@ router.post('/', validateCategoryDuplication, createKeywordCategory);
  *               name: { type: string }
  *     responses:
  *       200:
- *         description: 키워드 카테고리를 수정해야다.
+ *         description: 키워드 카테고리 수정 성공
  *         content:
  *           application/json:
  *             schema:
@@ -230,7 +233,7 @@ router.post('/', validateCategoryDuplication, createKeywordCategory);
  *                   properties:
  *                     _id:
  *                       type: string
- *                       example: "5f5f5f5f5f5f5f5f5f5f5f5f"
+ *                       example: "66898279850f512db15ee832"
  *                     name:
  *                       type: string
  *                       example: "meme"
@@ -286,8 +289,8 @@ router.post('/', validateCategoryDuplication, createKeywordCategory);
  *                   example: null
  *   delete:
  *     tags: [KeywordCategory]
- *     summary: 키워드 카테고리 삭제
- *     description: 키워드 카테고리를 삭제합니다
+ *     summary: 키워드 카테고리 삭제 (백오피스)
+ *     description: 키워드 카테고리를 삭제합니다 (백오피스)
  *     parameters:
  *       - in: path
  *         name: categoryName
