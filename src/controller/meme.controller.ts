@@ -186,7 +186,18 @@ const searchMemeListByKeyword = async (req: CustomRequest, res: Response, next: 
 
   try {
     const memeList = await MemeService.searchMemeByKeyword(page, size, keyword);
-    return res.json(createSuccessResponse(HttpCode.OK, 'Search meme list by keyword', memeList));
+    const data = {
+      pagination: {
+        total: memeList.total,
+        page: memeList.page,
+        perPage: size,
+        currentPage: memeList.page,
+        totalPages: memeList.totalPages,
+      },
+      memeList: memeList.data,
+    };
+
+    return res.json(createSuccessResponse(HttpCode.OK, 'Search meme list by keyword', data));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
