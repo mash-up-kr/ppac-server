@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
 import _ from 'lodash';
-import { CustomRequest } from '../middleware/requestedInfo';
 
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
+import { CustomRequest } from '../middleware/requestedInfo';
 import { InteractionType, MemeInteractionModel } from '../model/memeInteraction';
 import * as UserService from '../service/user.service';
 import { createSuccessResponse } from '../util/response';

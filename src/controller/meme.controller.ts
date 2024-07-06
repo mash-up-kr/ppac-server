@@ -147,7 +147,10 @@ const getTodayMemeList = async (req: Request, res: Response, next: NextFunction)
 
   if (size > 5) {
     return next(
-      new CustomError(`Invalid 'size' parameter. Today Meme max size is 5.`, HttpCode.BAD_REQUEST),
+      new CustomError(
+        `Invalid 'size' parameter. Today Meme List max size is 5.`,
+        HttpCode.BAD_REQUEST,
+      ),
     );
   }
 
