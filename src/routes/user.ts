@@ -85,6 +85,9 @@ const router = express.Router();
  *                  message:
  *                    type: string
  *                    example: deviceId' field should be provided
+ *                 data:
+ *                   type: null
+ *                   example: null
  *        500:
  *          description: Internal server error
  *          content:
@@ -102,6 +105,9 @@ const router = express.Router();
  *                    type: string
  *                    example:
  *                      Internal server error
+ *                 data:
+ *                   type: null
+ *                   example: null
  */
 router.post('/', UserController.createUser); // user 생성
 
@@ -186,6 +192,9 @@ router.post('/', UserController.createUser); // user 생성
  *                 message:
  *                   type: string
  *                   example: deviceID should be provided
+ *                 data:
+ *                   type: null
+ *                   example: null
  */
 router.get('/:deviceId', getRequestedUserInfo, UserController.getUser); // user 조회
 
@@ -249,6 +258,9 @@ router.get('/:deviceId', getRequestedUserInfo, UserController.getUser); // user 
  *                 message:
  *                   type: string
  *                   example: deviceID should be provided
+ *                 data:
+ *                   type: null
+ *                   example: null
  *       500:
  *         description: Internal server error
  *         content:
@@ -266,7 +278,9 @@ router.get('/:deviceId', getRequestedUserInfo, UserController.getUser); // user 
  *                   type: string
  *                   example:
  *                     - Internal server error
- *
+ *                 data:
+ *                   type: null
+ *                   example: null
  */
 router.get('/:deviceId/save', getRequestedUserInfo, UserController.getSavedMeme); // user가 저장한 meme 조회
 
@@ -330,6 +344,9 @@ router.get('/:deviceId/save', getRequestedUserInfo, UserController.getSavedMeme)
  *                 message:
  *                   type: string
  *                   example: deviceID should be provided
+ *                 data:
+ *                   type: null
+ *                   example: null
  *       500:
  *         description: Internal server error
  *         content:
@@ -347,6 +364,9 @@ router.get('/:deviceId/save', getRequestedUserInfo, UserController.getSavedMeme)
  *                   type: string
  *                   example:
  *                     - Internal server error
+ *                 data:
+ *                   type: null
+ *                   example: null
  */
 router.get('/:deviceId/lastSeenMeme', getRequestedUserInfo, UserController.getLastSeenMeme);
 

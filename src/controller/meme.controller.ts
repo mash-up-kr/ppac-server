@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import _ from 'lodash';
-import mongoose from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
@@ -81,8 +81,13 @@ const createMeme = async (req: Request, res: Response, next: NextFunction) => {
     return next(new CustomError(`'keywordIds' field should be provided`, HttpCode.BAD_REQUEST));
   }
 
+  const createPayload: IMemeCreatePayload = {
+    ...req.body,
+    keywordIds: req.body.keywordIds.map((id: string) => new Types.ObjectId(id)),
+  };
+
   try {
-    const meme = await MemeService.createMeme(req.body as IMemeCreatePayload);
+    const meme = await MemeService.createMeme(createPayload);
     return res.json(createSuccessResponse(HttpCode.CREATED, 'Create Meme', meme));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
@@ -91,10 +96,14 @@ const createMeme = async (req: Request, res: Response, next: NextFunction) => {
 
 const updateMeme = async (req: CustomRequest, res: Response, next: NextFunction) => {
   const meme = req.requestedMeme;
-  const updateInfo: IMemeUpdatePayload = req.body;
+
+  const updatePayload: IMemeUpdatePayload = {
+    ...req.body,
+    keywordIds: req.body.keywordIds.map((id: string) => new Types.ObjectId(id)),
+  };
 
   try {
-    const updatedMeme = await MemeService.updateMeme(meme._id, updateInfo);
+    const updatedMeme = await MemeService.updateMeme(meme._id, updatePayload);
     return res.json(createSuccessResponse(HttpCode.OK, 'Updated Meme', updatedMeme));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
@@ -147,7 +156,10 @@ const getTodayMemeList = async (req: Request, res: Response, next: NextFunction)
 
   if (size > 5) {
     return next(
-      new CustomError(`Invalid 'size' parameter. Today Meme max size is 5.`, HttpCode.BAD_REQUEST),
+      new CustomError(
+        `Invalid 'size' parameter. Today Meme List max size is 5.`,
+        HttpCode.BAD_REQUEST,
+      ),
     );
   }
 

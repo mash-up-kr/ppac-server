@@ -10,18 +10,15 @@ import {
 } from '../controller/keyword.controller';
 import { validateCategory, validateKeywordDulication } from '../middleware/duplicateValidator';
 import { getKeywordInfoByName, getKeywordInfoById } from '../middleware/requestedInfo';
-import { loggerMiddleware } from '../util/logger';
 
 const router = express.Router();
-
-router.use(loggerMiddleware);
 
 /**
  * @swagger
  * /api/keyword:
  *   post:
  *     tags: [Keyword]
- *     summary: 키워드 생성
+ *     summary: 키워드 생성 (백오피스)
  *     description: 키워드를 생성한다.
  *     requestBody:
  *       required: true
@@ -33,7 +30,7 @@ router.use(loggerMiddleware);
  *               category:
  *                 type: string
  *                 example: "감정"
- *               keyword:
+ *               name:
  *                 type: string
  *                 example: "웃긴"
  *     responses:
@@ -89,7 +86,7 @@ router.post('/', validateCategory, validateKeywordDulication, createKeyword);
  * /api/keyword/{keywordId}:
  *   put:
  *     tags: [Keyword]
- *     summary: 키워드 업데이트
+ *     summary: 키워드 업데이트 (백오피스)
  *     description: 키워드 정보를 업데이트한다.
  *     parameters:
  *       - in: path
@@ -179,18 +176,18 @@ router.put('/:keywordId', getKeywordInfoById, updateKeyword);
  * /api/keyword/{keywordId}:
  *   delete:
  *     tags: [Keyword]
- *     summary: 키워드 삭제
- *     description: 키워드를 삭제한다.
+ *     summary: 키워드 삭제 (백오피스)
+ *     description: 키워드를 삭제한다. (백오피스)
  *     parameters:
  *       - in: path
  *         name: keywordId
  *         required: true
- *         description: 키워드 id
+ *         description: 삭제할 키워드 id
  *         schema:
  *           type: string
  *     responses:
  *       200:
- *         description: Successfully deleted the keyword
+ *         description: 키워드 삭제 성공
  *         content:
  *           application/json:
  *             schema:
@@ -261,16 +258,28 @@ router.delete('/:keywordId', getKeywordInfoById, deleteKeyword);
  *                     properties:
  *                       _id:
  *                         type: string
- *                         example: "6096237971f57915779c1417"
- *                       keyword:
+ *                         example: "66880f7ee341b999bc14e896"
+ *                       name:
  *                         type: string
- *                         example: "cute"
+ *                         example: "행복"
+ *                       category:
+ *                         type: string
+ *                         example: "감정"
  *                       searchCount:
  *                         type: integer
- *                         example: 10
+ *                         example: 100
  *                       topReactionImage:
  *                         type: string
  *                         example: "https://example.com/top-reaction-image.jpg"
+ *                       isDeleted:
+ *                         type: boolean
+ *                         example: false
+ *                       createdAt:
+ *                         type: string
+ *                         example: "2024-07-05T15:21:34.012Z"
+ *                       updatedAt:
+ *                         type: string
+ *                         example: "2024-07-05T16:03:22.057Z"
  *       400:
  *         description: Invalid query parameter
  *         content:
@@ -328,7 +337,7 @@ router.get('/top', getTopKeywords);
  *             properties:
  *               name:
  *                 type: string
- *                 example: "cute"
+ *                 example: "슬픈"
  *     responses:
  *       200:
  *         description: Successfully updated keyword search count
@@ -353,16 +362,25 @@ router.get('/top', getTopKeywords);
  *                     properties:
  *                       _id:
  *                         type: string
- *                         example: "6096237971f57915779c1417"
- *                       keyword:
+ *                         example: "66880f7ee341b999bc14e896"
+ *                       name:
  *                         type: string
- *                         example: "cute"
+ *                         example: "긁"
+ *                       category:
+ *                         type: string
+ *                         example: "상황"
  *                       searchCount:
  *                         type: integer
- *                         example: 11
- *                       topReactionImage:
+ *                         example: 1
+ *                       isDeleted:
+ *                         type: boolean
+ *                         example: false
+ *                       createdAt:
  *                         type: string
- *                         example: "https://example.com/top-reaction-image.jpg"
+ *                         example: "2024-07-05T15:21:34.012Z"
+ *                       updatedAt:
+ *                         type: string
+ *                         example: "2024-07-05T16:03:22.057Z"
  *       400:
  *         description: 잘못된 요청
  *         content:
@@ -409,8 +427,8 @@ router.patch('/count', getKeywordInfoByName, increaseSearchCount);
  * /api/keyword/recommend:
  *   get:
  *     tags: [Keyword]
- *     summary: 추천 키워드 조회
- *     description: 추천 키워드를 조회합니다.
+ *     summary: 무슨 밈 찾아? 키워드 카테고리, 키워드 목록
+ *     description: 무슨 밈 찾아? 키워드 카테고리, 키워드 목록 출력
  *     responses:
  *       200:
  *         description: 추천 키워드 목록
@@ -431,11 +449,21 @@ router.patch('/count', getKeywordInfoByName, increaseSearchCount);
  *                 data:
  *                   type: object
  *                   properties:
- *                     categories:
+ *                     감정:
  *                       type: array
- *                       items:
- *                         type: string
- *                         example: "test1"
+ *                       example:
+ *                         - "행복"
+ *                         - "슬픈"
+ *                         - "분노"
+ *                         - "웃긴"
+ *                         - "피곤"
+ *                     상황:
+ *                       type: array
+ *                       example:
+ *                         - "회사"
+ *                         - "대학"
+ *                         - "공부"
+ *                         - "긁"
  *       500:
  *         description: Internal server error
  *         content:

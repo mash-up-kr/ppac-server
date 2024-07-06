@@ -252,7 +252,9 @@ async function deleteMemeSave(user: IUserDocument, meme: IMemeDocument): Promise
 }
 async function getTopReactionImage(keyword: IKeywordDocument): Promise<string> {
   try {
-    const topReactionMeme = await MemeModel.findOne({ keywordIds: keyword._id }).sort({
+    const topReactionMeme: IMemeDocument = await MemeModel.findOne({
+      keywordIds: { $in: [keyword._id] },
+    }).sort({
       reaction: -1,
     });
 
