@@ -10,8 +10,8 @@ const router = express.Router();
  *  /api/user:
  *    post:
  *      tags: [User]
- *      summary: user 생성
- *      description: user 생성
+ *      summary: 유저 생성
+ *      description: 유저를 생성한다.
  *      requestBody:
  *        required: true
  *        content:
@@ -19,9 +19,12 @@ const router = express.Router();
  *            schema:
  *              type: object
  *              properties:
- *                deviceId: { type: string }
+ *                deviceId:
+ *                  type: string
+ *                  example: abcdefgh
+ *                  description: 유저의 디바이스 아이디
  *      responses:
- *        200:
+ *        '200':
  *          description: user
  *          content:
  *            application/json:
@@ -43,11 +46,14 @@ const router = express.Router();
  *                      deviceId:
  *                        type: string
  *                        example: "deviceId"
+ *                        description: 유저의 deviceId
  *                      lastSeenMeme:
  *                        type: array
+ *                        description: 최근에 본 밈 id (최대 10개)
  *                        items:
  *                          type: string
  *                          example: "66805b1a72ef94c9c0ba134c"
+ *                        default: []
  *                      isDeleted:
  *                        type: boolean
  *                        example: false
@@ -70,7 +76,7 @@ const router = express.Router();
  *                        type: integer
  *                        example: 1
  *        400:
- *          description: deviceId' field should be provided
+ *          description: deviceId field should be provided
  *          content:
  *            application/json:
  *              schema:
@@ -84,10 +90,10 @@ const router = express.Router();
  *                    example: 400
  *                  message:
  *                    type: string
- *                    example: deviceId' field should be provided
- *                 data:
- *                   type: null
- *                   example: null
+ *                    example: deviceId field should be provided
+ *                  data:
+ *                    type: null
+ *                    example: null
  *        500:
  *          description: Internal server error
  *          content:
@@ -105,25 +111,25 @@ const router = express.Router();
  *                    type: string
  *                    example:
  *                      Internal server error
- *                 data:
- *                   type: null
- *                   example: null
+ *                  data:
+ *                    type: null
+ *                    example: null
  */
 router.post('/', UserController.createUser); // user 생성
 
 /**
  * @swagger
- * /api/user/{deviceId}:
+ * /api/user:
  *   get:
  *     tags: [User]
  *     summary: user
  *     description: user
  *     parameters:
- *     - in: path
- *       name: deviceId
- *       schema:
- *         type: string
- *       description: deviceId
+ *     - name: x-device-id
+ *       in: header
+ *       description: 유저의 고유한 deviceId
+ *       required: true
+ *       type: string
  *     responses:
  *       200:
  *         description: get user
@@ -152,9 +158,11 @@ router.post('/', UserController.createUser); // user 생성
  *                       example: "deviceId"
  *                     lastSeenMeme:
  *                       type: array
+ *                       description: 최근에 본 밈 id (최대 10개)
  *                       items:
  *                         type: string
  *                         example: "66805b1a72ef94c9c0ba134c"
+ *                       default: []
  *                     isDeleted:
  *                       type: boolean
  *                       example: false
@@ -177,7 +185,7 @@ router.post('/', UserController.createUser); // user 생성
  *                       type: integer
  *                       example: 1
  *       400:
- *         description: deviceID should be provided
+ *         description: deviceId should be provided
  *         content:
  *           application/json:
  *             schema:
@@ -191,12 +199,12 @@ router.post('/', UserController.createUser); // user 생성
  *                   example: 400
  *                 message:
  *                   type: string
- *                   example: deviceID should be provided
+ *                   example: deviceId should be provided
  *                 data:
  *                   type: null
  *                   example: null
  */
-router.get('/:deviceId', getRequestedUserInfo, UserController.getUser); // user 조회
+router.get('/', getRequestedUserInfo, UserController.getUser); // user 조회
 
 /**
  * @swagger
@@ -204,13 +212,13 @@ router.get('/:deviceId', getRequestedUserInfo, UserController.getUser); // user 
  *   get:
  *     tags: [User]
  *     summary: 사용자가 저장한 밈 정보 조회 (나의 파밈함)
- *     description: user
+ *     description: 사용자가 저장한 밈 목록 (나의 파밈함)
  *     parameters:
- *     - in: path
- *       name: deviceId
- *       schema:
- *         type: string
- *       description: deviceId
+ *     - name: x-device-id
+ *       in: header
+ *       description: 유저의 고유한 deviceId
+ *       required: true
+ *       type: string
  *     responses:
  *       200:
  *         description: updated user
@@ -243,7 +251,7 @@ router.get('/:deviceId', getRequestedUserInfo, UserController.getUser); // user 
  *                         type: boolean
  *                         example: true
  *       400:
- *         description: deviceID should be provided
+ *         description: deviceId should be provided
  *         content:
  *           application/json:
  *             schema:
@@ -257,7 +265,7 @@ router.get('/:deviceId', getRequestedUserInfo, UserController.getUser); // user 
  *                   example: 400
  *                 message:
  *                   type: string
- *                   example: deviceID should be provided
+ *                   example: deviceId should be provided
  *                 data:
  *                   type: null
  *                   example: null
@@ -290,13 +298,13 @@ router.get('/saved-memes', getRequestedUserInfo, UserController.getSavedMeme); /
  *   get:
  *     tags: [User]
  *     summary: 사용자가 최근에 본 밈 정보 조회 (최근 본 밈)
- *     description: user
+ *     description: 사용자가 최근에 본 밈 정보 조회 (최근 본 밈)
  *     parameters:
- *     - in: path
- *       name: deviceId
- *       schema:
- *         type: string
- *       description: deviceId
+ *     - name: x-device-id
+ *       in: header
+ *       description: 유저의 고유한 deviceId
+ *       required: true
+ *       type: string
  *     responses:
  *       200:
  *         description: updated user
@@ -329,7 +337,7 @@ router.get('/saved-memes', getRequestedUserInfo, UserController.getSavedMeme); /
  *                         type: boolean
  *                         example: true
  *       400:
- *         description: deviceID should be provided
+ *         description: deviceId should be provided
  *         content:
  *           application/json:
  *             schema:
@@ -343,7 +351,7 @@ router.get('/saved-memes', getRequestedUserInfo, UserController.getSavedMeme); /
  *                   example: 400
  *                 message:
  *                   type: string
- *                   example: deviceID should be provided
+ *                   example: deviceId should be provided
  *                 data:
  *                   type: null
  *                   example: null
