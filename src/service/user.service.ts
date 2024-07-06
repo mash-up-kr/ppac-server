@@ -126,13 +126,10 @@ async function updateLastSeenMeme(user: IUserDocument, meme: IMemeDocument): Pro
 async function getLastSeenMeme(user: IUserDocument): Promise<IMemeDocument[]> {
   try {
     const lastSeenMeme = user.lastSeenMeme;
-    const memeList = await MemeModel.find(
-      {
-        _id: { $in: lastSeenMeme },
-        isDeleted: false,
-      },
-      { createdAt: 0, updatedAt: 0, isDeleted: 0 },
-    ).lean();
+    const memeList = await MemeModel.find({
+      _id: { $in: lastSeenMeme },
+      isDeleted: false,
+    }).lean();
 
     return memeList;
   } catch (err) {
@@ -152,13 +149,10 @@ async function getSavedMeme(user: IUserDocument): Promise<IMemeDocument[]> {
       isDeleted: false,
     }).lean();
 
-    const memeList = await MemeModel.find(
-      {
-        _id: { $in: savedMeme.map((meme) => meme.memeId) },
-        isDeleted: false,
-      },
-      { createdAt: 0, updatedAt: 0, isDeleted: 0 },
-    ).lean();
+    const memeList = await MemeModel.find({
+      _id: { $in: savedMeme.map((meme) => meme.memeId) },
+      isDeleted: false,
+    }).lean();
 
     logger.info(
       `Get savedMeme - deviceId(${user.deviceId}), memeList(${JSON.stringify(memeList)})`,
