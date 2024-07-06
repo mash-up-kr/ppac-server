@@ -20,6 +20,8 @@
     "lodash": "^4.17.21",
     "pino": "^9.1.0",
     "pino-pretty": "^11.0.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "ts-node": "^10.9.2",
     "yamljs": "^0.3.0"
   },

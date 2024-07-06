@@ -78,7 +78,7 @@ const increaseSearchCount = async (req: CustomRequest, res: Response, next: Next
   const keyword = req.requestedKeyword;
   try {
     const updatedKeyword = await KeywordService.increaseSearchCount(keyword._id);
-    logger.info(`increaseed searchCount for keyword: ${JSON.stringify(updatedKeyword)}`);
+    logger.info(`increased searchCount for keyword: ${JSON.stringify(updatedKeyword)}`);
     return res.json(
       createSuccessResponse(HttpCode.OK, 'Increase search Count for keyword', updatedKeyword),
     );

@@ -15,8 +15,15 @@ import { startOfWeek } from 'date-fns';
 
 async function getUser(deviceId: string): Promise<IUserDocument | null> {
   try {
-    const user = await UserModel.findOne({ deviceId, isDeleted: false });
-    return user.toObject();
+    const user = await UserModel.findOne(
+      { deviceId, isDeleted: false },
+      {
+        _id: 0,
+        createdAt: 0,
+        updatedAt: 0,
+      },
+    );
+    return user?.toObject() || null;
   } catch (err) {
     logger.error(`Failed to getUser - deviceId${deviceId}`);
     throw new CustomError(
@@ -36,7 +43,7 @@ async function createUser(deviceId: string): Promise<IUserInfos> {
     if (foundUser) {
       const countInteractionType = (type: InteractionType) =>
         MemeInteractionModel.countDocuments({
-          deviceId: user.deviceId,
+          deviceId: foundUser.deviceId,
           interactionType: type,
         });
 
@@ -60,8 +67,7 @@ async function createUser(deviceId: string): Promise<IUserInfos> {
         reaction,
         save,
         share,
-        memeRecommendWatchCount: memeRecommendWatchCount,
-        level: 1,
+        memeRecommendWatchCount,
       };
     }
 
@@ -71,7 +77,7 @@ async function createUser(deviceId: string): Promise<IUserInfos> {
 
     await user.save();
     logger.info(`Created user - deviceId(${JSON.stringify(user.toObject())})`);
-    return { ...user.toObject(), watch: 0, share: 0, reaction: 0, save: 0, level: 1 };
+    return { ...user.toObject(), watch: 0, share: 0, reaction: 0, save: 0 };
   } catch (err) {
     logger.error(`Failed to create User`);
     throw new CustomError(`Failed to create a User`, HttpCode.INTERNAL_SERVER_ERROR);
@@ -120,10 +126,13 @@ async function updateLastSeenMeme(user: IUserDocument, meme: IMemeDocument): Pro
 async function getLastSeenMeme(user: IUserDocument): Promise<IMemeDocument[]> {
   try {
     const lastSeenMeme = user.lastSeenMeme;
-    const memeList = await MemeModel.find({
-      memeId: { $in: lastSeenMeme },
-      isDeleted: false,
-    }).lean();
+    const memeList = await MemeModel.find(
+      {
+        _id: { $in: lastSeenMeme },
+        isDeleted: false,
+      },
+      { createdAt: 0, updatedAt: 0, isDeleted: 0 },
+    ).lean();
 
     return memeList;
   } catch (err) {
