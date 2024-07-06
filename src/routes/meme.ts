@@ -7,11 +7,11 @@ import {
   createMeme,
   getTodayMemeList,
   getAllMemeList,
-  searchMemeByKeyword,
   createMemeShare,
   createMemeSave,
   createMemeReaction,
   createMemeWatch,
+  searchMemeListByKeyword,
 } from '../controller/meme.controller';
 import {
   getRequestedMemeInfo,
@@ -1214,16 +1214,28 @@ router.post('/:memeId/reaction', getRequestedUserInfo, getRequestedMemeInfo, cre
  * /api/meme/search/{name}:
  *   get:
  *     tags: [Meme]
- *     summary: 키워드에 해당하는 밈 조회
+ *     summary: 키워드가 포함된 밈 검색 (페이지네이션 적용)
  *     description: 키워드 클릭 시 해당 키워드를 포함한 밈을 조회하고 목록을 반환한다.
  *     parameters:
- *     - in: path
- *       name: name
- *       schema:
- *         type: string
- *         example: "행복"
- *       required: true
- *       description: 키워드명
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: number
+ *           example: 1
+ *           description: 현재 페이지 번호 (기본값 1)
+ *       - in: query
+ *         name: size
+ *         schema:
+ *           type: number
+ *           example: 10
+ *           description: 한 번에 조회할 밈 개수 (기본값 10)
+ *       - in: path
+ *         name: name
+ *         schema:
+ *           type: string
+ *           example: "행복"
+ *           required: true
+ *           description: 키워드명
  *     responses:
  *       200:
  *         description: 키워드를 포함한 밈 목록
@@ -1242,56 +1254,73 @@ router.post('/:memeId/reaction', getRequestedUserInfo, getRequestedMemeInfo, cre
  *                   type: string
  *                   example: Search meme by keyword
  *                 data:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       _id:
- *                         type: string
- *                         example: "6686b075aa47d3ef168cd07e"
- *                       title:
- *                         type: string
- *                         example: "완전 럭키비키자나~"
- *                       keywordIds:
- *                         type: array
- *                         items:
- *                           type: object
- *                           properties:
- *                             _id:
- *                               type: string
+ *                   type: object
+ *                   properties:
+ *                     pagination:
+ *                       type: object
+ *                       properties:
+ *                         total:
+ *                           type: integer
+ *                           example: 2
+ *                         page:
+ *                           type: integer
+ *                           example: 1
+ *                         perPage:
+ *                           type: integer
+ *                           example: 10
+ *                         currentPage:
+ *                           type: integer
+ *                           example: 1
+ *                         totalPages:
+ *                           type: integer
+ *                           example: 1
+ *                     memeList:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           _id:
+ *                             type: string
+ *                             example: "66805b1a72ef94c9c0ba134c"
+ *                           image:
+ *                             type: string
+ *                             example: "https://example.com/meme.jpg"
+ *                           isDeleted:
+ *                             type: boolean
+ *                             example: false
+ *                           isTodayMeme:
+ *                             type: boolean
+ *                             example: false
+ *                           keywordIds:
+ *                             type: array
+ *                             items:
+ *                               type: object
+ *                               properties:
+ *                                 _id:
+ *                                   type: string
+ *                                   example: "667fee7ac58681a42d57dc3b"
+ *                                 name:
+ *                                   type: string
+ *                                   example: "행복"
  *                               example:
- *                                - "667fee7ac58681a42d57dc3b"
- *                                - "667fee7ac58681a42d57dc3d"
- *                                - "667fee7ac58681a42d57dc3v"
- *                             name:
- *                               type: string
- *                               example:
- *                                - "행복"
- *                                - "장원영"
- *                                - "럭키비키"
- *                       image:
- *                         type: string
- *                         example: "https://example.com/meme.jpg"
- *                       reaction:
- *                         type: integer
- *                         example: 0
- *                       source:
- *                         type: string
- *                         example: "유투브"
- *                       isTodayMeme:
- *                         type: boolean
- *                         example: true
- *                       isDeleted:
- *                         type: boolean
- *                         example: false
- *                       createdAt:
- *                         type: string
- *                         format: date-time
- *                         example: "2024-06-29T19:05:55.638Z"
- *                       updatedAt:
- *                         type: string
- *                         format: date-time
- *                         example: "2024-06-29T19:05:55.638Z"
+ *                                - _id: "667fee7ac58681a42d57dc3b"
+ *                                  name: "행복"
+ *                                - _id: "667fee7ac58681a42d57dc3d"
+ *                                  name: "장원영"
+ *                           title:
+ *                             type: string
+ *                             example: "무한상사 정총무"
+ *                           source:
+ *                             type: string
+ *                             example: "무한도전 102화"
+ *                           reaction:
+ *                             type: integer
+ *                             example: 99
+ *                             description: 밈 리액션 수
+ *                           watch:
+ *                             type: integer
+ *                             example: 999
+ *                             description: 밈 조회수
  *       400:
  *         description: Invalid keyword name
  *         content:
@@ -1307,7 +1336,7 @@ router.post('/:memeId/reaction', getRequestedUserInfo, getRequestedMemeInfo, cre
  *                   example: 400
  *                 message:
  *                   type: string
- *                   example: Keyword with name 'invalid_keyword' does not exist
+ *                   example: Keyword with name '행복' does not exist
  *       500:
  *         description: Internal server error
  *         content:
@@ -1328,6 +1357,6 @@ router.post('/:memeId/reaction', getRequestedUserInfo, getRequestedMemeInfo, cre
  *                   type: null
  *                   example: null
  */
-router.get('/search/:name', getKeywordInfoByName, searchMemeByKeyword);
+router.get('/search/:name', getKeywordInfoByName, searchMemeListByKeyword); // 키워드에 해당하는 밈 검색하기
 
 export default router;

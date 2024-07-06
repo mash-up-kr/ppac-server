@@ -154,21 +154,41 @@ async function deleteKeywordOfMeme(deleteKeywordId: Types.ObjectId) {
   );
 }
 
-async function searchMemeByKeyword(keyword: IKeywordDocument): Promise<IMemeDocument[]> {
+async function searchMemeByKeyword(
+  page: number,
+  size: number,
+  keyword: IKeywordDocument,
+): Promise<{ total: number; page: number; totalPages: number; data: IMemeDocument[] }> {
   try {
+    const totalMemes = await MemeModel.countDocuments({
+      keywordIds: { $in: keyword._id },
+      isDeleted: false,
+    });
+
     const memeList = await MemeModel.find(
-      { keywordIds: keyword._id },
+      { keywordIds: { $in: keyword._id } },
       { createdAt: 0, updatedAt: 0 },
     )
+      .skip((page - 1) * size)
+      .limit(size)
       .sort({ reaction: -1 })
       .populate('keywordIds', 'name')
       .lean();
 
-    return memeList;
+    logger.info(
+      `Get all meme list with keyword(${keyword.name}) - page(${page}), size(${size}), total(${totalMemes})`,
+    );
+
+    return {
+      total: totalMemes,
+      page,
+      totalPages: Math.ceil(totalMemes / size),
+      data: memeList,
+    };
   } catch (err) {
-    logger.error(`Failed to search meme by keyword(${keyword})`, err.message);
+    logger.error(`Failed to search meme list with keyword(${keyword})`, err.message);
     throw new CustomError(
-      `Failed to search meme by keyword(${keyword})`,
+      `Failed to search meme list with keyword(${keyword})`,
       HttpCode.INTERNAL_SERVER_ERROR,
     );
   }
