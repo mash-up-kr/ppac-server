@@ -158,7 +158,7 @@ const router = express.Router();
  *                   type: null
  *                   example: null
  */
-router.get('/list', getAllMemeList); // meme 목록 전체 조회
+router.get('/list', getAllMemeList); // meme 목록 전체 조회 (페이지네이션)
 
 /**
  * @swagger
@@ -1352,6 +1352,6 @@ router.post('/:memeId/reaction', getRequestedUserInfo, getRequestedMemeInfo, cre
  *                   type: null
  *                   example: null
  */
-router.get('/search/:name', getKeywordInfoByName, searchMemeListByKeyword); // 키워드에 해당하는 밈 검색하기
+router.get('/search/:name', getKeywordInfoByName, searchMemeListByKeyword); // 키워드에 해당하는 밈 검색하기 (페이지네이션)
 
 export default router;

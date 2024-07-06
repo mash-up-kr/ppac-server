@@ -211,17 +211,29 @@ router.get('/', getRequestedUserInfo, UserController.getUser); // user 조회
  * /api/user/saved-memes:
  *   get:
  *     tags: [User]
- *     summary: 사용자가 저장한 밈 정보 조회 (나의 파밈함)
+ *     summary: 사용자가 저장한 밈 목록 조회 (나의 파밈함) - 페이지네이션
  *     description: 사용자가 저장한 밈 목록 (나의 파밈함)
  *     parameters:
- *     - name: x-device-id
- *       in: header
- *       description: 유저의 고유한 deviceId
- *       required: true
- *       type: string
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: number
+ *           example: 1
+ *           description: 현재 페이지 번호 (기본값 1)
+ *       - in: query
+ *         name: size
+ *         schema:
+ *           type: number
+ *           example: 10
+ *           description: 한 번에 조회할 밈 개수 (기본값 10)
+ *       - name: x-device-id
+ *         in: header
+ *         description: 유저의 고유한 deviceId
+ *         required: true
+ *         type: string
  *     responses:
  *       200:
- *         description: updated user
+ *         description: 사용자가 저장한 밈 목록 조회
  *         content:
  *           application/json:
  *             schema:
@@ -235,21 +247,67 @@ router.get('/', getRequestedUserInfo, UserController.getUser); // user 조회
  *                   example: 200
  *                 message:
  *                   type: string
- *                   example: Found User
+ *                   example: Get saved Meme List
  *                 data:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       _id:
- *                         type: string
- *                         example: "5f6f6b1d6ab9c8f7d9a4b5c6"
- *                       image:
- *                         type: string
- *                         example: "image5"
- *                       isTodayMeme:
- *                         type: boolean
- *                         example: true
+ *                   type: object
+ *                   properties:
+ *                     pagination:
+ *                       type: object
+ *                       properties:
+ *                         total:
+ *                           type: integer
+ *                           example: 2
+ *                         page:
+ *                           type: integer
+ *                           example: 1
+ *                         perPage:
+ *                           type: integer
+ *                           example: 10
+ *                         currentPage:
+ *                           type: integer
+ *                           example: 1
+ *                         totalPages:
+ *                           type: integer
+ *                           example: 1
+ *                     memeList:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           _id:
+ *                             type: string
+ *                             example: "66805b1a72ef94c9c0ba134c"
+ *                           image:
+ *                             type: string
+ *                             example: "https://example.com/meme.jpg"
+ *                           isDeleted:
+ *                             type: boolean
+ *                             example: false
+ *                           isTodayMeme:
+ *                             type: boolean
+ *                             example: false
+ *                           keywordIds:
+ *                             type: array
+ *                             items:
+ *                               example: "667fee7ac58681a42d57dc3b"
+ *                           title:
+ *                             type: string
+ *                             example: "무한상사 정총무"
+ *                           source:
+ *                             type: string
+ *                             example: "무한도전 102화"
+ *                           reaction:
+ *                             type: integer
+ *                             example: 99
+ *                             description: 밈 리액션 수
+ *                           createdAt:
+ *                             type: string
+ *                             format: date-time
+ *                             example: "2024-06-29T19:06:02.489Z"
+ *                           updatedAt:
+ *                             type: string
+ *                             format: date-time
+ *                             example: "2024-06-29T19:06:02.489Z"
  *       400:
  *         description: deviceId should be provided
  *         content:
@@ -290,7 +348,7 @@ router.get('/', getRequestedUserInfo, UserController.getUser); // user 조회
  *                   type: null
  *                   example: null
  */
-router.get('/saved-memes', getRequestedUserInfo, UserController.getSavedMeme); // user가 저장한 meme 조회 (10개 제한)
+router.get('/saved-memes', getRequestedUserInfo, UserController.getSavedMeme); // user가 저장한 meme 조회 (페이지네이션 적용)
 
 /**
  * @swagger
@@ -307,7 +365,7 @@ router.get('/saved-memes', getRequestedUserInfo, UserController.getSavedMeme); /
  *       type: string
  *     responses:
  *       200:
- *         description: updated user
+ *         description: 최근에 본 밈 목록
  *         content:
  *           application/json:
  *             schema:
@@ -321,7 +379,7 @@ router.get('/saved-memes', getRequestedUserInfo, UserController.getSavedMeme); /
  *                   example: 200
  *                 message:
  *                   type: string
- *                   example: get lastSeenMeme
+ *                   example: 최근에 본 밈 목록 조회
  *                 data:
  *                   type: array
  *                   items:
@@ -329,13 +387,38 @@ router.get('/saved-memes', getRequestedUserInfo, UserController.getSavedMeme); /
  *                     properties:
  *                       _id:
  *                         type: string
- *                         example: "5f6f6b1d6ab9c8f7d9a4b5c6"
+ *                         example: "66805b1a72ef94c9c0ba134c"
  *                       image:
  *                         type: string
- *                         example: "http://image5"
+ *                         example: "https://example.com/meme.jpg"
+ *                       isDeleted:
+ *                         type: boolean
+ *                         example: false
  *                       isTodayMeme:
  *                         type: boolean
- *                         example: true
+ *                         example: false
+ *                       keywordIds:
+ *                         type: array
+ *                         items:
+ *                           example: "667fee7ac58681a42d57dc3b"
+ *                       title:
+ *                         type: string
+ *                         example: "무한상사 정총무"
+ *                       source:
+ *                         type: string
+ *                         example: "무한도전 102화"
+ *                       reaction:
+ *                         type: integer
+ *                         example: 99
+ *                         description: 밈 리액션 수
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2024-06-29T19:06:02.489Z"
+ *                       updatedAt:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2024-06-29T19:06:02.489Z"
  *       400:
  *         description: deviceId should be provided
  *         content:
@@ -376,6 +459,6 @@ router.get('/saved-memes', getRequestedUserInfo, UserController.getSavedMeme); /
  *                   type: null
  *                   example: null
  */
-router.get('/recent-memes', getRequestedUserInfo, UserController.getLastSeenMeme); // user가 최근에 본 밈 정보 조회
+router.get('/recent-memes', getRequestedUserInfo, UserController.getLastSeenMeme); // user가 최근에 본 밈 정보 조회 (10개 제한)
 
 export default router;
