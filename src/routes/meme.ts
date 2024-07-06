@@ -130,6 +130,9 @@ const router = express.Router();
  *                 message:
  *                   type: string
  *                   example: Invalid 'page' parameter
+ *                 data:
+ *                   type: null
+ *                   example: null
  *       '500':
  *         description: Internal server error
  *         content:
@@ -146,6 +149,9 @@ const router = express.Router();
  *                 message:
  *                   type: string
  *                   example: Internal server error
+ *                 data:
+ *                   type: null
+ *                   example: null
  */
 router.get('/list', getAllMemeList); // meme 목록 전체 조회
 
@@ -239,6 +245,9 @@ router.get('/list', getAllMemeList); // meme 목록 전체 조회
  *                 message:
  *                   type: string
  *                   example: Invalid 'size' parameter. Today Meme max size is 5.
+ *                 data:
+ *                   type: null
+ *                   example: null
  *       500:
  *         description: Internal server error
  *         content:
@@ -255,6 +264,9 @@ router.get('/list', getAllMemeList); // meme 목록 전체 조회
  *                 message:
  *                   type: string
  *                   example: Internal server error
+ *                 data:
+ *                   type: null
+ *                   example: null
  */
 router.get('/todayMeme', getTodayMemeList); // 오늘의 추천 밈 (5개)
 
@@ -370,6 +382,9 @@ router.get('/todayMeme', getTodayMemeList); // 오늘의 추천 밈 (5개)
  *                 message:
  *                   type: string
  *                   example: title field should be provided
+ *                 data:
+ *                   type: null
+ *                   example: null
  *       500:
  *         description: Internal server error
  *         content:
@@ -386,6 +401,9 @@ router.get('/todayMeme', getTodayMemeList); // 오늘의 추천 밈 (5개)
  *                 message:
  *                   type: string
  *                   example: Internal server error
+ *                 data:
+ *                   type: null
+ *                   example: null
  */
 router.post('/', createMeme); // meme 생성
 
@@ -476,6 +494,9 @@ router.post('/', createMeme); // meme 생성
  *                 message:
  *                   type: string
  *                   example: 'memeId field should be provided'
+ *                 data:
+ *                   type: null
+ *                   example: null
  *       404:
  *         description: Meme not found
  *         content:
@@ -492,6 +513,9 @@ router.post('/', createMeme); // meme 생성
  *                 message:
  *                   type: string
  *                   example: 'Meme(memeId) not found.'
+ *                 data:
+ *                   type: null
+ *                   example: null
  *       500:
  *         description: Internal Server Error
  *         content:
@@ -508,6 +532,9 @@ router.post('/', createMeme); // meme 생성
  *                 message:
  *                   type: string
  *                   example: 'Internal Server Error'
+ *                 data:
+ *                   type: null
+ *                   example: null
  */
 router.get('/:memeId', getMemeWithKeywords); // meme 조회
 
@@ -630,6 +657,9 @@ router.get('/:memeId', getMemeWithKeywords); // meme 조회
  *                 message:
  *                   type: string
  *                   example: Invalid 'memeId' parameter
+ *                 data:
+ *                   type: null
+ *                   example: null
  *       404:
  *         description: Meme not found
  *         content:
@@ -646,6 +676,9 @@ router.get('/:memeId', getMemeWithKeywords); // meme 조회
  *                 message:
  *                   type: string
  *                   example: Meme (6686b064aa47d3ef168cd078) not found
+ *                 data:
+ *                   type: null
+ *                   example: null
  *       500:
  *         description: Internal server error
  *         content:
@@ -662,6 +695,9 @@ router.get('/:memeId', getMemeWithKeywords); // meme 조회
  *                 message:
  *                   type: string
  *                   example: Internal server error
+ *                 data:
+ *                   type: null
+ *                   example: null
  */
 router.patch('/:memeId', getRequestedMemeInfo, updateMeme); // meme 수정
 
@@ -730,6 +766,9 @@ router.patch('/:memeId', getRequestedMemeInfo, updateMeme); // meme 수정
  *                 message:
  *                   type: string
  *                   example: Meme(66805b1372ef94c9c0ba1349) does not exist
+ *                 data:
+ *                   type: null
+ *                   example: null
  *       500:
  *         description: Internal server error
  *         content:
@@ -746,6 +785,9 @@ router.patch('/:memeId', getRequestedMemeInfo, updateMeme); // meme 수정
  *                 message:
  *                   type: string
  *                   example: Internal server error
+ *                 data:
+ *                   type: null
+ *                   example: null
  */
 router.delete('/:memeId', getRequestedMemeInfo, deleteMeme); // meme 삭제
 
@@ -807,6 +849,9 @@ router.delete('/:memeId', getRequestedMemeInfo, deleteMeme); // meme 삭제
  *                 message:
  *                   type: string
  *                   example: 'deviceId should be provided'
+ *                 data:
+ *                   type: null
+ *                   example: null
  *       404:
  *         description: Meme or user not found
  *         content:
@@ -823,6 +868,9 @@ router.delete('/:memeId', getRequestedMemeInfo, deleteMeme); // meme 삭제
  *                 message:
  *                   type: string
  *                   example: Meme(66805b1372ef94c9c0ba1349) does not exist
+ *                 data:
+ *                   type: null
+ *                   example: null
  *       500:
  *         description: Internal server error
  *         content:
@@ -839,6 +887,9 @@ router.delete('/:memeId', getRequestedMemeInfo, deleteMeme); // meme 삭제
  *                 message:
  *                   type: string
  *                   example: Internal server error
+ *                 data:
+ *                   type: null
+ *                   example: null
  */
 router.post('/:memeId/save', getRequestedUserInfo, getRequestedMemeInfo, createMemeSave);
 
@@ -900,6 +951,9 @@ router.post('/:memeId/save', getRequestedUserInfo, getRequestedMemeInfo, createM
  *                 message:
  *                   type: string
  *                   example: 'deviceId should be provided'
+ *                 data:
+ *                   type: null
+ *                   example: null
  *       404:
  *         description: Meme or user not found
  *         content:
@@ -916,6 +970,9 @@ router.post('/:memeId/save', getRequestedUserInfo, getRequestedMemeInfo, createM
  *                 message:
  *                   type: string
  *                   example: Meme(66805b1372ef94c9c0ba1349) does not exist
+ *                 data:
+ *                   type: null
+ *                   example: null
  *       500:
  *         description: Internal server error
  *         content:
@@ -932,6 +989,9 @@ router.post('/:memeId/save', getRequestedUserInfo, getRequestedMemeInfo, createM
  *                 message:
  *                   type: string
  *                   example: Internal server error
+ *                 data:
+ *                   type: null
+ *                   example: null
  */
 router.post('/:memeId/share', getRequestedUserInfo, getRequestedMemeInfo, createMemeShare);
 
@@ -1005,6 +1065,9 @@ router.post('/:memeId/share', getRequestedUserInfo, getRequestedMemeInfo, create
  *                 message:
  *                   type: string
  *                   example: Invalid 'type' parameter.
+ *                 data:
+ *                   type: null
+ *                   example: null
  *       404:
  *         description: Meme or user not found
  *         content:
@@ -1021,6 +1084,9 @@ router.post('/:memeId/share', getRequestedUserInfo, getRequestedMemeInfo, create
  *                 message:
  *                   type: string
  *                   example: Meme(66805b1372ef94c9c0ba1349) does not exist
+ *                 data:
+ *                   type: null
+ *                   example: null
  *       500:
  *         description: Internal server error
  *         content:
@@ -1037,6 +1103,9 @@ router.post('/:memeId/share', getRequestedUserInfo, getRequestedMemeInfo, create
  *                 message:
  *                   type: string
  *                   example: Internal server error
+ *                 data:
+ *                   type: null
+ *                   example: null
  */
 router.post('/:memeId/watch/:type', getRequestedUserInfo, getRequestedMemeInfo, createMemeWatch);
 
@@ -1115,6 +1184,9 @@ router.post('/:memeId/watch/:type', getRequestedUserInfo, getRequestedMemeInfo, 
  *                 message:
  *                   type: string
  *                   example: Meme (6686b064aa47d3ef168cd078) or user not found
+ *                 data:
+ *                   type: null
+ *                   example: null
  *       500:
  *         description: Internal server error
  *         content:
@@ -1131,6 +1203,9 @@ router.post('/:memeId/watch/:type', getRequestedUserInfo, getRequestedMemeInfo, 
  *                 message:
  *                   type: string
  *                   example: Internal server error
+ *                 data:
+ *                   type: null
+ *                   example: null
  */
 router.post('/:memeId/reaction', getRequestedUserInfo, getRequestedMemeInfo, createMemeReaction);
 
@@ -1249,6 +1324,9 @@ router.post('/:memeId/reaction', getRequestedUserInfo, getRequestedMemeInfo, cre
  *                 message:
  *                   type: string
  *                   example: Internal server error
+ *                 data:
+ *                   type: null
+ *                   example: null
  */
 router.get('/search/:name', getKeywordInfoByName, searchMemeByKeyword);
 

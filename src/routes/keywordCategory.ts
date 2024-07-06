@@ -96,6 +96,9 @@ const router = express.Router();
  *                 message:
  *                   type: string
  *                   example: Internal server error
+ *                 data:
+ *                   type: null
+ *                   example: null
  */
 router.post('/', validateCategoryDuplication, createKeywordCategory);
 
@@ -167,6 +170,9 @@ router.post('/', validateCategoryDuplication, createKeywordCategory);
  *                 message:
  *                   type: string
  *                   example: field should be provided
+ *                 data:
+ *                   type: null
+ *                   example: null
  *       500:
  *         description: Internal server error
  *         content:
@@ -256,6 +262,9 @@ router.post('/', validateCategoryDuplication, createKeywordCategory);
  *                 message:
  *                   type: string
  *                   example: field should be provided
+ *                 data:
+ *                   type: null
+ *                   example: null
  *       500:
  *         description: Internal server error
  *         content:
@@ -272,6 +281,9 @@ router.post('/', validateCategoryDuplication, createKeywordCategory);
  *                 message:
  *                   type: string
  *                   example: Internal server error
+ *                 data:
+ *                   type: null
+ *                   example: null
  *   delete:
  *     tags: [KeywordCategory]
  *     summary: 키워드 카테고리 삭제
@@ -319,6 +331,9 @@ router.post('/', validateCategoryDuplication, createKeywordCategory);
  *                 message:
  *                   type: string
  *                   example: Cannot find KeywordCategory
+ *                 data:
+ *                   type: null
+ *                   example: null
  *       500:
  *         description: Internal server error
  *         content:
@@ -335,6 +350,9 @@ router.post('/', validateCategoryDuplication, createKeywordCategory);
  *                 message:
  *                   type: string
  *                   example: Internal server error
+ *                 data:
+ *                   type: null
+ *                   example: null
  */
 router.get('/:categoryName', getRequestedKeywordCategoryInfo, getKeywordCategory);
 router.put('/:categoryName', getRequestedKeywordCategoryInfo, updateKeywordCategory);
