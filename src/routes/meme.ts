@@ -162,7 +162,7 @@ router.get('/list', getAllMemeList); // meme 목록 전체 조회 (페이지네�
 
 /**
  * @swagger
- * /api/meme/todayMeme:
+ * /api/meme/recommend-meme:
  *   get:
  *     tags: [Meme]
  *     summary: 추천 밈 정보 조회
@@ -273,7 +273,7 @@ router.get('/list', getAllMemeList); // meme 목록 전체 조회 (페이지네�
  *                   type: null
  *                   example: null
  */
-router.get('/todayMeme', getTodayMemeList); // 오늘의 추천 밈 (5개)
+router.get('/recommend-meme', getTodayMemeList); // 오늘의 추천 밈 (5개)
 
 /**
  * @swagger
