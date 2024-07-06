@@ -804,7 +804,7 @@ router.delete('/:memeId', getRequestedMemeInfo, deleteMeme); // meme 삭제
  *                   type: string
  *                   example: Internal server error
  */
-router.post('/:memeId/save', getRequestedMemeInfo, getRequestedUserInfo, createMemeSave);
+router.post('/:memeId/save', getRequestedUserInfo, getRequestedMemeInfo, createMemeSave);
 
 /**
  * @swagger
@@ -897,7 +897,7 @@ router.post('/:memeId/save', getRequestedMemeInfo, getRequestedUserInfo, createM
  *                   type: string
  *                   example: Internal server error
  */
-router.post('/:memeId/share', getRequestedMemeInfo, getRequestedUserInfo, createMemeShare);
+router.post('/:memeId/share', getRequestedUserInfo, getRequestedMemeInfo, createMemeShare);
 
 /**
  * @swagger
@@ -1002,7 +1002,8 @@ router.post('/:memeId/share', getRequestedMemeInfo, getRequestedUserInfo, create
  *                   type: string
  *                   example: Internal server error
  */
-router.post('/:memeId/watch/:type', getRequestedMemeInfo, getRequestedUserInfo, createMemeWatch);
+router.post('/:memeId/watch/:type', getRequestedUserInfo, getRequestedMemeInfo, createMemeWatch);
+
 /**
  * @swagger
  * /api/meme/{memeId}/reaction:
@@ -1096,7 +1097,7 @@ router.post('/:memeId/watch/:type', getRequestedMemeInfo, getRequestedUserInfo, 
  *                   type: string
  *                   example: Internal server error
  */
-router.post('/:memeId/reaction', getRequestedMemeInfo, getRequestedUserInfo, createMemeReaction);
+router.post('/:memeId/reaction', getRequestedUserInfo, getRequestedMemeInfo, createMemeReaction);
 
 /**
  * @swagger
