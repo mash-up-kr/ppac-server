@@ -1,17 +1,17 @@
+import { startOfWeek } from 'date-fns';
 import _ from 'lodash';
 
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
 import { IMemeDocument, MemeModel } from '../model/meme';
 import { InteractionType, MemeInteractionModel } from '../model/memeInteraction';
-import { IUser, IUserDocument, IUserInfos, UserModel } from '../model/user';
 import {
   MemeRecommendWatchModel,
   IMemeRecommendWatchUpdatePayload,
   IMemeRecommendWatchCreatePayload,
 } from '../model/memeRecommendWatch';
+import { IUser, IUserDocument, IUserInfos, UserModel } from '../model/user';
 import { logger } from '../util/logger';
-import { startOfWeek } from 'date-fns';
 
 async function getUser(deviceId: string): Promise<IUserDocument | null> {
   try {
