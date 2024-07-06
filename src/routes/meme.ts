@@ -27,11 +27,24 @@ const router = express.Router();
  *   get:
  *     tags:
  *       - Meme
- *     summary: Get all meme
- *     description: Retrieve a list of all memes
+ *     summary: 밈 전체 목록 조회
+ *     description: 밈 전체 목록 조회
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: number
+ *           example: 1
+ *           description: 현재 페이지 번호 (기본값 1)
+ *       - in: query
+ *         name: size
+ *         schema:
+ *           type: number
+ *           example: 10
+ *           description: 한 번에 조회할 밈 개수 (기본값 10)
  *     responses:
  *       '200':
- *         description: A list of memes
+ *         description: 밈 목록
  *         content:
  *           application/json:
  *             schema:
@@ -45,7 +58,7 @@ const router = express.Router();
  *                   example: 200
  *                 message:
  *                   type: string
- *                   example: Get all meme list
+ *                   example: 밈 전체 목록 조회
  *                 data:
  *                   type: object
  *                   properties:
@@ -141,11 +154,22 @@ router.get('/list', getAllMemeList); // meme 목록 전체 조회
  * /api/meme/todayMeme:
  *   get:
  *     tags: [Meme]
- *     summary: Get today's meme list
- *     description: Get a list of today's 6 memes
+ *     summary: 추천 밈 정보 조회
+ *     description: 추천 밈 목록을 조회한다. (현재는 주 단위, 추후 일 단위로 변경될 수 있음)
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               size:
+ *                 type: number
+ *                 example: 5
+ *                 description: 추천 밈 개수 / 기본값 5, body를 넘기지않으면 자동으로 서버에서 5로 설정 후 5개 조회
  *     responses:
  *       200:
- *         description: Get a list of today's 6 memes
+ *         description: 추천 밈 목록 조회 성공
  *         content:
  *           application/json:
  *             schema:
@@ -239,8 +263,8 @@ router.get('/todayMeme', getTodayMemeList); // 오늘의 추천 밈 (5개)
  * /api/meme:
  *   post:
  *     tags: [Meme]
- *     summary: Create a new meme
- *     description: Create a new meme with title, image, source, and keywordIds
+ *     summary: 밈 생성 (백오피스)
+ *     description: 밈을 생성한다. (백오피스)
  *     requestBody:
  *       required: true
  *       content:
@@ -250,25 +274,25 @@ router.get('/todayMeme', getTodayMemeList); // 오늘의 추천 밈 (5개)
  *             properties:
  *               title:
  *                 type: string
- *                 example: "Funny Meme"
- *                 description: The title of the meme
+ *                 example: "무한도전 정총무"
+ *                 description: 밈 제목
  *               image:
  *                 type: string
  *                 example: "https://example.com/meme.jpg"
- *                 description: URL of the meme image
+ *                 description: 밈 이미지 주소
  *               source:
  *                 type: string
- *                 example: "Internet"
- *                 description: Source of the meme
+ *                 example: "무한도전 102화"
+ *                 description: 밈 출처
  *               keywordIds:
  *                 type: array
  *                 items:
  *                   type: string
  *                   example: "667fee6dc58681a42d57dc37"
- *                   description: Array of keyword IDs associated with the meme
+ *                   description: 밈의 키워드 id 목록
  *     responses:
  *       201:
- *         description: The created meme
+ *         description: 생성된 밈 정보
  *         content:
  *           application/json:
  *             schema:
@@ -286,52 +310,52 @@ router.get('/todayMeme', getTodayMemeList); // 오늘의 추천 밈 (5개)
  *                 data:
  *                   type: object
  *                   properties:
+ *                     _id:
+ *                       type: string
+ *                       example: "6686af56f7c49ec21e3ef1c1"
+ *                       description: 밈 id
  *                     title:
  *                       type: string
- *                       example: "Funny Meme"
- *                       description: The title of the meme
+ *                       example: "무한도전 정총무"
+ *                       description: 밈 제목
  *                     image:
  *                       type: string
  *                       example: "https://example.com/meme.jpg"
- *                       description: URL of the meme image
+ *                       description: 밈 이미지 주소
  *                     source:
  *                       type: string
- *                       example: "Internet"
- *                       description: Source of the meme
+ *                       example: "무한도전 102화"
+ *                       description: 밈 출처
  *                     keywordIds:
  *                       type: array
  *                       items:
  *                         type: string
  *                         example: "667fee6dc58681a42d57dc37"
- *                         description: Array of keyword IDs associated with the meme
+ *                         description: 밈의 키워드 id 목록
  *                     reaction:
  *                       type: integer
  *                       example: 0
- *                       description: Number of reactions for the meme
+ *                       description: ㅋㅋㅋ 리액션 수 (생성 시 기본값 0)
  *                     isTodayMeme:
  *                       type: boolean
  *                       example: false
- *                       description: Indicates if the meme is for today
+ *                       description: 추천 밈 여부
  *                     isDeleted:
  *                       type: boolean
  *                       example: false
- *                       description: Indicates if the meme is deleted
- *                     _id:
- *                       type: string
- *                       example: "6686af56f7c49ec21e3ef1c1"
- *                       description: The ID of the created meme
+ *                       description: 밈 삭제 여부
  *                     createdAt:
  *                       type: string
  *                       format: date-time
  *                       example: "2024-07-04T14:19:02.918Z"
- *                       description: Timestamp when the meme was created
+ *                       description: 생성 시각
  *                     updatedAt:
  *                       type: string
  *                       format: date-time
  *                       example: "2024-07-04T14:19:02.918Z"
- *                       description: Timestamp when the meme was last updated
+ *                       description: 업데이트 시각
  *       400:
- *         description: Invalid request body or missing required fields
+ *         description: 잘못된 요청 - requestBody 형식 확인 필요
  *         content:
  *           application/json:
  *             schema:
@@ -370,15 +394,15 @@ router.post('/', createMeme); // meme 생성
  * /api/meme/{memeId}:
  *   get:
  *     tags: [Meme]
- *     summary: get memeInfo with keywords
- *     description: get memeInfo with keywords
+ *     summary: 밈 정보 조회(키워드 포함)
+ *     description: 밈 정보를 조회한다. 밈의 키워드 정보도 함께 포함한다. 이때 키워드는 키워드명만 제공된다 (키워드의 개별 정보 X)
  *     parameters:
  *     - in: path
  *       name: memeId
  *       required: true
  *       schema:
  *         type: string
- *       description: The ID of the meme
+ *       description: 밈 ID
  *     responses:
  *       200:
  *         description: The meme
@@ -404,16 +428,16 @@ router.post('/', createMeme); // meme 생성
  *                       example: "66805b1372ef94c9c0ba1349"
  *                     title:
  *                       type: string
- *                       example: "title1"
+ *                       example: "무한도전 정총무"
  *                     image:
  *                       type: string
- *                       example: "image1"
+ *                       example: "https://example.com/meme.jpg"
  *                     reaction:
  *                       type: integer
  *                       example: 0
  *                     source:
  *                       type: string
- *                       example: "source1"
+ *                       example: "무한도전 102화"
  *                     isTodayMeme:
  *                       type: boolean
  *                       example: false
@@ -432,7 +456,10 @@ router.post('/', createMeme); // meme 생성
  *                       type: array
  *                       items:
  *                         type: string
- *                         example: "angry"
+ *                         example:
+ *                           - "무한상사"
+ *                           - "정총무"
+ *                           - "전자두뇌"
  *       400:
  *         description: Bad Request
  *         content:
@@ -483,20 +510,21 @@ router.post('/', createMeme); // meme 생성
  *                   example: 'Internal Server Error'
  */
 router.get('/:memeId', getMemeWithKeywords); // meme 조회
+
 /**
  * @swagger
  * /api/meme/{memeId}:
  *   patch:
  *     tags: [Meme]
- *     summary: Update a meme
- *     description: Update a meme with the specified memeId
+ *     summary: 밈 수정(백오피스)
+ *     description: 밈을 수정한다 (백오피스)
  *     parameters:
  *     - in: path
  *       name: memeId
  *       schema:
  *         type: string
  *       required: true
- *       description: The ID of the meme to update
+ *       description: 수정할 밈 id
  *     requestBody:
  *       required: true
  *       content:
@@ -506,17 +534,25 @@ router.get('/:memeId', getMemeWithKeywords); // meme 조회
  *             properties:
  *               title:
  *                 type: string
+ *                 example: "무한도전 정총무 2탄"
+ *                 description: 밈 제목
  *               image:
  *                 type: string
+ *                 example: "https://example.com/meme.jpg"
+ *                 description: 밈 이미지 주소
  *               source:
  *                 type: string
+ *                 example: "무한도전 103화"
+ *                 description: 밈 출처
  *               keywordIds:
  *                 type: array
  *                 items:
  *                   type: string
+ *                   example: "667fee6dc58681a42d57dc37"
+ *                   description: 밈의 키워드 id 목록
  *     responses:
  *       200:
- *         description: Updated Meme
+ *         description: 수정된 밈 정보
  *         content:
  *           application/json:
  *             schema:
@@ -537,37 +573,37 @@ router.get('/:memeId', getMemeWithKeywords); // meme 조회
  *                     _id:
  *                       type: string
  *                       example: "6686b064aa47d3ef168cd078"
- *                       description: The ID of the updated meme
+ *                       description: 밈 id
  *                     title:
  *                       type: string
- *                       example: "title5"
- *                       description: The updated title of the meme
+ *                       example: "무한도전 정총무"
+ *                       description: 밈 제목
+ *                     image:
+ *                       type: string
+ *                       example: "https://example.com/meme.jpg"
+ *                       description: 밈 이미지 주소
+ *                     source:
+ *                       type: string
+ *                       example: "source5"
+ *                       description: The updated source of the meme
  *                     keywordIds:
  *                       type: array
  *                       items:
  *                         type: string
  *                         example: "667fee7ac58681a42d57dc3b"
- *                         description: Array of updated keyword IDs associated with the meme
- *                     image:
- *                       type: string
- *                       example: "image5"
- *                       description: The updated URL of the meme image
+ *                         description: 밈의 키워드 id 목록
  *                     reaction:
  *                       type: integer
  *                       example: 0
- *                       description: The updated number of reactions for the meme
- *                     source:
- *                       type: string
- *                       example: "source5"
- *                       description: The updated source of the meme
+ *                       description: ㅋㅋㅋ 리액션 수 (생성 시 기본값 0)
  *                     isTodayMeme:
  *                       type: boolean
  *                       example: true
- *                       description: Updated flag indicating if the meme is for today
+ *                       description: 추천 밈 여부
  *                     isDeleted:
  *                       type: boolean
  *                       example: false
- *                       description: Updated flag indicating if the meme is deleted
+ *                       description: 밈 삭제 여부
  *                     createdAt:
  *                       type: string
  *                       format: date-time
@@ -579,7 +615,7 @@ router.get('/:memeId', getMemeWithKeywords); // meme 조회
  *                       example: "2024-07-04T15:15:06.833Z"
  *                       description: Timestamp when the meme was last updated
  *       400:
- *         description: Invalid memeId or request body
+ *         description: 잘못된 요청
  *         content:
  *           application/json:
  *             schema:
@@ -634,8 +670,8 @@ router.patch('/:memeId', getRequestedMemeInfo, updateMeme); // meme 수정
  * /api/meme/{memeId}:
  *   delete:
  *     tags: [Meme]
- *     summary: Delete a meme
- *     description: Delete a meme with the specified memeId
+ *     summary: 밈 삭제(백오피스)
+ *     description: 밈을 삭제한다.
  *     parameters:
  *     - in: path
  *       name: memeId
@@ -718,14 +754,14 @@ router.delete('/:memeId', getRequestedMemeInfo, deleteMeme); // meme 삭제
  * /api/meme/{memeId}/save:
  *   post:
  *     tags: [Meme]
- *     summary: Save a meme for the user
- *     description: Save a meme for the user
+ *     summary: 밈 저장 (내 파밈함에 보관됨)
+ *     description: 밈을 저장한다. 저장한 밈은 내 파밈함에 보관된다.
  *     parameters:
  *     - in: path
  *       name: memeId
  *       schema:
  *         type: string
- *       description: The ID of the meme to save
+ *       description: 저장할 밈 id
  *     requestBody:
  *       required: true
  *       content:
@@ -811,14 +847,14 @@ router.post('/:memeId/save', getRequestedUserInfo, getRequestedMemeInfo, createM
  * /api/meme/{memeId}/share:
  *   post:
  *     tags: [Meme]
- *     summary: Share a meme
- *     description: Share a meme by the user
+ *     summary: 밈 공유
+ *     description: 밈 공유할 때 사용되는 api로 '밈 공유' 카운트를 올린다.
  *     parameters:
  *     - in: path
  *       name: memeId
  *       schema:
  *         type: string
- *       description: The ID of the meme to share
+ *       description: 공유할 밈 id
  *     requestBody:
  *       required: true
  *       content:
@@ -904,20 +940,20 @@ router.post('/:memeId/share', getRequestedUserInfo, getRequestedMemeInfo, create
  * /api/meme/{memeId}/watch/{type}:
  *   post:
  *     tags: [Meme]
- *     summary: Watch a meme
- *     description: Record a user interaction with a meme (e.g., search or recommendation).
+ *     summary: 밈 보기 (밈의 타입 필요)
+ *     description: 사용자가 밈을 볼 때 사용되는 api로 '밈 보기' 카운트를 올린다. 밈의 타입을 적어줘야한다.
  *     parameters:
  *     - in: path
  *       name: memeId
  *       schema:
  *         type: string
- *       description: The ID of the meme to watch
+ *       description: 밈 id
  *     - in: path
  *       name: type
  *       schema:
  *         type: string
  *       enum: [search, recommend]
- *       description: The type of watch interaction (search or recommend)
+ *       description: 밈 종류 (search - 검색으로 조회된 밈 / recommend - 추천 탭에서 조회된 밈)
  *     requestBody:
  *       required: true
  *       content:
@@ -944,15 +980,15 @@ router.post('/:memeId/share', getRequestedUserInfo, getRequestedMemeInfo, create
  *                   example: 201
  *                 message:
  *                   type: string
- *                   example: Create Meme Watch or recommend Meme Watch
+ *                   example: Create Meme Watch 혹은 recommend Meme Watch
  *                 data:
  *                   oneOf:
  *                     - type: boolean
  *                       example: true
- *                       description: Returned when type is 'search'
+ *                       description: search 타입의 밈인 경우 밈 카운트 증가 성공 여부
  *                     - type: integer
  *                       example: 1
- *                       description: Returned when type is 'recommend'
+ *                       description: recommend 타입의 밈인 경우 추천 밈 조회 개수
  *       400:
  *         description: Invalid parameters or type
  *         content:
@@ -1009,15 +1045,15 @@ router.post('/:memeId/watch/:type', getRequestedUserInfo, getRequestedMemeInfo, 
  * /api/meme/{memeId}/reaction:
  *   post:
  *     tags: [Meme]
- *     summary: Create a reaction for a meme
- *     description: Create a reaction (e.g., like) for the specified meme
+ *     summary: 밈 리액션(ㅋㅋㅋ)
+ *     description: 밈 리액션 시 사용되는 api로 'ㅋ 남기기' 카운트를 올린다.
  *     parameters:
  *     - in: path
  *       name: memeId
  *       schema:
  *         type: string
  *       required: true
- *       description: The ID of the meme to react to
+ *       description: 리액션할 밈 id
  *     requestBody:
  *       required: true
  *       content:
@@ -1027,7 +1063,6 @@ router.post('/:memeId/watch/:type', getRequestedUserInfo, getRequestedMemeInfo, 
  *             properties:
  *               deviceId:
  *                 type: string
- *                 description: The ID of the device/user reacting to the meme
  *     responses:
  *       201:
  *         description: Created Meme Reaction
@@ -1104,18 +1139,19 @@ router.post('/:memeId/reaction', getRequestedUserInfo, getRequestedMemeInfo, cre
  * /api/meme/search/{name}:
  *   get:
  *     tags: [Meme]
- *     summary: Search memes by keyword
- *     description: Retrieve memes associated with a specific keyword
+ *     summary: 키워드에 해당하는 밈 조회
+ *     description: 키워드 클릭 시 해당 키워드를 포함한 밈을 조회하고 목록을 반환한다.
  *     parameters:
  *     - in: path
  *       name: name
  *       schema:
  *         type: string
+ *         example: "행복"
  *       required: true
- *       description: The name of the keyword to search for
+ *       description: 키워드명
  *     responses:
  *       200:
- *         description: A list of memes associated with the keyword
+ *         description: 키워드를 포함한 밈 목록
  *         content:
  *           application/json:
  *             schema:
@@ -1140,7 +1176,7 @@ router.post('/:memeId/reaction', getRequestedUserInfo, getRequestedMemeInfo, cre
  *                         example: "6686b075aa47d3ef168cd07e"
  *                       title:
  *                         type: string
- *                         example: "title5"
+ *                         example: "완전 럭키비키자나~"
  *                       keywordIds:
  *                         type: array
  *                         items:
@@ -1148,25 +1184,39 @@ router.post('/:memeId/reaction', getRequestedUserInfo, getRequestedMemeInfo, cre
  *                           properties:
  *                             _id:
  *                               type: string
- *                               example: "667fee7ac58681a42d57dc3b"
+ *                               example:
+ *                                - "667fee7ac58681a42d57dc3b"
+ *                                - "667fee7ac58681a42d57dc3d"
+ *                                - "667fee7ac58681a42d57dc3v"
  *                             name:
  *                               type: string
- *                               example: "pig"
+ *                               example:
+ *                                - "행복"
+ *                                - "장원영"
+ *                                - "럭키비키"
  *                       image:
  *                         type: string
- *                         example: "image5"
+ *                         example: "https://example.com/meme.jpg"
  *                       reaction:
  *                         type: integer
  *                         example: 0
  *                       source:
  *                         type: string
- *                         example: "source5"
+ *                         example: "유투브"
  *                       isTodayMeme:
  *                         type: boolean
  *                         example: true
  *                       isDeleted:
  *                         type: boolean
  *                         example: false
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2024-06-29T19:05:55.638Z"
+ *                       updatedAt:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2024-06-29T19:05:55.638Z"
  *       400:
  *         description: Invalid keyword name
  *         content:
