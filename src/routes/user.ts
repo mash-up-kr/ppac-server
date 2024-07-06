@@ -122,8 +122,8 @@ router.post('/', UserController.createUser); // user 생성
  * /api/user:
  *   get:
  *     tags: [User]
- *     summary: user
- *     description: user
+ *     summary: 유저 정보 조회
+ *     description: 유저 정보 조회
  *     parameters:
  *     - name: x-device-id
  *       in: header
