@@ -200,10 +200,10 @@ router.get('/:deviceId', getRequestedUserInfo, UserController.getUser); // user 
 
 /**
  * @swagger
- * /api/user/{deviceId}/save:
+ * /api/user/saved-memes:
  *   get:
  *     tags: [User]
- *     summary: user
+ *     summary: 사용자가 저장한 밈 정보 조회 (나의 파밈함)
  *     description: user
  *     parameters:
  *     - in: path
@@ -282,14 +282,14 @@ router.get('/:deviceId', getRequestedUserInfo, UserController.getUser); // user 
  *                   type: null
  *                   example: null
  */
-router.get('/:deviceId/save', getRequestedUserInfo, UserController.getSavedMeme); // user가 저장한 meme 조회
+router.get('/saved-memes', getRequestedUserInfo, UserController.getSavedMeme); // user가 저장한 meme 조회 (10개 제한)
 
 /**
  * @swagger
- * /api/user/{deviceId}/lastSeenMeme:
+ * /api/user/recent-memes:
  *   get:
  *     tags: [User]
- *     summary: user
+ *     summary: 사용자가 최근에 본 밈 정보 조회 (최근 본 밈)
  *     description: user
  *     parameters:
  *     - in: path
@@ -368,6 +368,6 @@ router.get('/:deviceId/save', getRequestedUserInfo, UserController.getSavedMeme)
  *                   type: null
  *                   example: null
  */
-router.get('/:deviceId/lastSeenMeme', getRequestedUserInfo, UserController.getLastSeenMeme);
+router.get('/recent-memes', getRequestedUserInfo, UserController.getLastSeenMeme); // user가 최근에 본 밈 정보 조회
 
 export default router;
