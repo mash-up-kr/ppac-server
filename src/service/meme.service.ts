@@ -165,10 +165,7 @@ async function searchMemeByKeyword(
       isDeleted: false,
     });
 
-    const memeList = await MemeModel.find(
-      { keywordIds: { $in: keyword._id } },
-      { createdAt: 0, updatedAt: 0 },
-    )
+    const memeList = await MemeModel.find({ keywordIds: { $in: keyword._id } })
       .skip((page - 1) * size)
       .limit(size)
       .sort({ reaction: -1 })

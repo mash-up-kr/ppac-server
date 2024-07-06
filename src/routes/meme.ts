@@ -1308,6 +1308,14 @@ router.post('/:memeId/reaction', getRequestedUserInfo, getRequestedMemeInfo, cre
  *                             type: integer
  *                             example: 999
  *                             description: 밈 조회수
+ *                           createdAt:
+ *                             type: string
+ *                             format: date-time
+ *                             example: "2024-06-29T19:06:02.489Z"
+ *                           updatedAt:
+ *                             type: string
+ *                             format: date-time
+ *                             example: "2024-06-29T19:06:02.489Z"
  *       400:
  *         description: Invalid keyword name
  *         content:
