@@ -27,7 +27,7 @@ const router = express.Router();
  *   get:
  *     tags:
  *       - Meme
- *     summary: 밈 전체 목록 조회
+ *     summary: 밈 전체 목록 조회 (페이지네이션 적용)
  *     description: 밈 전체 목록 조회
  *     parameters:
  *       - in: query
@@ -543,7 +543,7 @@ router.get('/:memeId', getMemeWithKeywords); // meme 조회
  * /api/meme/{memeId}:
  *   patch:
  *     tags: [Meme]
- *     summary: 밈 수정(백오피스)
+ *     summary: 밈 수정 (백오피스)
  *     description: 밈을 수정한다 (백오피스)
  *     parameters:
  *     - in: path
@@ -706,8 +706,8 @@ router.patch('/:memeId', getRequestedMemeInfo, updateMeme); // meme 수정
  * /api/meme/{memeId}:
  *   delete:
  *     tags: [Meme]
- *     summary: 밈 삭제(백오피스)
- *     description: 밈을 삭제한다.
+ *     summary: 밈 삭제 (백오피스)
+ *     description: 밈을 삭제한다. (백오피스용)
  *     parameters:
  *     - in: path
  *       name: memeId
@@ -799,20 +799,16 @@ router.delete('/:memeId', getRequestedMemeInfo, deleteMeme); // meme 삭제
  *     summary: 밈 저장 (내 파밈함에 보관됨)
  *     description: 밈을 저장한다. 저장한 밈은 내 파밈함에 보관된다.
  *     parameters:
+ *     - name: x-device-id
+ *       in: header
+ *       description: 유저의 고유한 deviceId
+ *       required: true
+ *       type: string
  *     - in: path
  *       name: memeId
  *       schema:
  *         type: string
  *       description: 저장할 밈 id
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               deviceId:
- *                 type: string
  *     responses:
  *       201:
  *         description: Meme successfully saved
@@ -891,7 +887,7 @@ router.delete('/:memeId', getRequestedMemeInfo, deleteMeme); // meme 삭제
  *                   type: null
  *                   example: null
  */
-router.post('/:memeId/save', getRequestedUserInfo, getRequestedMemeInfo, createMemeSave);
+router.post('/:memeId/save', getRequestedUserInfo, getRequestedMemeInfo, createMemeSave); // meme 저장하기
 
 /**
  * @swagger
@@ -901,20 +897,16 @@ router.post('/:memeId/save', getRequestedUserInfo, getRequestedMemeInfo, createM
  *     summary: 밈 공유
  *     description: 밈 공유할 때 사용되는 api로 '밈 공유' 카운트를 올린다.
  *     parameters:
+ *     - name: x-device-id
+ *       in: header
+ *       description: 유저의 고유한 deviceId
+ *       required: true
+ *       type: string
  *     - in: path
  *       name: memeId
  *       schema:
  *         type: string
  *       description: 공유할 밈 id
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               deviceId:
- *                 type: string
  *     responses:
  *       201:
  *         description: Meme successfully shared
@@ -993,7 +985,7 @@ router.post('/:memeId/save', getRequestedUserInfo, getRequestedMemeInfo, createM
  *                   type: null
  *                   example: null
  */
-router.post('/:memeId/share', getRequestedUserInfo, getRequestedMemeInfo, createMemeShare);
+router.post('/:memeId/share', getRequestedUserInfo, getRequestedMemeInfo, createMemeShare); // meme 공유하기
 
 /**
  * @swagger
@@ -1003,6 +995,11 @@ router.post('/:memeId/share', getRequestedUserInfo, getRequestedMemeInfo, create
  *     summary: 밈 보기 (밈의 타입 필요)
  *     description: 사용자가 밈을 볼 때 사용되는 api로 '밈 보기' 카운트를 올린다. 밈의 타입을 적어줘야한다.
  *     parameters:
+ *     - name: x-device-id
+ *       in: header
+ *       description: 유저의 고유한 deviceId
+ *       required: true
+ *       type: string
  *     - in: path
  *       name: memeId
  *       schema:
@@ -1014,16 +1011,6 @@ router.post('/:memeId/share', getRequestedUserInfo, getRequestedMemeInfo, create
  *         type: string
  *       enum: [search, recommend]
  *       description: 밈 종류 (search - 검색으로 조회된 밈 / recommend - 추천 탭에서 조회된 밈)
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               deviceId:
- *                 type: string
- *                 description: The ID of the device/user
  *     responses:
  *       201:
  *         description: Meme watch interaction recorded successfully
@@ -1107,7 +1094,7 @@ router.post('/:memeId/share', getRequestedUserInfo, getRequestedMemeInfo, create
  *                   type: null
  *                   example: null
  */
-router.post('/:memeId/watch/:type', getRequestedUserInfo, getRequestedMemeInfo, createMemeWatch);
+router.post('/:memeId/watch/:type', getRequestedUserInfo, getRequestedMemeInfo, createMemeWatch); // meme 보기
 
 /**
  * @swagger
@@ -1117,22 +1104,17 @@ router.post('/:memeId/watch/:type', getRequestedUserInfo, getRequestedMemeInfo, 
  *     summary: 밈 리액션(ㅋㅋㅋ)
  *     description: 밈 리액션 시 사용되는 api로 'ㅋ 남기기' 카운트를 올린다.
  *     parameters:
+ *     - name: x-device-id
+ *       in: header
+ *       description: 유저의 고유한 deviceId
+ *       required: true
+ *       type: string
  *     - in: path
  *       name: memeId
  *       schema:
  *         type: string
  *       required: true
  *       description: 리액션할 밈 id
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               deviceId:
- *                 type: string
- *     responses:
  *       201:
  *         description: Created Meme Reaction
  *         content:
@@ -1207,7 +1189,7 @@ router.post('/:memeId/watch/:type', getRequestedUserInfo, getRequestedMemeInfo, 
  *                   type: null
  *                   example: null
  */
-router.post('/:memeId/reaction', getRequestedUserInfo, getRequestedMemeInfo, createMemeReaction);
+router.post('/:memeId/reaction', getRequestedUserInfo, getRequestedMemeInfo, createMemeReaction); // meme 리액션 남기기
 
 /**
  * @swagger
