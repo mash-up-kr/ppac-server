@@ -92,15 +92,15 @@ export const getRequestedUserInfo = async (
   res: Response,
   next: NextFunction,
 ) => {
-  const deviceId = req.params?.deviceId || req.body?.deviceId || null;
+  const deviceId = req.headers['x-device-id'] as string;
 
-  if (_.isNull(deviceId)) {
-    return next(new CustomError(`'deviceId' should be provided`, HttpCode.BAD_REQUEST));
+  if (!deviceId) {
+    return next(new CustomError(`'x-device-id' header should be provided`, HttpCode.BAD_REQUEST));
   }
 
   const user = await getUser(deviceId);
 
-  if (_.isNull(user)) {
+  if (!user) {
     return next(new CustomError(`user(${deviceId}) does not exist`, HttpCode.NOT_FOUND));
   }
 

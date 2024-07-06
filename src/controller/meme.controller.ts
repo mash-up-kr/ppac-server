@@ -171,12 +171,33 @@ const getTodayMemeList = async (req: Request, res: Response, next: NextFunction)
   }
 };
 
-const searchMemeByKeyword = async (req: CustomRequest, res: Response, next: NextFunction) => {
+const searchMemeListByKeyword = async (req: CustomRequest, res: Response, next: NextFunction) => {
   const keyword = req.requestedKeyword;
 
+  const page = parseInt(req.query.page as string) || 1;
+  if (page < 1) {
+    return next(new CustomError(`Invalid 'page' parameter`, HttpCode.BAD_REQUEST));
+  }
+
+  const size = parseInt(req.query.size as string) || 10;
+  if (size < 1) {
+    return next(new CustomError(`Invalid 'size' parameter`, HttpCode.BAD_REQUEST));
+  }
+
   try {
-    const memeList = await MemeService.searchMemeByKeyword(keyword);
-    return res.json(createSuccessResponse(HttpCode.OK, 'Search meme by keyword', memeList));
+    const memeList = await MemeService.searchMemeByKeyword(page, size, keyword);
+    const data = {
+      pagination: {
+        total: memeList.total,
+        page: memeList.page,
+        perPage: size,
+        currentPage: memeList.page,
+        totalPages: memeList.totalPages,
+      },
+      memeList: memeList.data,
+    };
+
+    return res.json(createSuccessResponse(HttpCode.OK, 'Search meme list by keyword', data));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
@@ -287,5 +308,5 @@ export {
   deleteMemeSave,
   updateMeme,
   getMemeWithKeywords,
-  searchMemeByKeyword,
+  searchMemeListByKeyword,
 };
