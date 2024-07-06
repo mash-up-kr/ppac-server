@@ -1,5 +1,6 @@
 import { startOfWeek } from 'date-fns';
 import _ from 'lodash';
+import { Types } from 'mongoose';
 
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
@@ -123,7 +124,7 @@ async function updateLastSeenMeme(user: IUserDocument, meme: IMemeDocument): Pro
   }
 }
 
-async function getLastSeenMeme(user: IUserDocument): Promise<IMemeDocument[]> {
+async function getLastSeenMemes(user: IUserDocument): Promise<IMemeDocument[]> {
   try {
     const lastSeenMeme = user.lastSeenMeme;
     const memeList = await MemeModel.find({
@@ -141,26 +142,39 @@ async function getLastSeenMeme(user: IUserDocument): Promise<IMemeDocument[]> {
   }
 }
 
-async function getSavedMeme(user: IUserDocument): Promise<IMemeDocument[]> {
+async function getSavedMemes(
+  page: number,
+  size: number,
+  user: IUserDocument,
+): Promise<{ total: number; page: number; totalPages: number; data: IMemeDocument[] }> {
   try {
-    const savedMeme = await MemeInteractionModel.find({
+    const totalSavedMemes = await MemeInteractionModel.countDocuments({
       deviceId: user.deviceId,
       interactionType: InteractionType.SAVE,
       isDeleted: false,
-    }).lean();
+    });
 
-    const memeList = await MemeModel.find({
-      _id: { $in: savedMeme.map((meme) => meme.memeId) },
+    const savedMemes = await MemeInteractionModel.find({
+      deviceId: user.deviceId,
+      interactionType: InteractionType.SAVE,
       isDeleted: false,
-    }).lean();
+    })
+      .skip((page - 1) * size)
+      .limit(size)
+      .sort({ createdAt: -1 })
+      .lean();
 
-    logger.info(
-      `Get savedMeme - deviceId(${user.deviceId}), memeList(${JSON.stringify(memeList)})`,
-    );
-    return memeList;
-  } catch (err) {
-    logger.error(`Failed get savedMeme`, err.message);
-    throw new CustomError(`Failed get savedMeme(${err.message})`, HttpCode.INTERNAL_SERVER_ERROR);
+    const memeIds = savedMemes.map(({ memeId }) => new Types.ObjectId(memeId));
+    const memeList = await MemeModel.find({ _id: { $in: memeIds }, isDeleted: false }).lean();
+
+    return {
+      total: totalSavedMemes,
+      page,
+      totalPages: Math.ceil(totalSavedMemes / size),
+      data: memeList,
+    };
+  } catch (error) {
+    throw new CustomError(`Failed to get saved memes`, HttpCode.INTERNAL_SERVER_ERROR, error);
   }
 }
 
@@ -210,7 +224,7 @@ export {
   getUser,
   createUser,
   updateLastSeenMeme,
-  getLastSeenMeme,
-  getSavedMeme,
+  getLastSeenMemes,
+  getSavedMemes,
   createMemeRecommendWatch,
 };
