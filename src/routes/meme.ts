@@ -88,24 +88,29 @@ const router = express.Router();
  *                           _id:
  *                             type: string
  *                             example: "66805b1a72ef94c9c0ba134c"
- *                           title:
- *                             type: string
- *                             example: "title2"
  *                           image:
  *                             type: string
- *                             example: "image2"
- *                           reaction:
- *                             type: integer
- *                             example: 0
- *                           source:
- *                             type: string
- *                             example: "source2"
- *                           isTodayMeme:
- *                             type: boolean
- *                             example: false
+ *                             example: "https://example.com/meme.jpg"
  *                           isDeleted:
  *                             type: boolean
  *                             example: false
+ *                           isTodayMeme:
+ *                             type: boolean
+ *                             example: false
+ *                           keywordIds:
+ *                             type: array
+ *                             items:
+ *                               example: "667fee7ac58681a42d57dc3b"
+ *                           title:
+ *                             type: string
+ *                             example: "무한상사 정총무"
+ *                           source:
+ *                             type: string
+ *                             example: "무한도전 102화"
+ *                           reaction:
+ *                             type: integer
+ *                             example: 99
+ *                             description: 밈 리액션 수
  *                           createdAt:
  *                             type: string
  *                             format: date-time
