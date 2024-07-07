@@ -31,6 +31,7 @@ const MemeRecommendWatchSchema: Schema = new Schema(
   {
     deviceId: { type: String, required: true },
     startDate: { type: Date, required: true },
+    isDeleted: { type: Boolean, required: true, default: false },
     memeIds: [{ type: Types.ObjectId, ref: 'Meme', required: true }],
   },
   {

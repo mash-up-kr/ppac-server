@@ -140,9 +140,6 @@ router.post('/', validateCategory, validateKeywordDulication, createKeyword);
  *                     searchCount:
  *                       type: integer
  *                       example: 0
- *                     isDeleted:
- *                       type: boolean
- *                       example: false
  *                     createdAt:
  *                       type: string
  *                       example: "2024-07-05T15:21:34.012Z"
@@ -271,9 +268,6 @@ router.delete('/:keywordId', getKeywordInfoById, deleteKeyword);
  *                       topReactionImage:
  *                         type: string
  *                         example: "https://example.com/top-reaction-image.jpg"
- *                       isDeleted:
- *                         type: boolean
- *                         example: false
  *                       createdAt:
  *                         type: string
  *                         example: "2024-07-05T15:21:34.012Z"
@@ -372,9 +366,6 @@ router.get('/top', getTopKeywords);
  *                       searchCount:
  *                         type: integer
  *                         example: 1
- *                       isDeleted:
- *                         type: boolean
- *                         example: false
  *                       createdAt:
  *                         type: string
  *                         example: "2024-07-05T15:21:34.012Z"

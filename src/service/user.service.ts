@@ -87,24 +87,26 @@ async function createUser(deviceId: string): Promise<IUserInfos> {
 
 async function updateLastSeenMeme(user: IUserDocument, meme: IMemeDocument): Promise<IUser> {
   try {
-    const newLastSeenMeme = [...user.lastSeenMeme];
+    const newLastSeenMeme = [...user.lastSeenMeme].map((id) => id.toString());
 
-    const index = newLastSeenMeme.indexOf(meme._id);
+    const index = newLastSeenMeme.indexOf(meme._id.toString());
     // 새 값이 존재하면 해당 값을 배열에서 제거합니다.
     if (index !== -1) {
       newLastSeenMeme.splice(index, 1);
     }
     // 새 값을 배열의 첫 번째 위치에 추가합니다.
-    newLastSeenMeme.unshift(meme._id);
+    newLastSeenMeme.unshift(meme._id.toString());
 
     if (newLastSeenMeme.length > 10) {
       newLastSeenMeme.pop();
     }
 
+    const newLastSeenMemeList = newLastSeenMeme.map((id) => new Types.ObjectId(id));
+
     const updatedUser = await UserModel.findOneAndUpdate(
       { deviceId: user.deviceId },
       {
-        $set: { lastSeenMeme: newLastSeenMeme },
+        $set: { lastSeenMeme: newLastSeenMemeList },
       },
       {
         projection: { _id: 0, createdAt: 0, updatedAt: 0 },
@@ -127,10 +129,13 @@ async function updateLastSeenMeme(user: IUserDocument, meme: IMemeDocument): Pro
 async function getLastSeenMemes(user: IUserDocument): Promise<IMemeDocument[]> {
   try {
     const lastSeenMeme = user.lastSeenMeme;
-    const memeList = await MemeModel.find({
-      _id: { $in: lastSeenMeme },
-      isDeleted: false,
-    }).lean();
+    const memeList = await MemeModel.find(
+      {
+        _id: { $in: lastSeenMeme },
+        isDeleted: false,
+      },
+      { isDeleted: 0 },
+    ).lean();
 
     return memeList;
   } catch (err) {
@@ -154,18 +159,24 @@ async function getSavedMemes(
       isDeleted: false,
     });
 
-    const savedMemes = await MemeInteractionModel.find({
-      deviceId: user.deviceId,
-      interactionType: InteractionType.SAVE,
-      isDeleted: false,
-    })
+    const savedMemes = await MemeInteractionModel.find(
+      {
+        deviceId: user.deviceId,
+        interactionType: InteractionType.SAVE,
+        isDeleted: false,
+      },
+      { isDeleted: 0 },
+    )
       .skip((page - 1) * size)
       .limit(size)
       .sort({ createdAt: -1 })
       .lean();
 
     const memeIds = savedMemes.map(({ memeId }) => new Types.ObjectId(memeId));
-    const memeList = await MemeModel.find({ _id: { $in: memeIds }, isDeleted: false }).lean();
+    const memeList = await MemeModel.find(
+      { _id: { $in: memeIds }, isDeleted: false },
+      { isDeleted: 0 },
+    ).lean();
 
     return {
       total: totalSavedMemes,
@@ -182,7 +193,7 @@ async function createMemeRecommendWatch(user: IUserDocument, meme: IMemeDocument
   try {
     const todayWeekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
     const memeRecommendWatch = await MemeRecommendWatchModel.findOne({
-      memeId: meme._id,
+      memeIds: meme._id,
       startDate: todayWeekStart,
       deviceId: user.deviceId,
       isDeleted: false,
@@ -191,8 +202,12 @@ async function createMemeRecommendWatch(user: IUserDocument, meme: IMemeDocument
     if (!_.isNull(memeRecommendWatch)) {
       logger.info(`Already watched recommend meme - deviceId(${user.deviceId})`);
 
+      const updatedMemeList = Array.from(
+        new Set([...memeRecommendWatch.memeIds, meme._id].map((id) => id.toString())),
+      ).map((id) => new Types.ObjectId(id));
+
       const updatePayload: IMemeRecommendWatchUpdatePayload = {
-        memeIds: [...memeRecommendWatch.memeIds, meme._id],
+        memeIds: updatedMemeList,
       };
 
       await MemeRecommendWatchModel.findOneAndUpdate(

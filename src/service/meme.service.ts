@@ -44,7 +44,7 @@ async function getMemeWithKeywords(memeId: string): Promise<IMemeWithKeywords | 
           keywords: '$keywords.name',
         },
       },
-      { $project: { keywordIds: 0 } },
+      { $project: { keywordIds: 0, isDeleted: 0 } },
     ]);
 
     if (!meme) {
@@ -76,7 +76,7 @@ async function getTodayMemeList(limit: number = 5): Promise<IMemeWithKeywords[]>
         keywords: '$keywords.name',
       },
     },
-    { $project: { keywordIds: 0 } },
+    { $project: { keywordIds: 0, isDeleted: 0 } },
   ]);
 
   const memeIds = todayMemeList.map((meme) => meme._id);
@@ -92,7 +92,7 @@ async function getAllMemeList(
 ): Promise<{ total: number; page: number; totalPages: number; data: IMemeDocument[] }> {
   const totalMemes = await MemeModel.countDocuments();
 
-  const memeList = await MemeModel.find({ isDeleted: false })
+  const memeList = await MemeModel.find({ isDeleted: false }, { isDeleted: 0 })
     .skip((page - 1) * size)
     .limit(size)
     .sort({ createdAt: -1 });
@@ -135,7 +135,7 @@ async function updateMeme(memeId: Types.ObjectId, updateInfo: any): Promise<IMem
 
 async function deleteMeme(memeId: Types.ObjectId): Promise<boolean> {
   const deletedMeme = await MemeModel.findOneAndDelete(
-    { _id: memeId },
+    { _id: memeId, isDeleted: false },
     { $set: { isDeleted: true } },
   ).lean();
 
@@ -165,7 +165,10 @@ async function searchMemeByKeyword(
       isDeleted: false,
     });
 
-    const memeList = await MemeModel.find({ keywordIds: { $in: keyword._id } })
+    const memeList = await MemeModel.find(
+      { isDeleted: false, keywordIds: { $in: keyword._id } },
+      { isDeleted: 0 },
+    )
       .skip((page - 1) * size)
       .limit(size)
       .sort({ reaction: -1 })
@@ -221,7 +224,7 @@ async function createMemeInteraction(
     // 'reaction'인 경우에만 Meme의 reaction 수를 업데이트한다.
     if (interactionType === InteractionType.REACTION) {
       await MemeModel.findOneAndUpdate(
-        { memeId: meme._id },
+        { memeId: meme._id, isDeleted: false },
         { $inc: { reaction: 1 } },
         {
           projection: { _id: 0, createdAt: 0, updatedAt: 0 },
@@ -270,6 +273,7 @@ async function deleteMemeSave(user: IUserDocument, meme: IMemeDocument): Promise
 async function getTopReactionImage(keyword: IKeywordDocument): Promise<string> {
   try {
     const topReactionMeme: IMemeDocument = await MemeModel.findOne({
+      isDeleted: false,
       keywordIds: { $in: [keyword._id] },
     }).sort({
       reaction: -1,

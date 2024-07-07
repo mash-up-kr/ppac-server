@@ -280,9 +280,6 @@ router.get('/', getRequestedUserInfo, UserController.getUser); // user 조회
  *                           image:
  *                             type: string
  *                             example: "https://example.com/meme.jpg"
- *                           isDeleted:
- *                             type: boolean
- *                             example: false
  *                           isTodayMeme:
  *                             type: boolean
  *                             example: false
@@ -391,9 +388,6 @@ router.get('/saved-memes', getRequestedUserInfo, UserController.getSavedMemes); 
  *                       image:
  *                         type: string
  *                         example: "https://example.com/meme.jpg"
- *                       isDeleted:
- *                         type: boolean
- *                         example: false
  *                       isTodayMeme:
  *                         type: boolean
  *                         example: false

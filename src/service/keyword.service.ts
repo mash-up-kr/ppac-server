@@ -52,7 +52,10 @@ async function deleteKeyword(keywordId: Types.ObjectId): Promise<boolean> {
 
 async function getTopKeywords(limit: number = 6): Promise<IKeywordDocument[]> {
   try {
-    const topKeywords = await KeywordModel.find().sort({ searchCount: -1 }).limit(limit).lean();
+    const topKeywords = await KeywordModel.find({}, { isDeleted: 0 })
+      .sort({ searchCount: -1 })
+      .limit(limit)
+      .lean();
     return topKeywords;
   } catch (err) {
     logger.error(`Failed to get top keywords: ${err.message}`);
@@ -65,7 +68,7 @@ async function increaseSearchCount(keywordId: Types.ObjectId): Promise<IKeywordD
     const updatedKeyword = await KeywordModel.findOneAndUpdate(
       { _id: keywordId },
       { $inc: { searchCount: 1 } },
-      { new: true },
+      { new: true, projection: { isDeleted: 0 } },
     );
     if (!updatedKeyword) {
       throw new CustomError(`KeywordId ${keywordId} not found`, HttpCode.NOT_FOUND);

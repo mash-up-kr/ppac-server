@@ -91,9 +91,6 @@ const router = express.Router();
  *                           image:
  *                             type: string
  *                             example: "https://example.com/meme.jpg"
- *                           isDeleted:
- *                             type: boolean
- *                             example: false
  *                           isTodayMeme:
  *                             type: boolean
  *                             example: false
@@ -167,17 +164,13 @@ router.get('/list', getAllMemeList); // meme 목록 전체 조회 (페이지네�
  *     tags: [Meme]
  *     summary: 추천 밈 정보 조회
  *     description: 추천 밈 목록을 조회한다. (현재는 주 단위, 추후 일 단위로 변경될 수 있음)
- *     requestBody:
- *       required: false
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               size:
- *                 type: number
- *                 example: 5
- *                 description: 추천 밈 개수 / 기본값 5, body를 넘기지않으면 자동으로 서버에서 5로 설정 후 5개 조회
+ *     parameters:
+ *       - in: query
+ *         name: size
+ *         schema:
+ *           type: number
+ *           example: 5
+ *           description: 추천 밈 개수 / 기본값 5, body를 넘기지않으면 자동으로 서버에서 5로 설정 후 5개 조회
  *     responses:
  *       200:
  *         description: 추천 밈 목록 조회 성공
@@ -218,9 +211,6 @@ router.get('/list', getAllMemeList); // meme 목록 전체 조회 (페이지네�
  *                       isTodayMeme:
  *                         type: boolean
  *                         example: true
- *                       isDeleted:
- *                         type: boolean
- *                         example: false
  *                       createdAt:
  *                         type: string
  *                         format: date-time
@@ -357,10 +347,6 @@ router.get('/recommend-memes', getTodayMemeList); // 오늘의 추천 밈 (5개)
  *                       type: boolean
  *                       example: false
  *                       description: 추천 밈 여부
- *                     isDeleted:
- *                       type: boolean
- *                       example: false
- *                       description: 밈 삭제 여부
  *                     createdAt:
  *                       type: string
  *                       format: date-time
@@ -458,13 +444,13 @@ router.post('/', createMeme); // meme 생성
  *                     reaction:
  *                       type: integer
  *                       example: 0
+ *                     watch:
+ *                       type: integer
+ *                       example: 0
  *                     source:
  *                       type: string
  *                       example: "무한도전 102화"
  *                     isTodayMeme:
- *                       type: boolean
- *                       example: false
- *                     isDeleted:
  *                       type: boolean
  *                       example: false
  *                     createdAt:
@@ -810,6 +796,7 @@ router.delete('/:memeId', getRequestedMemeInfo, deleteMeme); // meme 삭제
  *       required: true
  *       type: string
  *     - in: path
+ *       required: true
  *       name: memeId
  *       schema:
  *         type: string
@@ -1007,11 +994,13 @@ router.post('/:memeId/share', getRequestedUserInfo, getRequestedMemeInfo, create
  *       type: string
  *     - in: path
  *       name: memeId
+ *       required: true
  *       schema:
  *         type: string
  *       description: 밈 id
  *     - in: path
  *       name: type
+ *       required: true
  *       schema:
  *         type: string
  *       enum: [search, recommend]
@@ -1120,6 +1109,7 @@ router.post('/:memeId/watch/:type', getRequestedUserInfo, getRequestedMemeInfo, 
  *         type: string
  *       required: true
  *       description: 리액션할 밈 id
+ *     responses:
  *       201:
  *         description: Created Meme Reaction
  *         content:
@@ -1272,9 +1262,6 @@ router.post('/:memeId/reaction', getRequestedUserInfo, getRequestedMemeInfo, cre
  *                           image:
  *                             type: string
  *                             example: "https://example.com/meme.jpg"
- *                           isDeleted:
- *                             type: boolean
- *                             example: false
  *                           isTodayMeme:
  *                             type: boolean
  *                             example: false
