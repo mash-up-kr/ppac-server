@@ -438,23 +438,21 @@ router.patch('/count', getKeywordInfoByName, increaseSearchCount);
  *                   type: string
  *                   example: Get Recommended Keywords
  *                 data:
- *                   type: object
- *                   properties:
- *                     감정:
- *                       type: array
- *                       example:
- *                         - "행복"
- *                         - "슬픈"
- *                         - "분노"
- *                         - "웃긴"
- *                         - "피곤"
- *                     상황:
- *                       type: array
- *                       example:
- *                         - "회사"
- *                         - "대학"
- *                         - "공부"
- *                         - "긁"
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       category:
+ *                         type: string
+ *                         example: "상황"
+ *                       keywords:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                           example:
+ *                             - "키워드1"
+ *                             - "키워드2"
+ *                             - "키워드3"
  *       500:
  *         description: Internal server error
  *         content:

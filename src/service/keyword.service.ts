@@ -98,7 +98,7 @@ async function getKeywordById(keywordId: Types.ObjectId): Promise<IKeywordDocume
   }
 }
 
-async function getRecommendedKeywords(): Promise<{ [categoryName: string]: string[] }> {
+async function getRecommendedKeywords(): Promise<{ title: string; keywords: string[] }[]> {
   try {
     const result = await KeywordCategoryModel.aggregate([
       {
@@ -140,13 +140,8 @@ async function getRecommendedKeywords(): Promise<{ [categoryName: string]: strin
       },
     ]);
 
-    const keywordList = result.reduce((acc, { category, keywords }) => {
-      acc[category] = keywords;
-      return acc;
-    }, {});
-
     logger.info('Successfully retrieved recommended keywords');
-    return keywordList;
+    return result;
   } catch (err) {
     logger.error(`Failed to get recommended keywords: ${err.message}`);
     throw new CustomError('Failed to get recommended keywords', HttpCode.INTERNAL_SERVER_ERROR);
