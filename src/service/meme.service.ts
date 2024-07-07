@@ -1,9 +1,9 @@
 import _ from 'lodash';
 import { Types } from 'mongoose';
-import { IKeywordDocument } from '../model/keyword';
 
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
+import { IKeywordDocument } from '../model/keyword';
 import { IMemeCreatePayload, IMemeDocument, MemeModel, IMemeWithKeywords } from '../model/meme';
 import { InteractionType, MemeInteractionModel } from '../model/memeInteraction';
 import { IUserDocument } from '../model/user';
@@ -44,7 +44,7 @@ async function getMemeWithKeywords(memeId: string): Promise<IMemeWithKeywords | 
           keywords: '$keywords.name',
         },
       },
-      { $project: { keywordIds: 0 } },
+      { $project: { keywordIds: 0, isDeleted: 0 } },
     ]);
 
     if (!meme) {
@@ -76,7 +76,7 @@ async function getTodayMemeList(limit: number = 5): Promise<IMemeWithKeywords[]>
         keywords: '$keywords.name',
       },
     },
-    { $project: { keywordIds: 0 } },
+    { $project: { keywordIds: 0, isDeleted: 0 } },
   ]);
 
   const memeIds = todayMemeList.map((meme) => meme._id);
@@ -92,7 +92,7 @@ async function getAllMemeList(
 ): Promise<{ total: number; page: number; totalPages: number; data: IMemeDocument[] }> {
   const totalMemes = await MemeModel.countDocuments();
 
-  const memeList = await MemeModel.find({ isDeleted: false })
+  const memeList = await MemeModel.find({ isDeleted: false }, { isDeleted: 0 })
     .skip((page - 1) * size)
     .limit(size)
     .sort({ createdAt: -1 });
@@ -135,7 +135,7 @@ async function updateMeme(memeId: Types.ObjectId, updateInfo: any): Promise<IMem
 
 async function deleteMeme(memeId: Types.ObjectId): Promise<boolean> {
   const deletedMeme = await MemeModel.findOneAndDelete(
-    { _id: memeId },
+    { _id: memeId, isDeleted: false },
     { $set: { isDeleted: true } },
   ).lean();
 
@@ -154,21 +154,41 @@ async function deleteKeywordOfMeme(deleteKeywordId: Types.ObjectId) {
   );
 }
 
-async function searchMemeByKeyword(keyword: IKeywordDocument): Promise<IMemeDocument[]> {
+async function searchMemeByKeyword(
+  page: number,
+  size: number,
+  keyword: IKeywordDocument,
+): Promise<{ total: number; page: number; totalPages: number; data: IMemeDocument[] }> {
   try {
+    const totalMemes = await MemeModel.countDocuments({
+      keywordIds: { $in: keyword._id },
+      isDeleted: false,
+    });
+
     const memeList = await MemeModel.find(
-      { keywordIds: keyword._id },
-      { createdAt: 0, updatedAt: 0 },
+      { isDeleted: false, keywordIds: { $in: keyword._id } },
+      { isDeleted: 0 },
     )
+      .skip((page - 1) * size)
+      .limit(size)
       .sort({ reaction: -1 })
       .populate('keywordIds', 'name')
       .lean();
 
-    return memeList;
+    logger.info(
+      `Get all meme list with keyword(${keyword.name}) - page(${page}), size(${size}), total(${totalMemes})`,
+    );
+
+    return {
+      total: totalMemes,
+      page,
+      totalPages: Math.ceil(totalMemes / size),
+      data: memeList,
+    };
   } catch (err) {
-    logger.error(`Failed to search meme by keyword(${keyword})`, err.message);
+    logger.error(`Failed to search meme list with keyword(${keyword})`, err.message);
     throw new CustomError(
-      `Failed to search meme by keyword(${keyword})`,
+      `Failed to search meme list with keyword(${keyword})`,
       HttpCode.INTERNAL_SERVER_ERROR,
     );
   }
@@ -204,7 +224,7 @@ async function createMemeInteraction(
     // 'reaction'인 경우에만 Meme의 reaction 수를 업데이트한다.
     if (interactionType === InteractionType.REACTION) {
       await MemeModel.findOneAndUpdate(
-        { memeId: meme._id },
+        { memeId: meme._id, isDeleted: false },
         { $inc: { reaction: 1 } },
         {
           projection: { _id: 0, createdAt: 0, updatedAt: 0 },
@@ -252,16 +272,23 @@ async function deleteMemeSave(user: IUserDocument, meme: IMemeDocument): Promise
 }
 async function getTopReactionImage(keyword: IKeywordDocument): Promise<string> {
   try {
-    const topReactionMeme = await MemeModel.findOne({ keywordIds: keyword._id }).sort({ reaction: -1 });
+    const topReactionMeme: IMemeDocument = await MemeModel.findOne({
+      isDeleted: false,
+      keywordIds: { $in: [keyword._id] },
+    }).sort({
+      reaction: -1,
+    });
 
     logger.info(`Get top reaction meme - keyword(${keyword.name}), meme(${topReactionMeme._id})`);
     return topReactionMeme.image;
-  }catch (err) {
+  } catch (err) {
     logger.error(`Failed get top reaction meme`, err.message);
-    throw new CustomError(`Failed get top reaction meme(${err.message})`, HttpCode.INTERNAL_SERVER_ERROR);
+    throw new CustomError(
+      `Failed get top reaction meme(${err.message})`,
+      HttpCode.INTERNAL_SERVER_ERROR,
+    );
   }
 }
-
 
 export {
   getMeme,
@@ -277,4 +304,3 @@ export {
   searchMemeByKeyword,
   getTopReactionImage,
 };
-

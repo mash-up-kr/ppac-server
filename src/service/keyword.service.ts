@@ -52,7 +52,10 @@ async function deleteKeyword(keywordId: Types.ObjectId): Promise<boolean> {
 
 async function getTopKeywords(limit: number = 6): Promise<IKeywordDocument[]> {
   try {
-    const topKeywords = await KeywordModel.find().sort({ searchCount: -1 }).limit(limit).lean();
+    const topKeywords = await KeywordModel.find({}, { isDeleted: 0 })
+      .sort({ searchCount: -1 })
+      .limit(limit)
+      .lean();
     return topKeywords;
   } catch (err) {
     logger.error(`Failed to get top keywords: ${err.message}`);
@@ -65,7 +68,7 @@ async function increaseSearchCount(keywordId: Types.ObjectId): Promise<IKeywordD
     const updatedKeyword = await KeywordModel.findOneAndUpdate(
       { _id: keywordId },
       { $inc: { searchCount: 1 } },
-      { new: true },
+      { new: true, projection: { isDeleted: 0 } },
     );
     if (!updatedKeyword) {
       throw new CustomError(`KeywordId ${keywordId} not found`, HttpCode.NOT_FOUND);
@@ -95,7 +98,7 @@ async function getKeywordById(keywordId: Types.ObjectId): Promise<IKeywordDocume
   }
 }
 
-async function getRecommendedKeywords(): Promise<{ [categoryName: string]: string[] }> {
+async function getRecommendedKeywords(): Promise<{ title: string; keywords: string[] }[]> {
   try {
     const result = await KeywordCategoryModel.aggregate([
       {
@@ -137,13 +140,8 @@ async function getRecommendedKeywords(): Promise<{ [categoryName: string]: strin
       },
     ]);
 
-    const keywordList = result.reduce((acc, { category, keywords }) => {
-      acc[category] = keywords;
-      return acc;
-    }, {});
-
     logger.info('Successfully retrieved recommended keywords');
-    return keywordList;
+    return result;
   } catch (err) {
     logger.error(`Failed to get recommended keywords: ${err.message}`);
     throw new CustomError('Failed to get recommended keywords', HttpCode.INTERNAL_SERVER_ERROR);
