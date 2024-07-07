@@ -43,6 +43,9 @@ const router = express.Router();
  *                  data:
  *                    type: object
  *                    properties:
+ *                      _id:
+ *                        type: string
+ *                        example: "66805b1372ef94c9c0ba1349"
  *                      deviceId:
  *                        type: string
  *                        example: "deviceId"

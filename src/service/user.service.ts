@@ -19,7 +19,6 @@ async function getUser(deviceId: string): Promise<IUserDocument | null> {
     const user = await UserModel.findOne(
       { deviceId, isDeleted: false },
       {
-        _id: 0,
         createdAt: 0,
         updatedAt: 0,
       },
@@ -38,7 +37,7 @@ async function createUser(deviceId: string): Promise<IUserInfos> {
   try {
     const foundUser = await UserModel.findOne(
       { deviceId, isDeleted: false },
-      { _id: 0, createdAt: 0, updatedAt: 0 },
+      { createdAt: 0, updatedAt: 0 },
     );
 
     if (foundUser) {
@@ -109,7 +108,7 @@ async function updateLastSeenMeme(user: IUserDocument, meme: IMemeDocument): Pro
         $set: { lastSeenMeme: newLastSeenMemeList },
       },
       {
-        projection: { _id: 0, createdAt: 0, updatedAt: 0 },
+        projection: { createdAt: 0, updatedAt: 0 },
         returnDocument: 'after',
       },
     ).lean();
