@@ -33,6 +33,38 @@ async function getUser(deviceId: string): Promise<IUserDocument | null> {
   }
 }
 
+async function makeUserInfos(deviceId: string): Promise<IUserInfos> {
+  const user = await UserModel.findOne({ deviceId, isDeleted: false });
+  const countInteractionType = (type: InteractionType) =>
+    MemeInteractionModel.countDocuments({
+      deviceId: user.deviceId,
+      interactionType: type,
+    });
+
+  const [watch, reaction, share, save] = await Promise.all([
+    countInteractionType(InteractionType.WATCH),
+    countInteractionType(InteractionType.REACTION),
+    countInteractionType(InteractionType.SHARE),
+    countInteractionType(InteractionType.SAVE),
+  ]);
+
+  const todayWeekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
+  const memeRecommendWatchCount = await MemeRecommendWatchModel.countDocuments({
+    startDate: todayWeekStart,
+    deviceId: user.deviceId,
+    isDeleted: false,
+  });
+
+  return {
+    ...user.toObject(),
+    watch,
+    reaction,
+    save,
+    share,
+    memeRecommendWatchCount,
+  };
+}
+
 async function createUser(deviceId: string): Promise<IUserInfos> {
   try {
     const foundUser = await UserModel.findOne(
@@ -41,33 +73,9 @@ async function createUser(deviceId: string): Promise<IUserInfos> {
     );
 
     if (foundUser) {
-      const countInteractionType = (type: InteractionType) =>
-        MemeInteractionModel.countDocuments({
-          deviceId: foundUser.deviceId,
-          interactionType: type,
-        });
-
-      const [watch, reaction, share, save] = await Promise.all([
-        countInteractionType(InteractionType.WATCH),
-        countInteractionType(InteractionType.REACTION),
-        countInteractionType(InteractionType.SHARE),
-        countInteractionType(InteractionType.SAVE),
-      ]);
-
-      const todayWeekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
-      const memeRecommendWatchCount = await MemeRecommendWatchModel.countDocuments({
-        startDate: todayWeekStart,
-        deviceId: foundUser.deviceId,
-        isDeleted: false,
-      });
-
+      const foundUserInfos = await makeUserInfos(deviceId);
       return {
-        ...foundUser.toObject(),
-        watch,
-        reaction,
-        save,
-        share,
-        memeRecommendWatchCount,
+        ...foundUserInfos,
       };
     }
 
@@ -240,5 +248,6 @@ export {
   updateLastSeenMeme,
   getLastSeenMemes,
   getSavedMemes,
+  makeUserInfos,
   createMemeRecommendWatch,
 };

@@ -4,7 +4,6 @@ import _ from 'lodash';
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
 import { CustomRequest } from '../middleware/requestedInfo';
-import { InteractionType, MemeInteractionModel } from '../model/memeInteraction';
 import * as UserService from '../service/user.service';
 import { createSuccessResponse } from '../util/response';
 
@@ -26,31 +25,9 @@ const getUser = async (req: CustomRequest, res: Response, next: NextFunction) =>
   const user = req.requestedUser;
 
   try {
-    const countInteractionType = (type: InteractionType) =>
-      MemeInteractionModel.countDocuments({
-        deviceId: user.deviceId,
-        interactionType: type,
-      });
-
-    const [watch, reaction, share, save] = await Promise.all([
-      countInteractionType(InteractionType.WATCH),
-      countInteractionType(InteractionType.REACTION),
-      countInteractionType(InteractionType.SHARE),
-      countInteractionType(InteractionType.SAVE),
-    ]);
-
-    const level = getLevel(watch, reaction, share);
-
-    return res.json(
-      createSuccessResponse(HttpCode.OK, 'Get User', {
-        ...user,
-        watch,
-        reaction,
-        share,
-        save,
-        level,
-      }),
-    );
+    const userInfos = await UserService.makeUserInfos(user.deviceId);
+    const level = getLevel(userInfos.watch, userInfos.reaction, userInfos.share);
+    return res.json(createSuccessResponse(HttpCode.OK, 'Get User', { ...userInfos, level }));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
