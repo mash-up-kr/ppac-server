@@ -446,13 +446,17 @@ router.patch('/count', getKeywordInfoByName, increaseSearchCount);
  *                         type: string
  *                         example: "상황"
  *                       keywords:
- *                         type: array
- *                         items:
- *                           type: string
- *                           example:
- *                             - "키워드1"
- *                             - "키워드2"
- *                             - "키워드3"
+ *                         type: object
+ *                         properties:
+ *                           _id:
+ *                              type: string
+ *                              example: "667ff3d1239eeaf78630a283"
+ *                           name:
+ *                              type: string
+ *                              example: "웃긴"
+ *               name:
+ *                 type: string
+ *                 example: "웃긴"
  *       500:
  *         description: Internal server error
  *         content:

@@ -4,7 +4,7 @@ import { Types } from 'mongoose';
 
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
-import { IMemeDocument, MemeModel } from '../model/meme';
+import { IMemeDocument, IMemeGetResponse, MemeModel } from '../model/meme';
 import { InteractionType, MemeInteractionModel } from '../model/memeInteraction';
 import {
   MemeRecommendWatchModel,
@@ -12,6 +12,8 @@ import {
   IMemeRecommendWatchCreatePayload,
 } from '../model/memeRecommendWatch';
 import { IUser, IUserDocument, IUserInfos, UserModel } from '../model/user';
+
+import * as KeywordService from './keyword.service';
 import { logger } from '../util/logger';
 
 async function getUser(deviceId: string): Promise<IUserDocument | null> {
@@ -133,7 +135,7 @@ async function updateLastSeenMeme(user: IUserDocument, meme: IMemeDocument): Pro
   }
 }
 
-async function getLastSeenMemes(user: IUserDocument): Promise<IMemeDocument[]> {
+async function getLastSeenMemes(user: IUserDocument): Promise<IMemeGetResponse[]> {
   try {
     const lastSeenMeme = user.lastSeenMeme;
     const memeList = await MemeModel.find(
@@ -144,7 +146,15 @@ async function getLastSeenMemes(user: IUserDocument): Promise<IMemeDocument[]> {
       { isDeleted: 0 },
     ).lean();
 
-    return memeList;
+    const ret = await Promise.all(
+      memeList.map(async (meme) => {
+        const keywords = await KeywordService.getKeywordInfoByKeywordIds(meme.keywordIds);
+        return { ..._.omit(meme, 'keywordIds'), keywords };
+      }),
+    );
+    logger.info(`Get lastSeenMeme - deviceId(${user.deviceId}), memeList(${ret})`);
+
+    return ret;
   } catch (err) {
     logger.error(`Failed get lastSeenMeme`, err.message);
     throw new CustomError(
@@ -158,7 +168,7 @@ async function getSavedMemes(
   page: number,
   size: number,
   user: IUserDocument,
-): Promise<{ total: number; page: number; totalPages: number; data: IMemeDocument[] }> {
+): Promise<{ total: number; page: number; totalPages: number; data: IMemeGetResponse[] }> {
   try {
     const totalSavedMemes = await MemeInteractionModel.countDocuments({
       deviceId: user.deviceId,
@@ -185,11 +195,18 @@ async function getSavedMemes(
       { isDeleted: 0 },
     ).lean();
 
+    const ret = await Promise.all(
+      memeList.map(async (meme) => {
+        const keywords = await KeywordService.getKeywordInfoByKeywordIds(meme.keywordIds);
+        return { ..._.omit(meme, 'keywordIds'), keywords };
+      }),
+    );
+
     return {
       total: totalSavedMemes,
       page,
       totalPages: Math.ceil(totalSavedMemes / size),
-      data: memeList,
+      data: ret,
     };
   } catch (error) {
     throw new CustomError(`Failed to get saved memes`, HttpCode.INTERNAL_SERVER_ERROR, error);

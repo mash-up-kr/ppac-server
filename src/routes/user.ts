@@ -286,10 +286,17 @@ router.get('/', getRequestedUserInfo, UserController.getUser); // user 조회
  *                           isTodayMeme:
  *                             type: boolean
  *                             example: false
- *                           keywordIds:
+ *                           keywords:
  *                             type: array
  *                             items:
- *                               example: "667fee7ac58681a42d57dc3b"
+ *                               type: object
+ *                               properties:
+ *                                 _id:
+ *                                   type: string
+ *                                   example: "5f6f6b1d6ab9c8f7d9a4b5c6"
+ *                                 title:
+ *                                   type: string
+ *                                   example: "무한도전"
  *                           title:
  *                             type: string
  *                             example: "무한상사 정총무"
@@ -300,6 +307,10 @@ router.get('/', getRequestedUserInfo, UserController.getUser); // user 조회
  *                             type: integer
  *                             example: 99
  *                             description: 밈 리액션 수
+ *                           watch:
+ *                             type: integer
+ *                             example: 999
+ *                             description: 조회 수
  *                           createdAt:
  *                             type: string
  *                             format: date-time
@@ -394,10 +405,17 @@ router.get('/saved-memes', getRequestedUserInfo, UserController.getSavedMemes); 
  *                       isTodayMeme:
  *                         type: boolean
  *                         example: false
- *                       keywordIds:
+ *                       keywords:
  *                         type: array
  *                         items:
- *                           example: "667fee7ac58681a42d57dc3b"
+ *                           type: object
+ *                           properties:
+ *                             _id:
+ *                               type: string
+ *                               example: "667fee7ac58681a42d57dc3b"
+ *                             name:
+ *                               type: string
+ *                               example: "무한도전"
  *                       title:
  *                         type: string
  *                         example: "무한상사 정총무"
@@ -408,6 +426,10 @@ router.get('/saved-memes', getRequestedUserInfo, UserController.getSavedMemes); 
  *                         type: integer
  *                         example: 99
  *                         description: 밈 리액션 수
+ *                       watch:
+ *                         type: integer
+ *                         example: 999
+ *                         description: 밈 조회수
  *                       createdAt:
  *                         type: string
  *                         format: date-time

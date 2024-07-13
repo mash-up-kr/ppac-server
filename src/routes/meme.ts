@@ -94,10 +94,17 @@ const router = express.Router();
  *                           isTodayMeme:
  *                             type: boolean
  *                             example: false
- *                           keywordIds:
+ *                           keywords:
  *                             type: array
  *                             items:
- *                               example: "667fee7ac58681a42d57dc3b"
+ *                               type: object
+ *                               properties:
+ *                                 _id:
+ *                                   type: string
+ *                                   example: "667fee6dc58681a42d57dc37"
+ *                                 name:
+ *                                   type: string
+ *                                   example: "무한도전"
  *                           title:
  *                             type: string
  *                             example: "무한상사 정총무"
@@ -222,8 +229,14 @@ router.get('/list', getAllMemeList); // meme 목록 전체 조회 (페이지네�
  *                       keywords:
  *                         type: array
  *                         items:
- *                           type: string
- *                           example: "angry"
+ *                           type: object
+ *                           properties:
+ *                             _id:
+ *                               type: string
+ *                               example: "66805b1372ef94c9c0ba1349"
+ *                             name:
+ *                               type: string
+ *                               example: "무한도전"
  *       400:
  *         description: Invalid request parameters
  *         content:
@@ -464,11 +477,14 @@ router.post('/', createMeme); // meme 생성
  *                     keywords:
  *                       type: array
  *                       items:
- *                         type: string
- *                         example:
- *                           - "무한상사"
- *                           - "정총무"
- *                           - "전자두뇌"
+ *                         type: object
+ *                         properties:
+ *                           _id:
+ *                             type: string
+ *                             example: "66805b1372ef94c9c0ba1349"
+ *                           name:
+ *                             type: string
+ *                             example: "무한도전"
  *       400:
  *         description: Bad Request
  *         content:
@@ -1265,22 +1281,17 @@ router.post('/:memeId/reaction', getRequestedUserInfo, getRequestedMemeInfo, cre
  *                           isTodayMeme:
  *                             type: boolean
  *                             example: false
- *                           keywordIds:
+ *                           keywords:
  *                             type: array
  *                             items:
  *                               type: object
  *                               properties:
  *                                 _id:
  *                                   type: string
- *                                   example: "667fee7ac58681a42d57dc3b"
+ *                                   example: "66805b1a72ef94c9c0ba134c"
  *                                 name:
  *                                   type: string
  *                                   example: "행복"
- *                               example:
- *                                - _id: "667fee7ac58681a42d57dc3b"
- *                                  name: "행복"
- *                                - _id: "667fee7ac58681a42d57dc3d"
- *                                  name: "장원영"
  *                           title:
  *                             type: string
  *                             example: "무한상사 정총무"

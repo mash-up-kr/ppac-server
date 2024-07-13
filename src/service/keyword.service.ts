@@ -3,7 +3,12 @@ import { Types } from 'mongoose';
 
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
-import { IKeywordCreatePayload, KeywordModel, IKeywordDocument } from '../model/keyword';
+import {
+  IKeywordCreatePayload,
+  KeywordModel,
+  IKeywordDocument,
+  IKeywordGetResponse,
+} from '../model/keyword';
 import { KeywordCategoryModel } from '../model/keywordCategory';
 import { logger } from '../util/logger';
 
@@ -98,7 +103,26 @@ async function getKeywordById(keywordId: Types.ObjectId): Promise<IKeywordDocume
   }
 }
 
-async function getRecommendedKeywords(): Promise<{ title: string; keywords: string[] }[]> {
+async function getKeywordInfoByKeywordIds(
+  keywordIds: Types.ObjectId[],
+): Promise<IKeywordGetResponse[]> {
+  try {
+    const keyword = await KeywordModel.find(
+      { _id: { $in: keywordIds }, isDeleted: false },
+      {
+        _id: 1,
+        name: 1,
+      },
+    ).lean();
+    return keyword;
+  } catch (err) {
+    logger.info(`Failed to get a Keyword Info By id (${keywordIds})`);
+  }
+}
+
+async function getRecommendedKeywords(): Promise<
+  { title: string; keywords: IKeywordGetResponse[] }[]
+> {
   try {
     const result = await KeywordCategoryModel.aggregate([
       {
@@ -119,23 +143,16 @@ async function getRecommendedKeywords(): Promise<{ title: string; keywords: stri
         $project: {
           _id: 0,
           category: '$name',
-          keywords: '$keywords.name',
-        },
-      },
-      {
-        $unwind: '$keywords',
-      },
-      {
-        $group: {
-          _id: '$category',
-          keywords: { $push: '$keywords' },
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-          category: '$_id',
-          keywords: 1,
+          keywords: {
+            $map: {
+              input: '$keywords',
+              as: 'keyword',
+              in: {
+                name: '$$keyword.name',
+                _id: '$$keyword._id',
+              },
+            },
+          },
         },
       },
     ]);
@@ -157,4 +174,5 @@ export {
   getKeywordByName,
   getKeywordById,
   getRecommendedKeywords,
+  getKeywordInfoByKeywordIds,
 };

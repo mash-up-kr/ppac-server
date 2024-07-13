@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
+import { IKeywordGetResponse } from './keyword';
 
 export interface IMemeCreatePayload {
   title: string;
@@ -21,6 +22,19 @@ export interface IMeme {
   reaction: number;
   source: string;
   isTodayMeme: boolean;
+}
+
+export interface IMemeGetResponse {
+  _id: Types.ObjectId;
+  title: string;
+  keywords: IKeywordGetResponse[];
+  image: string;
+  reaction: number;
+  source: string;
+  isTodayMeme: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  isDeleted: boolean;
 }
 
 export interface IMemeDocument extends Document {

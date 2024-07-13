@@ -14,6 +14,11 @@ export interface IKeywordWithImage extends IKeyword {
   topReactionImage: string;
 }
 
+export interface IKeywordGetResponse {
+  _id: Types.ObjectId;
+  name: string;
+}
+
 export interface IKeyword {
   name: string;
   category: string;

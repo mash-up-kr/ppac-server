@@ -3,10 +3,18 @@ import { Types } from 'mongoose';
 
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
-import { IKeywordDocument } from '../model/keyword';
-import { IMemeCreatePayload, IMemeDocument, MemeModel, IMemeWithKeywords } from '../model/meme';
+import { IKeywordDocument, KeywordModel } from '../model/keyword';
+import {
+  IMemeCreatePayload,
+  IMemeDocument,
+  MemeModel,
+  IMemeWithKeywords,
+  IMemeGetResponse,
+} from '../model/meme';
 import { InteractionType, MemeInteractionModel } from '../model/memeInteraction';
 import { IUserDocument } from '../model/user';
+
+import * as KeywordService from './keyword.service';
 import { logger } from '../util/logger';
 
 async function getMeme(memeId: string): Promise<IMemeDocument | null> {
@@ -30,7 +38,9 @@ async function getMeme(memeId: string): Promise<IMemeDocument | null> {
 async function getMemeWithKeywords(memeId: string): Promise<IMemeWithKeywords | null> {
   try {
     const meme = await MemeModel.aggregate([
-      { $match: { _id: new Types.ObjectId(memeId), isDeleted: false } },
+      {
+        $match: { _id: new Types.ObjectId(memeId), isDeleted: false },
+      },
       {
         $lookup: {
           from: 'keyword',
@@ -41,10 +51,21 @@ async function getMemeWithKeywords(memeId: string): Promise<IMemeWithKeywords | 
       },
       {
         $addFields: {
-          keywords: '$keywords.name',
+          keywords: {
+            $map: {
+              input: '$keywords',
+              as: 'keyword',
+              in: {
+                name: '$$keyword.name',
+                _id: '$$keyword._id',
+              },
+            },
+          },
         },
       },
-      { $project: { keywordIds: 0, isDeleted: 0 } },
+      {
+        $project: { keywordIds: 0, isDeleted: 0 },
+      },
     ]);
 
     if (!meme) {
@@ -61,8 +82,12 @@ async function getMemeWithKeywords(memeId: string): Promise<IMemeWithKeywords | 
 
 async function getTodayMemeList(limit: number = 5): Promise<IMemeWithKeywords[]> {
   const todayMemeList = await MemeModel.aggregate([
-    { $match: { isTodayMeme: true, isDeleted: false } },
-    { $limit: limit },
+    {
+      $match: { isTodayMeme: true, isDeleted: false },
+    },
+    {
+      $limit: limit,
+    },
     {
       $lookup: {
         from: 'keyword',
@@ -73,10 +98,21 @@ async function getTodayMemeList(limit: number = 5): Promise<IMemeWithKeywords[]>
     },
     {
       $addFields: {
-        keywords: '$keywords.name',
+        keywords: {
+          $map: {
+            input: '$keywords',
+            as: 'keyword',
+            in: {
+              name: '$$keyword.name',
+              _id: '$$keyword._id',
+            },
+          },
+        },
       },
     },
-    { $project: { keywordIds: 0, isDeleted: 0 } },
+    {
+      $project: { keywordIds: 0, isDeleted: 0 },
+    },
   ]);
 
   const memeIds = todayMemeList.map((meme) => meme._id);
@@ -89,20 +125,28 @@ async function getTodayMemeList(limit: number = 5): Promise<IMemeWithKeywords[]>
 async function getAllMemeList(
   page: number,
   size: number,
-): Promise<{ total: number; page: number; totalPages: number; data: IMemeDocument[] }> {
+): Promise<{ total: number; page: number; totalPages: number; data: IMemeGetResponse[] }> {
   const totalMemes = await MemeModel.countDocuments();
 
   const memeList = await MemeModel.find({ isDeleted: false }, { isDeleted: 0 })
     .skip((page - 1) * size)
     .limit(size)
     .sort({ createdAt: -1 });
+
+  const ret: IMemeGetResponse[] = await Promise.all(
+    memeList.map(async (meme) => {
+      const keywords = await KeywordService.getKeywordInfoByKeywordIds(meme.keywordIds);
+      return { ..._.omit(meme.toObject(), 'keywordIds'), keywords };
+    }),
+  );
+
   logger.info(`Get all meme list - page(${page}), size(${size}), total(${totalMemes})`);
 
   return {
     total: totalMemes,
     page,
     totalPages: Math.ceil(totalMemes / size),
-    data: memeList,
+    data: ret,
   };
 }
 
@@ -158,7 +202,7 @@ async function searchMemeByKeyword(
   page: number,
   size: number,
   keyword: IKeywordDocument,
-): Promise<{ total: number; page: number; totalPages: number; data: IMemeDocument[] }> {
+): Promise<{ total: number; page: number; totalPages: number; data: IMemeGetResponse[] }> {
   try {
     const totalMemes = await MemeModel.countDocuments({
       keywordIds: { $in: keyword._id },
@@ -172,8 +216,14 @@ async function searchMemeByKeyword(
       .skip((page - 1) * size)
       .limit(size)
       .sort({ reaction: -1 })
-      .populate('keywordIds', 'name')
       .lean();
+
+    const ret = await Promise.all(
+      memeList.map(async (meme) => {
+        const keywords = await KeywordService.getKeywordInfoByKeywordIds(meme.keywordIds);
+        return { ..._.omit(meme, 'keywordIds'), keywords };
+      }),
+    );
 
     logger.info(
       `Get all meme list with keyword(${keyword.name}) - page(${page}), size(${size}), total(${totalMemes})`,
@@ -183,7 +233,7 @@ async function searchMemeByKeyword(
       total: totalMemes,
       page,
       totalPages: Math.ceil(totalMemes / size),
-      data: memeList,
+      data: ret,
     };
   } catch (err) {
     logger.error(`Failed to search meme list with keyword(${keyword})`, err.message);
