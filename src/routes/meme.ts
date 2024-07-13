@@ -12,6 +12,7 @@ import {
   createMemeReaction,
   createMemeWatch,
   searchMemeListByKeyword,
+  deleteMemeSave,
 } from '../controller/meme.controller';
 import {
   getRequestedMemeInfo,
@@ -896,6 +897,105 @@ router.delete('/:memeId', getRequestedMemeInfo, deleteMeme); // meme 삭제
  *                   example: null
  */
 router.post('/:memeId/save', getRequestedUserInfo, getRequestedMemeInfo, createMemeSave); // meme 저장하기
+
+/**
+ * @swagger
+ * /api/meme/{memeId}/save:
+ *   delete:
+ *     tags: [Meme]
+ *     summary: 밈 저장
+ *     description: 밈 저장할 취소할 때 사용되는 api
+ *     parameters:
+ *     - name: x-device-id
+ *       in: header
+ *       description: 유저의 고유한 deviceId
+ *       required: true
+ *       type: string
+ *     - in: path
+ *       name: memeId
+ *       schema:
+ *         type: string
+ *       description: 저장할 밈 id
+ *     responses:
+ *       200:
+ *         description: Meme successfully saved
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 code:
+ *                   type: integer
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: Deleted Meme Save
+ *                 data:
+ *                   type: boolean
+ *                   example: true
+ *       400:
+ *         description: Invalid parameters
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: error
+ *                 code:
+ *                   type: integer
+ *                   example: 400
+ *                 message:
+ *                   type: string
+ *                   example: 'deviceId should be provided'
+ *                 data:
+ *                   type: null
+ *                   example: null
+ *       404:
+ *         description: Meme or user not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: error
+ *                 code:
+ *                   type: integer
+ *                   example: 404
+ *                 message:
+ *                   type: string
+ *                   example: Meme(66805b1372ef94c9c0ba1349) does not exist
+ *                 data:
+ *                   type: null
+ *                   example: null
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: error
+ *                 code:
+ *                   type: integer
+ *                   example: 500
+ *                 message:
+ *                   type: string
+ *                   example: Internal server error
+ *                 data:
+ *                   type: null
+ *                   example: null
+ *
+ * */
+router.delete('/:memeId/save', getRequestedUserInfo, getRequestedMemeInfo, deleteMemeSave);
 
 /**
  * @swagger
