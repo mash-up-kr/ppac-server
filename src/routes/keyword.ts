@@ -267,7 +267,7 @@ router.delete('/:keywordId', getKeywordInfoById, deleteKeyword);
  *                         example: 100
  *                       topReactionImage:
  *                         type: string
- *                         example: "https://example.com/top-reaction-image.jpg"
+ *                         example: "https://ppac-meme.s3.ap-northeast-2.amazonaws.com/17207029441190.png"
  *                       createdAt:
  *                         type: string
  *                         example: "2024-07-05T15:21:34.012Z"

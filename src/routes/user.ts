@@ -282,7 +282,7 @@ router.get('/', getRequestedUserInfo, UserController.getUser); // user 조회
  *                             example: "66805b1a72ef94c9c0ba134c"
  *                           image:
  *                             type: string
- *                             example: "https://example.com/meme.jpg"
+ *                             example: "https://ppac-meme.s3.ap-northeast-2.amazonaws.com/17207029441190.png"
  *                           isTodayMeme:
  *                             type: boolean
  *                             example: false
@@ -401,7 +401,7 @@ router.get('/saved-memes', getRequestedUserInfo, UserController.getSavedMemes); 
  *                         example: "66805b1a72ef94c9c0ba134c"
  *                       image:
  *                         type: string
- *                         example: "https://example.com/meme.jpg"
+ *                         example: "https://ppac-meme.s3.ap-northeast-2.amazonaws.com/17207029441190.png"
  *                       isTodayMeme:
  *                         type: boolean
  *                         example: false

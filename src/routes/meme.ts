@@ -90,7 +90,7 @@ const router = express.Router();
  *                             example: "66805b1a72ef94c9c0ba134c"
  *                           image:
  *                             type: string
- *                             example: "https://example.com/meme.jpg"
+ *                             example: "https://ppac-meme.s3.ap-northeast-2.amazonaws.com/17207029441190.png"
  *                           isTodayMeme:
  *                             type: boolean
  *                             example: false
@@ -208,7 +208,7 @@ router.get('/list', getAllMemeList); // meme 목록 전체 조회 (페이지네�
  *                         example: "title1"
  *                       image:
  *                         type: string
- *                         example: "image1"
+ *                         example: "https://ppac-meme.s3.ap-northeast-2.amazonaws.com/17207029441190.png"
  *                       reaction:
  *                         type: integer
  *                         example: 0
@@ -298,7 +298,7 @@ router.get('/recommend-memes', getTodayMemeList); // 오늘의 추천 밈 (5개)
  *                 description: 밈 제목
  *               image:
  *                 type: string
- *                 example: "https://example.com/meme.jpg"
+ *                 example: "https://ppac-meme.s3.ap-northeast-2.amazonaws.com/17207029441190.png"
  *                 description: 밈 이미지 주소
  *               source:
  *                 type: string
@@ -340,7 +340,7 @@ router.get('/recommend-memes', getTodayMemeList); // 오늘의 추천 밈 (5개)
  *                       description: 밈 제목
  *                     image:
  *                       type: string
- *                       example: "https://example.com/meme.jpg"
+ *                       example: "https://ppac-meme.s3.ap-northeast-2.amazonaws.com/17207029441190.png"
  *                       description: 밈 이미지 주소
  *                     source:
  *                       type: string
@@ -453,7 +453,7 @@ router.post('/', createMeme); // meme 생성
  *                       example: "무한도전 정총무"
  *                     image:
  *                       type: string
- *                       example: "https://example.com/meme.jpg"
+ *                       example: "https://ppac-meme.s3.ap-northeast-2.amazonaws.com/17207029441190.png"
  *                     reaction:
  *                       type: integer
  *                       example: 0
@@ -572,7 +572,7 @@ router.get('/:memeId', getMemeWithKeywords); // meme 조회
  *                 description: 밈 제목
  *               image:
  *                 type: string
- *                 example: "https://example.com/meme.jpg"
+ *                 example: "https://ppac-meme.s3.ap-northeast-2.amazonaws.com/17207029441190.png"
  *                 description: 밈 이미지 주소
  *               source:
  *                 type: string
@@ -614,7 +614,7 @@ router.get('/:memeId', getMemeWithKeywords); // meme 조회
  *                       description: 밈 제목
  *                     image:
  *                       type: string
- *                       example: "https://example.com/meme.jpg"
+ *                       example: "https://ppac-meme.s3.ap-northeast-2.amazonaws.com/17207029441190.png"
  *                       description: 밈 이미지 주소
  *                     source:
  *                       type: string
@@ -1277,7 +1277,7 @@ router.post('/:memeId/reaction', getRequestedUserInfo, getRequestedMemeInfo, cre
  *                             example: "66805b1a72ef94c9c0ba134c"
  *                           image:
  *                             type: string
- *                             example: "https://example.com/meme.jpg"
+ *                             example: "https://ppac-meme.s3.ap-northeast-2.amazonaws.com/17207029441190.png"
  *                           isTodayMeme:
  *                             type: boolean
  *                             example: false
