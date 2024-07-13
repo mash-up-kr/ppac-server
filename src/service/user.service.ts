@@ -149,7 +149,13 @@ async function getLastSeenMemes(user: IUserDocument): Promise<IMemeGetResponse[]
     const ret = await Promise.all(
       memeList.map(async (meme) => {
         const keywords = await KeywordService.getKeywordInfoByKeywordIds(meme.keywordIds);
-        return { ..._.omit(meme, 'keywordIds'), keywords };
+        const isSaved = await MemeInteractionModel.findOne({
+          deviceId: user.deviceId,
+          memeId: meme._id,
+          type: InteractionType.SAVE,
+          isDeleted: false,
+        });
+        return { ..._.omit(meme, 'keywordIds'), keywords, isSaved: !_.isNil(isSaved) };
       }),
     );
     logger.info(`Get lastSeenMeme - deviceId(${user.deviceId}), memeList(${ret})`);
@@ -198,7 +204,13 @@ async function getSavedMemes(
     const ret = await Promise.all(
       memeList.map(async (meme) => {
         const keywords = await KeywordService.getKeywordInfoByKeywordIds(meme.keywordIds);
-        return { ..._.omit(meme, 'keywordIds'), keywords };
+        const isSaved = await MemeInteractionModel.findOne({
+          deviceId: user.deviceId,
+          memeId: meme._id,
+          type: InteractionType.SAVE,
+          isDeleted: false,
+        });
+        return { ..._.omit(meme, 'keywordIds'), keywords, isSaved: !_.isNil(isSaved) };
       }),
     );
 

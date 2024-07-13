@@ -95,6 +95,9 @@ const router = express.Router();
  *                           isTodayMeme:
  *                             type: boolean
  *                             example: false
+ *                           isSaved:
+ *                             type: boolean
+ *                             example: true
  *                           keywords:
  *                             type: array
  *                             items:
@@ -163,7 +166,7 @@ const router = express.Router();
  *                   type: null
  *                   example: null
  */
-router.get('/list', getAllMemeList); // meme 목록 전체 조회 (페이지네이션)
+router.get('/list', getRequestedUserInfo, getAllMemeList); // meme 목록 전체 조회 (페이지네이션)
 
 /**
  * @swagger
@@ -227,6 +230,9 @@ router.get('/list', getAllMemeList); // meme 목록 전체 조회 (페이지네�
  *                         type: string
  *                         format: date-time
  *                         example: "2024-06-29T19:05:55.638Z"
+ *                       isSaved:
+ *                         type: boolean
+ *                         example: true
  *                       keywords:
  *                         type: array
  *                         items:
@@ -277,7 +283,7 @@ router.get('/list', getAllMemeList); // meme 목록 전체 조회 (페이지네�
  *                   type: null
  *                   example: null
  */
-router.get('/recommend-memes', getTodayMemeList); // 오늘의 추천 밈 (5개)
+router.get('/recommend-memes', getRequestedUserInfo, getTodayMemeList); // 오늘의 추천 밈 (5개)
 
 /**
  * @swagger
@@ -475,6 +481,9 @@ router.post('/', createMeme); // meme 생성
  *                       type: string
  *                       format: date-time
  *                       example: "2024-06-29T19:05:55.638Z"
+ *                     isSaved:
+ *                       type: boolean
+ *                       example: true
  *                     keywords:
  *                       type: array
  *                       items:
@@ -544,7 +553,7 @@ router.post('/', createMeme); // meme 생성
  *                   type: null
  *                   example: null
  */
-router.get('/:memeId', getMemeWithKeywords); // meme 조회
+router.get('/:memeId', getRequestedUserInfo, getRequestedMemeInfo, getMemeWithKeywords); // meme 조회
 
 /**
  * @swagger
@@ -1381,6 +1390,9 @@ router.post('/:memeId/reaction', getRequestedUserInfo, getRequestedMemeInfo, cre
  *                           isTodayMeme:
  *                             type: boolean
  *                             example: false
+ *                           isSaved:
+ *                             type: boolean
+ *                             example: true
  *                           keywords:
  *                             type: array
  *                             items:

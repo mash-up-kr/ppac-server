@@ -286,6 +286,9 @@ router.get('/', getRequestedUserInfo, UserController.getUser); // user 조회
  *                           isTodayMeme:
  *                             type: boolean
  *                             example: false
+ *                           isSaved:
+ *                             type: boolean
+ *                             example: false
  *                           keywords:
  *                             type: array
  *                             items:
@@ -403,6 +406,9 @@ router.get('/saved-memes', getRequestedUserInfo, UserController.getSavedMemes); 
  *                         type: string
  *                         example: "https://ppac-meme.s3.ap-northeast-2.amazonaws.com/17207029441190.png"
  *                       isTodayMeme:
+ *                         type: boolean
+ *                         example: false
+ *                       isSaved:
  *                         type: boolean
  *                         example: false
  *                       keywords:

@@ -40,24 +40,17 @@ const getMeme = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-const getMemeWithKeywords = async (req: Request, res: Response, next: NextFunction) => {
-  const memeId = req.params?.memeId || null;
-
-  if (_.isNull(memeId)) {
-    return next(new CustomError(`'memeId' field should be provided`, HttpCode.BAD_REQUEST));
-  }
-
-  if (!mongoose.Types.ObjectId.isValid(memeId)) {
-    return next(new CustomError(`'memeId' is not a valid ObjectId`, HttpCode.BAD_REQUEST));
-  }
+const getMemeWithKeywords = async (req: CustomRequest, res: Response, next: NextFunction) => {
+  const user = req.requestedUser;
+  const meme = req.requestedMeme;
 
   try {
-    const meme = await MemeService.getMemeWithKeywords(memeId);
-    if (_.isNull(meme)) {
-      return next(new CustomError(`Meme(${memeId}) not found.`, HttpCode.NOT_FOUND));
+    const ret = await MemeService.getMemeWithKeywords(user, meme);
+    if (_.isNull(ret)) {
+      return next(new CustomError(`Meme(${meme._id}) not found.`, HttpCode.NOT_FOUND));
     }
 
-    logger.info(`Get meme with keywords - ${memeId})`);
+    logger.info(`Get meme with keywords - ${meme._id})`);
     return res.json(createSuccessResponse(HttpCode.OK, 'Get Meme', meme));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
@@ -120,7 +113,8 @@ const deleteMeme = async (req: CustomRequest, res: Response, next: NextFunction)
   }
 };
 
-const getAllMemeList = async (req: Request, res: Response, next: NextFunction) => {
+const getAllMemeList = async (req: CustomRequest, res: Response, next: NextFunction) => {
+  const user = req.requestedUser;
   const page = parseInt(req.query.page as string) || 1;
   if (page < 1) {
     return next(new CustomError(`Invalid 'page' parameter`, HttpCode.BAD_REQUEST));
@@ -132,7 +126,7 @@ const getAllMemeList = async (req: Request, res: Response, next: NextFunction) =
   }
 
   try {
-    const memeList = await MemeService.getAllMemeList(page, size);
+    const memeList = await MemeService.getAllMemeList(page, size, user);
 
     const data = {
       pagination: {
@@ -151,7 +145,8 @@ const getAllMemeList = async (req: Request, res: Response, next: NextFunction) =
   }
 };
 
-const getTodayMemeList = async (req: Request, res: Response, next: NextFunction) => {
+const getTodayMemeList = async (req: CustomRequest, res: Response, next: NextFunction) => {
+  const user = req.requestedUser;
   const size = parseInt(req.query.size as string) || 5;
 
   if (size > 5) {
@@ -164,7 +159,7 @@ const getTodayMemeList = async (req: Request, res: Response, next: NextFunction)
   }
 
   try {
-    const todayMemeList = await MemeService.getTodayMemeList(size);
+    const todayMemeList = await MemeService.getTodayMemeList(size, user);
     return res.json(createSuccessResponse(HttpCode.OK, 'Get today meme list', todayMemeList));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
