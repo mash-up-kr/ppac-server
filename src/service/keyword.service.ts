@@ -49,7 +49,7 @@ async function updateKeyword(
 }
 async function deleteKeyword(keywordId: Types.ObjectId): Promise<boolean> {
   const deletedKeyword = await KeywordModel.findOneAndDelete({ _id: keywordId }).lean();
-  if (!deletedKeyword) {
+  if (_.isNull(deletedKeyword)) {
     throw new CustomError(`Keyword with ID ${keywordId} not found`, HttpCode.NOT_FOUND);
   }
   return true;
@@ -75,7 +75,7 @@ async function increaseSearchCount(keywordId: Types.ObjectId): Promise<IKeywordD
       { $inc: { searchCount: 1 } },
       { new: true, projection: { isDeleted: 0 } },
     );
-    if (!updatedKeyword) {
+    if (_.isNull(updatedKeyword)) {
       throw new CustomError(`KeywordId ${keywordId} not found`, HttpCode.NOT_FOUND);
     }
     return updatedKeyword;
