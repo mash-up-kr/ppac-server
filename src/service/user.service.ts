@@ -147,13 +147,15 @@ async function getLastSeenMemeList(user: IUserDocument): Promise<IMemeGetRespons
     ).lean();
 
     const getLastSeenMemeList = await MemeService.getMemeListWithKeywordsAndisSaved(user, memeList);
-    logger.info(`Get lastSeenMeme - deviceId(${user.deviceId}), memeList(${getLastSeenMemeList})`);
+    logger.info(
+      `Get lastSeenMemeList - deviceId(${user.deviceId}), memeList(${getLastSeenMemeList})`,
+    );
 
     return getLastSeenMemeList;
   } catch (err) {
-    logger.error(`Failed get lastSeenMeme`, err.message);
+    logger.error(`Failed get lastSeenMemeList`, err.message);
     throw new CustomError(
-      `Failed get lastSeenMeme(${err.message})`,
+      `Failed get lastSeenMemeList(${err.message})`,
       HttpCode.INTERNAL_SERVER_ERROR,
     );
   }
