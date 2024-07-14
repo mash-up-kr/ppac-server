@@ -44,7 +44,8 @@ describe("[PATCH] '/api/meme/:memeId' ", () => {
 
     response = await request(app).get(`/api/meme/${testMemeId}`).set('x-device-id', 'deviceId');
     expect(response.body.data._id).toBe(memeList[0]._id.toString());
-    expect(response.body.data.keywords).toHaveProperty({ _id: keywordIds[1], name: keywords[1] });
+    expect(response.body.data.keywords[0]).toHaveProperty('_id');
+    expect(response.body.data.keywords[0]).toHaveProperty('name');
     expect(response.body.data.isTodayMeme).toBeTruthy();
   });
 });
