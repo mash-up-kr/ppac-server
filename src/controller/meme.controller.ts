@@ -51,7 +51,7 @@ const getMemeWithKeywords = async (req: CustomRequest, res: Response, next: Next
     }
 
     logger.info(`Get meme with keywords - ${meme._id})`);
-    return res.json(createSuccessResponse(HttpCode.OK, 'Get Meme', meme));
+    return res.json(createSuccessResponse(HttpCode.OK, 'Get Meme', ret));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
