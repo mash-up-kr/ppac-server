@@ -2,9 +2,11 @@ import { startOfWeek } from 'date-fns';
 import _ from 'lodash';
 import { Types } from 'mongoose';
 
+import * as MemeService from './meme.service';
+import * as MemeInteractionService from './memeInteraction.service';
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
-import { IMemeDocument, MemeModel } from '../model/meme';
+import { IMemeDocument, IMemeGetResponse, MemeModel } from '../model/meme';
 import { InteractionType, MemeInteractionModel } from '../model/memeInteraction';
 import {
   MemeRecommendWatchModel,
@@ -33,6 +35,38 @@ async function getUser(deviceId: string): Promise<IUserDocument | null> {
   }
 }
 
+async function makeUserInfos(deviceId: string): Promise<IUserInfos> {
+  const user = await UserModel.findOne({ deviceId, isDeleted: false });
+  const countInteractionType = (type: InteractionType) =>
+    MemeInteractionModel.countDocuments({
+      deviceId: user.deviceId,
+      interactionType: type,
+    });
+
+  const [watch, reaction, share, save] = await Promise.all([
+    countInteractionType(InteractionType.WATCH),
+    countInteractionType(InteractionType.REACTION),
+    countInteractionType(InteractionType.SHARE),
+    countInteractionType(InteractionType.SAVE),
+  ]);
+
+  const todayWeekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
+  const memeRecommendWatchCount = await MemeRecommendWatchModel.countDocuments({
+    startDate: todayWeekStart,
+    deviceId: user.deviceId,
+    isDeleted: false,
+  });
+
+  return {
+    ...user.toObject(),
+    watch,
+    reaction,
+    save,
+    share,
+    memeRecommendWatchCount,
+  };
+}
+
 async function createUser(deviceId: string): Promise<IUserInfos> {
   try {
     const foundUser = await UserModel.findOne(
@@ -41,33 +75,9 @@ async function createUser(deviceId: string): Promise<IUserInfos> {
     );
 
     if (foundUser) {
-      const countInteractionType = (type: InteractionType) =>
-        MemeInteractionModel.countDocuments({
-          deviceId: foundUser.deviceId,
-          interactionType: type,
-        });
-
-      const [watch, reaction, share, save] = await Promise.all([
-        countInteractionType(InteractionType.WATCH),
-        countInteractionType(InteractionType.REACTION),
-        countInteractionType(InteractionType.SHARE),
-        countInteractionType(InteractionType.SAVE),
-      ]);
-
-      const todayWeekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
-      const memeRecommendWatchCount = await MemeRecommendWatchModel.countDocuments({
-        startDate: todayWeekStart,
-        deviceId: foundUser.deviceId,
-        isDeleted: false,
-      });
-
+      const foundUserInfos = await makeUserInfos(deviceId);
       return {
-        ...foundUser.toObject(),
-        watch,
-        reaction,
-        save,
-        share,
-        memeRecommendWatchCount,
+        ...foundUserInfos,
       };
     }
 
@@ -125,7 +135,7 @@ async function updateLastSeenMeme(user: IUserDocument, meme: IMemeDocument): Pro
   }
 }
 
-async function getLastSeenMemes(user: IUserDocument): Promise<IMemeDocument[]> {
+async function getLastSeenMemeList(user: IUserDocument): Promise<IMemeGetResponse[]> {
   try {
     const lastSeenMeme = user.lastSeenMeme;
     const memeList = await MemeModel.find(
@@ -136,52 +146,53 @@ async function getLastSeenMemes(user: IUserDocument): Promise<IMemeDocument[]> {
       { isDeleted: 0 },
     ).lean();
 
-    return memeList;
+    const getLastSeenMemeList = await MemeService.getMemeListWithKeywordsAndisSaved(user, memeList);
+    logger.info(
+      `Get lastSeenMemeList - deviceId(${user.deviceId}), memeList(${getLastSeenMemeList})`,
+    );
+
+    return getLastSeenMemeList;
   } catch (err) {
-    logger.error(`Failed get lastSeenMeme`, err.message);
+    logger.error(`Failed get lastSeenMemeList`, err.message);
     throw new CustomError(
-      `Failed get lastSeenMeme(${err.message})`,
+      `Failed get lastSeenMemeList(${err.message})`,
       HttpCode.INTERNAL_SERVER_ERROR,
     );
   }
 }
 
-async function getSavedMemes(
+async function getSavedMemeList(
   page: number,
   size: number,
   user: IUserDocument,
-): Promise<{ total: number; page: number; totalPages: number; data: IMemeDocument[] }> {
+): Promise<{ total: number; page: number; totalPages: number; data: IMemeGetResponse[] }> {
   try {
-    const totalSavedMemes = await MemeInteractionModel.countDocuments({
-      deviceId: user.deviceId,
-      interactionType: InteractionType.SAVE,
-      isDeleted: false,
-    });
+    const totalSavedMemes = await MemeInteractionService.getMemeInteractionCount(
+      user,
+      InteractionType.SAVE,
+    );
 
-    const savedMemes = await MemeInteractionModel.find(
-      {
-        deviceId: user.deviceId,
-        interactionType: InteractionType.SAVE,
-        isDeleted: false,
-      },
-      { isDeleted: 0 },
-    )
-      .skip((page - 1) * size)
-      .limit(size)
-      .sort({ createdAt: -1 })
-      .lean();
+    const savedMemeInteractionList = await MemeInteractionService.getMemeInteractionList(
+      page,
+      size,
+      user,
+      InteractionType.SAVE,
+    );
 
-    const memeIds = savedMemes.map(({ memeId }) => new Types.ObjectId(memeId));
+    const memeIds = savedMemeInteractionList.map(({ memeId }) => memeId);
     const memeList = await MemeModel.find(
       { _id: { $in: memeIds }, isDeleted: false },
       { isDeleted: 0 },
     ).lean();
 
+    const savedMemeList = await MemeService.getMemeListWithKeywordsAndisSaved(user, memeList);
+    logger.info(`Get savedMemeList - deviceId(${user.deviceId}), memeList(${savedMemeList})`);
+
     return {
       total: totalSavedMemes,
       page,
       totalPages: Math.ceil(totalSavedMemes / size),
-      data: memeList,
+      data: savedMemeList,
     };
   } catch (error) {
     throw new CustomError(`Failed to get saved memes`, HttpCode.INTERNAL_SERVER_ERROR, error);
@@ -238,7 +249,8 @@ export {
   getUser,
   createUser,
   updateLastSeenMeme,
-  getLastSeenMemes,
-  getSavedMemes,
+  getLastSeenMemeList,
+  getSavedMemeList,
+  makeUserInfos,
   createMemeRecommendWatch,
 };

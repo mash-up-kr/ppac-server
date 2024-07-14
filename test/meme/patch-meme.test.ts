@@ -3,8 +3,10 @@ import request from 'supertest';
 import app from '../../src/app';
 import { KeywordModel } from '../../src/model/keyword';
 import { IMemeUpdatePayload, MemeModel } from '../../src/model/meme';
+import { UserModel } from '../../src/model/user';
 import { createMockData as createKeywordMockData } from '../util/keyword.mock';
 import { createMockData } from '../util/meme.mock';
+import { mockUser } from '../util/user.mock';
 
 let memeList = [];
 let keywordIds = [];
@@ -22,10 +24,13 @@ describe("[PATCH] '/api/meme/:memeId' ", () => {
     await MemeModel.insertMany(mockDatas);
     memeList = await MemeModel.find({});
     testMemeId = memeList[0]._id.toString();
+
+    await UserModel.insertMany(mockUser);
   });
 
   afterAll(async () => {
     await MemeModel.deleteMany({});
+    await UserModel.deleteMany({});
   });
 
   it('should patch a meme', async () => {
@@ -37,9 +42,10 @@ describe("[PATCH] '/api/meme/:memeId' ", () => {
     expect(response.statusCode).toBe(200);
     expect(response.body.data._id).toBe(memeList[0]._id.toString());
 
-    response = await request(app).get(`/api/meme/${testMemeId}`);
+    response = await request(app).get(`/api/meme/${testMemeId}`).set('x-device-id', 'deviceId');
     expect(response.body.data._id).toBe(memeList[0]._id.toString());
-    expect(response.body.data.keywords).toEqual([keywords[1]]);
+    expect(response.body.data.keywords[0]).toHaveProperty('_id');
+    expect(response.body.data.keywords[0]).toHaveProperty('name');
     expect(response.body.data.isTodayMeme).toBeTruthy();
   });
 });

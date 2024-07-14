@@ -4,7 +4,6 @@ import _ from 'lodash';
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
 import { CustomRequest } from '../middleware/requestedInfo';
-import { InteractionType, MemeInteractionModel } from '../model/memeInteraction';
 import * as UserService from '../service/user.service';
 import { createSuccessResponse } from '../util/response';
 
@@ -26,48 +25,26 @@ const getUser = async (req: CustomRequest, res: Response, next: NextFunction) =>
   const user = req.requestedUser;
 
   try {
-    const countInteractionType = (type: InteractionType) =>
-      MemeInteractionModel.countDocuments({
-        deviceId: user.deviceId,
-        interactionType: type,
-      });
-
-    const [watch, reaction, share, save] = await Promise.all([
-      countInteractionType(InteractionType.WATCH),
-      countInteractionType(InteractionType.REACTION),
-      countInteractionType(InteractionType.SHARE),
-      countInteractionType(InteractionType.SAVE),
-    ]);
-
-    const level = getLevel(watch, reaction, share);
-
-    return res.json(
-      createSuccessResponse(HttpCode.OK, 'Get User', {
-        ...user,
-        watch,
-        reaction,
-        share,
-        save,
-        level,
-      }),
-    );
+    const userInfos = await UserService.makeUserInfos(user.deviceId);
+    const level = getLevel(userInfos.watch, userInfos.reaction, userInfos.share);
+    return res.json(createSuccessResponse(HttpCode.OK, 'Get User', { ...userInfos, level }));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
 };
 
-const getLastSeenMemes = async (req: CustomRequest, res: Response, next: NextFunction) => {
+const getLastSeenMemeList = async (req: CustomRequest, res: Response, next: NextFunction) => {
   const user = req.requestedUser;
 
   try {
-    const memeList = await UserService.getLastSeenMemes(user);
+    const memeList = await UserService.getLastSeenMemeList(user);
     return res.json(createSuccessResponse(HttpCode.OK, 'Get Last Seen Meme', memeList));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
 };
 
-const getSavedMemes = async (req: CustomRequest, res: Response, next: NextFunction) => {
+const getSavedMemeList = async (req: CustomRequest, res: Response, next: NextFunction) => {
   const user = req.requestedUser;
 
   const page = parseInt(req.query.page as string) || 1;
@@ -81,7 +58,7 @@ const getSavedMemes = async (req: CustomRequest, res: Response, next: NextFuncti
   }
 
   try {
-    const memeList = await UserService.getSavedMemes(page, size, user);
+    const memeList = await UserService.getSavedMemeList(page, size, user);
 
     const data = {
       pagination: {
@@ -99,7 +76,7 @@ const getSavedMemes = async (req: CustomRequest, res: Response, next: NextFuncti
   }
 };
 
-export { getUser, createUser, getLastSeenMemes, getSavedMemes };
+export { getUser, createUser, getLastSeenMemeList, getSavedMemeList };
 
 function getLevel(watch: number, reaction: number, share: number): number {
   let level = 1;

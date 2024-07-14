@@ -1,5 +1,7 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 
+import { IKeywordGetResponse } from './keyword';
+
 export interface IMemeCreatePayload {
   title: string;
   keywordIds: Types.ObjectId[];
@@ -23,6 +25,11 @@ export interface IMeme {
   isTodayMeme: boolean;
 }
 
+export interface IMemeGetResponse extends Omit<IMemeDocument, 'keywordIds'> {
+  keywords: IKeywordGetResponse[];
+  isSaved: boolean; // 나의 파밈함 저장 여부
+}
+
 export interface IMemeDocument extends Document {
   _id: Types.ObjectId;
   title: string;
@@ -34,11 +41,6 @@ export interface IMemeDocument extends Document {
   createdAt: Date;
   updatedAt: Date;
   isDeleted: boolean;
-}
-
-// keywordIds로 조회한 keywords로 대체된 Meme 정보
-export interface IMemeWithKeywords extends Omit<IMemeDocument, 'keywordIds'> {
-  keywords: string[];
 }
 
 const MemeSchema: Schema = new Schema(

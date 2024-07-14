@@ -8,14 +8,14 @@ export enum InteractionType {
 }
 
 export interface IMemeInteraction {
-  deviceId: String;
+  deviceId: string;
   memeId: Types.ObjectId;
   interactionType: InteractionType;
 }
 
-export interface IMemeInteraction extends Document {
+export interface IMemeInteractionDocument extends Document {
   _id: Types.ObjectId;
-  deviceId: String;
+  deviceId: string;
   memeId: Types.ObjectId;
   interactionType: InteractionType;
   isDeleted: boolean;
@@ -37,7 +37,7 @@ const MemeInteractionSchema: Schema = new Schema(
   },
 );
 
-export const MemeInteractionModel = mongoose.model<IMemeInteraction>(
+export const MemeInteractionModel = mongoose.model<IMemeInteractionDocument>(
   'memeInteraction',
   MemeInteractionSchema,
 );

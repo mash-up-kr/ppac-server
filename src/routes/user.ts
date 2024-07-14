@@ -282,14 +282,24 @@ router.get('/', getRequestedUserInfo, UserController.getUser); // user 조회
  *                             example: "66805b1a72ef94c9c0ba134c"
  *                           image:
  *                             type: string
- *                             example: "https://example.com/meme.jpg"
+ *                             example: "https://ppac-meme.s3.ap-northeast-2.amazonaws.com/17207029441190.png"
  *                           isTodayMeme:
  *                             type: boolean
  *                             example: false
- *                           keywordIds:
+ *                           isSaved:
+ *                             type: boolean
+ *                             example: true
+ *                           keywords:
  *                             type: array
  *                             items:
- *                               example: "667fee7ac58681a42d57dc3b"
+ *                               type: object
+ *                               properties:
+ *                                 _id:
+ *                                   type: string
+ *                                   example: "5f6f6b1d6ab9c8f7d9a4b5c6"
+ *                                 title:
+ *                                   type: string
+ *                                   example: "무한도전"
  *                           title:
  *                             type: string
  *                             example: "무한상사 정총무"
@@ -300,6 +310,10 @@ router.get('/', getRequestedUserInfo, UserController.getUser); // user 조회
  *                             type: integer
  *                             example: 99
  *                             description: 밈 리액션 수
+ *                           watch:
+ *                             type: integer
+ *                             example: 999
+ *                             description: 조회 수
  *                           createdAt:
  *                             type: string
  *                             format: date-time
@@ -348,7 +362,7 @@ router.get('/', getRequestedUserInfo, UserController.getUser); // user 조회
  *                   type: null
  *                   example: null
  */
-router.get('/saved-memes', getRequestedUserInfo, UserController.getSavedMemes); // user가 저장한 meme 조회 (페이지네이션 적용)
+router.get('/saved-memes', getRequestedUserInfo, UserController.getSavedMemeList); // user가 저장한 meme 조회 (페이지네이션 적용)
 
 /**
  * @swagger
@@ -390,14 +404,24 @@ router.get('/saved-memes', getRequestedUserInfo, UserController.getSavedMemes); 
  *                         example: "66805b1a72ef94c9c0ba134c"
  *                       image:
  *                         type: string
- *                         example: "https://example.com/meme.jpg"
+ *                         example: "https://ppac-meme.s3.ap-northeast-2.amazonaws.com/17207029441190.png"
  *                       isTodayMeme:
  *                         type: boolean
  *                         example: false
- *                       keywordIds:
+ *                       isSaved:
+ *                         type: boolean
+ *                         example: false
+ *                       keywords:
  *                         type: array
  *                         items:
- *                           example: "667fee7ac58681a42d57dc3b"
+ *                           type: object
+ *                           properties:
+ *                             _id:
+ *                               type: string
+ *                               example: "667fee7ac58681a42d57dc3b"
+ *                             name:
+ *                               type: string
+ *                               example: "무한도전"
  *                       title:
  *                         type: string
  *                         example: "무한상사 정총무"
@@ -408,6 +432,10 @@ router.get('/saved-memes', getRequestedUserInfo, UserController.getSavedMemes); 
  *                         type: integer
  *                         example: 99
  *                         description: 밈 리액션 수
+ *                       watch:
+ *                         type: integer
+ *                         example: 999
+ *                         description: 밈 조회수
  *                       createdAt:
  *                         type: string
  *                         format: date-time
@@ -456,6 +484,6 @@ router.get('/saved-memes', getRequestedUserInfo, UserController.getSavedMemes); 
  *                   type: null
  *                   example: null
  */
-router.get('/recent-memes', getRequestedUserInfo, UserController.getLastSeenMemes); // user가 최근에 본 밈 정보 조회 (10개 제한)
+router.get('/recent-memes', getRequestedUserInfo, UserController.getLastSeenMemeList); // user가 최근에 본 밈 정보 조회 (10개 제한)
 
 export default router;

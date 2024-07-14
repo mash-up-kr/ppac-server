@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
 import {
@@ -35,11 +37,11 @@ async function updateKeywordCategory(
     { new: true },
   );
 
-  if (!updatedCategory) {
+  if (_.isNull(updatedCategory)) {
     throw new CustomError(`Category with ID ${updatedCategory} not found`, HttpCode.NOT_FOUND);
   }
-  logger.info(`Update keyword category - category(${categoryName})`);
 
+  logger.info(`Update keyword category - category(${categoryName})`);
   return updatedCategory.toObject();
 }
 
@@ -50,19 +52,19 @@ async function deleteKeywordCategory(categoryName: string): Promise<boolean> {
     },
     { isDeleted: true },
   );
-  if (!deletedCategory) {
+  if (_.isNull(deletedCategory)) {
     throw new CustomError(`Category with Name ${categoryName} not found`, HttpCode.NOT_FOUND);
   }
   return true;
 }
 
-async function getKeywordCategory(categoryName: string): Promise<IKeywordCategoryDocument | null> {
+async function getKeywordCategory(categoryName: string): Promise<IKeywordCategoryDocument> {
   const keywordCategory = await KeywordCategoryModel.findOne({
     name: categoryName,
     isDeleted: false,
   });
 
-  if (!keywordCategory) {
+  if (_.isNull(keywordCategory)) {
     throw new CustomError(`Category with Name ${categoryName} not found`, HttpCode.NOT_FOUND);
   }
 
