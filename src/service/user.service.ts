@@ -2,6 +2,8 @@ import { startOfWeek } from 'date-fns';
 import _ from 'lodash';
 import { Types } from 'mongoose';
 
+import * as MemeService from './meme.service';
+import * as MemeInteractionService from './memeInteraction.service';
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
 import { IMemeDocument, IMemeGetResponse, MemeModel } from '../model/meme';
@@ -12,8 +14,6 @@ import {
   IMemeRecommendWatchCreatePayload,
 } from '../model/memeRecommendWatch';
 import { IUser, IUserDocument, IUserInfos, UserModel } from '../model/user';
-
-import * as KeywordService from './keyword.service';
 import { logger } from '../util/logger';
 
 async function getUser(deviceId: string): Promise<IUserDocument | null> {
@@ -135,7 +135,7 @@ async function updateLastSeenMeme(user: IUserDocument, meme: IMemeDocument): Pro
   }
 }
 
-async function getLastSeenMemes(user: IUserDocument): Promise<IMemeGetResponse[]> {
+async function getLastSeenMemeList(user: IUserDocument): Promise<IMemeGetResponse[]> {
   try {
     const lastSeenMeme = user.lastSeenMeme;
     const memeList = await MemeModel.find(
@@ -146,21 +146,10 @@ async function getLastSeenMemes(user: IUserDocument): Promise<IMemeGetResponse[]
       { isDeleted: 0 },
     ).lean();
 
-    const ret = await Promise.all(
-      memeList.map(async (meme) => {
-        const keywords = await KeywordService.getKeywordInfoByKeywordIds(meme.keywordIds);
-        const isSaved = await MemeInteractionModel.findOne({
-          deviceId: user.deviceId,
-          memeId: meme._id,
-          type: InteractionType.SAVE,
-          isDeleted: false,
-        });
-        return { ..._.omit(meme, 'keywordIds'), keywords, isSaved: !_.isNil(isSaved) };
-      }),
-    );
-    logger.info(`Get lastSeenMeme - deviceId(${user.deviceId}), memeList(${ret})`);
+    const getLastSeenMemeList = await MemeService.getMemeListWithKeywordsAndisSaved(user, memeList);
+    logger.info(`Get lastSeenMeme - deviceId(${user.deviceId}), memeList(${getLastSeenMemeList})`);
 
-    return ret;
+    return getLastSeenMemeList;
   } catch (err) {
     logger.error(`Failed get lastSeenMeme`, err.message);
     throw new CustomError(
@@ -170,55 +159,38 @@ async function getLastSeenMemes(user: IUserDocument): Promise<IMemeGetResponse[]
   }
 }
 
-async function getSavedMemes(
+async function getSavedMemeList(
   page: number,
   size: number,
   user: IUserDocument,
 ): Promise<{ total: number; page: number; totalPages: number; data: IMemeGetResponse[] }> {
   try {
-    const totalSavedMemes = await MemeInteractionModel.countDocuments({
-      deviceId: user.deviceId,
-      interactionType: InteractionType.SAVE,
-      isDeleted: false,
-    });
+    const totalSavedMemes = await MemeInteractionService.getMemeInteractionCount(
+      user,
+      InteractionType.SAVE,
+    );
 
-    const savedMemes = await MemeInteractionModel.find(
-      {
-        deviceId: user.deviceId,
-        interactionType: InteractionType.SAVE,
-        isDeleted: false,
-      },
-      { isDeleted: 0 },
-    )
-      .skip((page - 1) * size)
-      .limit(size)
-      .sort({ createdAt: -1 })
-      .lean();
+    const savedMemeInteractionList = await MemeInteractionService.getMemeInteractionList(
+      page,
+      size,
+      user,
+      InteractionType.SAVE,
+    );
 
-    const memeIds = savedMemes.map(({ memeId }) => new Types.ObjectId(memeId));
+    const memeIds = savedMemeInteractionList.map(({ memeId }) => memeId);
     const memeList = await MemeModel.find(
       { _id: { $in: memeIds }, isDeleted: false },
       { isDeleted: 0 },
     ).lean();
 
-    const ret = await Promise.all(
-      memeList.map(async (meme) => {
-        const keywords = await KeywordService.getKeywordInfoByKeywordIds(meme.keywordIds);
-        const isSaved = await MemeInteractionModel.findOne({
-          deviceId: user.deviceId,
-          memeId: meme._id,
-          type: InteractionType.SAVE,
-          isDeleted: false,
-        });
-        return { ..._.omit(meme, 'keywordIds'), keywords, isSaved: !_.isNil(isSaved) };
-      }),
-    );
+    const savedMemeList = await MemeService.getMemeListWithKeywordsAndisSaved(user, memeList);
+    logger.info(`Get savedMemeList - deviceId(${user.deviceId}), memeList(${savedMemeList})`);
 
     return {
       total: totalSavedMemes,
       page,
       totalPages: Math.ceil(totalSavedMemes / size),
-      data: ret,
+      data: savedMemeList,
     };
   } catch (error) {
     throw new CustomError(`Failed to get saved memes`, HttpCode.INTERNAL_SERVER_ERROR, error);
@@ -275,8 +247,8 @@ export {
   getUser,
   createUser,
   updateLastSeenMeme,
-  getLastSeenMemes,
-  getSavedMemes,
+  getLastSeenMemeList,
+  getSavedMemeList,
   makeUserInfos,
   createMemeRecommendWatch,
 };
