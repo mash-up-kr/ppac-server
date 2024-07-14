@@ -31,6 +31,11 @@ const router = express.Router();
  *     summary: 밈 전체 목록 조회 (페이지네이션 적용)
  *     description: 밈 전체 목록 조회
  *     parameters:
+ *       - name: x-device-id
+ *         in: header
+ *         description: 유저의 고유한 deviceId
+ *         required: true
+ *         type: string
  *       - in: query
  *         name: page
  *         schema:
@@ -176,6 +181,11 @@ router.get('/list', getRequestedUserInfo, getAllMemeList); // meme 목록 전체
  *     summary: 추천 밈 정보 조회
  *     description: 추천 밈 목록을 조회한다. (현재는 주 단위, 추후 일 단위로 변경될 수 있음)
  *     parameters:
+ *       - name: x-device-id
+ *         in: header
+ *         description: 유저의 고유한 deviceId
+ *         required: true
+ *         type: string
  *       - in: query
  *         name: size
  *         schema:
@@ -426,6 +436,11 @@ router.post('/', createMeme); // meme 생성
  *     summary: 밈 정보 조회(키워드 포함)
  *     description: 밈 정보를 조회한다. 밈의 키워드 정보도 함께 포함한다. 이때 키워드는 키워드명만 제공된다 (키워드의 개별 정보 X)
  *     parameters:
+ *     - name: x-device-id
+ *       in: header
+ *       description: 유저의 고유한 deviceId
+ *       required: true
+ *       type: string
  *     - in: path
  *       name: memeId
  *       required: true
@@ -1319,6 +1334,11 @@ router.post('/:memeId/reaction', getRequestedUserInfo, getRequestedMemeInfo, cre
  *     summary: 키워드가 포함된 밈 검색 (페이지네이션 적용)
  *     description: 키워드 클릭 시 해당 키워드를 포함한 밈을 조회하고 목록을 반환한다.
  *     parameters:
+ *     - name: x-device-id
+ *       in: header
+ *       description: 유저의 고유한 deviceId
+ *       required: true
+ *       type: string
  *       - in: query
  *         name: page
  *         schema:
@@ -1462,6 +1482,6 @@ router.post('/:memeId/reaction', getRequestedUserInfo, getRequestedMemeInfo, cre
  *                   type: null
  *                   example: null
  */
-router.get('/search/:name', getKeywordInfoByName, searchMemeListByKeyword); // 키워드에 해당하는 밈 검색하기 (페이지네이션)
+router.get('/search/:name', getRequestedUserInfo, getKeywordInfoByName, searchMemeListByKeyword); // 키워드에 해당하는 밈 검색하기 (페이지네이션)
 
 export default router;

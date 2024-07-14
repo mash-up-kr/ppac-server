@@ -288,7 +288,7 @@ router.get('/', getRequestedUserInfo, UserController.getUser); // user 조회
  *                             example: false
  *                           isSaved:
  *                             type: boolean
- *                             example: false
+ *                             example: true
  *                           keywords:
  *                             type: array
  *                             items:

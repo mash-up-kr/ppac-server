@@ -167,6 +167,7 @@ const getTodayMemeList = async (req: CustomRequest, res: Response, next: NextFun
 };
 
 const searchMemeListByKeyword = async (req: CustomRequest, res: Response, next: NextFunction) => {
+  const user = req.requestedUser;
   const keyword = req.requestedKeyword;
 
   const page = parseInt(req.query.page as string) || 1;
