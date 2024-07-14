@@ -31,6 +31,11 @@ const router = express.Router();
  *     summary: 밈 전체 목록 조회 (페이지네이션 적용)
  *     description: 밈 전체 목록 조회
  *     parameters:
+ *       - name: x-device-id
+ *         in: header
+ *         description: 유저의 고유한 deviceId
+ *         required: true
+ *         type: string
  *       - in: query
  *         name: page
  *         schema:
@@ -176,6 +181,11 @@ router.get('/list', getRequestedUserInfo, getAllMemeList); // meme 목록 전체
  *     summary: 추천 밈 정보 조회
  *     description: 추천 밈 목록을 조회한다. (현재는 주 단위, 추후 일 단위로 변경될 수 있음)
  *     parameters:
+ *       - name: x-device-id
+ *         in: header
+ *         description: 유저의 고유한 deviceId
+ *         required: true
+ *         type: string
  *       - in: query
  *         name: size
  *         schema:
@@ -426,12 +436,17 @@ router.post('/', createMeme); // meme 생성
  *     summary: 밈 정보 조회(키워드 포함)
  *     description: 밈 정보를 조회한다. 밈의 키워드 정보도 함께 포함한다. 이때 키워드는 키워드명만 제공된다 (키워드의 개별 정보 X)
  *     parameters:
+ *     - name: x-device-id
+ *       in: header
+ *       description: 유저의 고유한 deviceId
+ *       required: true
+ *       type: string
  *     - in: path
  *       name: memeId
  *       required: true
  *       schema:
  *         type: string
- *       description: 밈 ID
+ *         description: 밈 ID
  *     responses:
  *       200:
  *         description: The meme
@@ -826,7 +841,7 @@ router.delete('/:memeId', getRequestedMemeInfo, deleteMeme); // meme 삭제
  *       name: memeId
  *       schema:
  *         type: string
- *       description: 저장할 밈 id
+ *         description: 저장할 밈 id
  *     responses:
  *       201:
  *         description: Meme successfully saved
@@ -924,7 +939,7 @@ router.post('/:memeId/save', getRequestedUserInfo, getRequestedMemeInfo, createM
  *       name: memeId
  *       schema:
  *         type: string
- *       description: 저장할 밈 id
+ *         description: 저장할 밈 id
  *     responses:
  *       200:
  *         description: Meme successfully saved
@@ -1023,7 +1038,7 @@ router.delete('/:memeId/save', getRequestedUserInfo, getRequestedMemeInfo, delet
  *       name: memeId
  *       schema:
  *         type: string
- *       description: 공유할 밈 id
+ *         description: 공유할 밈 id
  *     responses:
  *       201:
  *         description: Meme successfully shared
@@ -1122,7 +1137,7 @@ router.post('/:memeId/share', getRequestedUserInfo, getRequestedMemeInfo, create
  *       required: true
  *       schema:
  *         type: string
- *       description: 밈 id
+ *         description: 밈 id
  *     - in: path
  *       name: type
  *       required: true
@@ -1232,8 +1247,8 @@ router.post('/:memeId/watch/:type', getRequestedUserInfo, getRequestedMemeInfo, 
  *       name: memeId
  *       schema:
  *         type: string
- *       required: true
- *       description: 리액션할 밈 id
+ *         required: true
+ *         description: 리액션할 밈 id
  *     responses:
  *       201:
  *         description: Created Meme Reaction
@@ -1319,25 +1334,30 @@ router.post('/:memeId/reaction', getRequestedUserInfo, getRequestedMemeInfo, cre
  *     summary: 키워드가 포함된 밈 검색 (페이지네이션 적용)
  *     description: 키워드 클릭 시 해당 키워드를 포함한 밈을 조회하고 목록을 반환한다.
  *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: number
- *           example: 1
- *           description: 현재 페이지 번호 (기본값 1)
- *       - in: query
- *         name: size
- *         schema:
- *           type: number
- *           example: 10
- *           description: 한 번에 조회할 밈 개수 (기본값 10)
- *       - in: path
- *         name: name
- *         schema:
- *           type: string
- *           example: "행복"
- *           required: true
- *           description: 키워드명
+ *     - name: x-device-id
+ *       in: header
+ *       description: 유저의 고유한 deviceId
+ *       required: true
+ *       type: string
+ *     - in: query
+ *       name: page
+ *       schema:
+ *         type: number
+ *         example: 1
+ *         description: 현재 페이지 번호 (기본값 1)
+ *     - in: query
+ *       name: size
+ *       schema:
+ *         type: number
+ *         example: 10
+ *         description: 한 번에 조회할 밈 개수 (기본값 10)
+ *     - in: path
+ *       name: name
+ *       schema:
+ *         type: string
+ *         example: "행복"
+ *         required: true
+ *         description: 키워드명
  *     responses:
  *       200:
  *         description: 키워드를 포함한 밈 목록
@@ -1462,6 +1482,6 @@ router.post('/:memeId/reaction', getRequestedUserInfo, getRequestedMemeInfo, cre
  *                   type: null
  *                   example: null
  */
-router.get('/search/:name', getKeywordInfoByName, searchMemeListByKeyword); // 키워드에 해당하는 밈 검색하기 (페이지네이션)
+router.get('/search/:name', getRequestedUserInfo, getKeywordInfoByName, searchMemeListByKeyword); // 키워드에 해당하는 밈 검색하기 (페이지네이션)
 
 export default router;

@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
+
 import { IKeywordGetResponse } from './keyword';
 
 export interface IMemeCreatePayload {
@@ -24,18 +25,9 @@ export interface IMeme {
   isTodayMeme: boolean;
 }
 
-export interface IMemeGetResponse {
-  _id: Types.ObjectId;
-  title: string;
+export interface IMemeGetResponse extends Omit<IMemeDocument, 'keywordIds'> {
   keywords: IKeywordGetResponse[];
-  image: string;
-  reaction: number;
-  source: string;
-  isTodayMeme: boolean;
   isSaved: boolean; // 나의 파밈함 저장 여부
-  createdAt: Date;
-  updatedAt: Date;
-  isDeleted: boolean;
 }
 
 export interface IMemeDocument extends Document {

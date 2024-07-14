@@ -3,8 +3,10 @@ import request from 'supertest';
 import app from '../../src/app';
 import { KeywordModel } from '../../src/model/keyword';
 import { MemeModel } from '../../src/model/meme';
+import { UserModel } from '../../src/model/user';
 import { createMockData as createKeywordMockData } from '../util/keyword.mock';
 import { createMockData } from '../util/meme.mock';
+import { mockUser } from '../util/user.mock';
 
 const totalCount = 15;
 let keywordIds = [];
@@ -19,14 +21,17 @@ describe("[GET] '/api/meme/list' ", () => {
 
     const memeMockDatas = createMockData(totalCount, 1, keywordIds);
     await MemeModel.insertMany(memeMockDatas);
+
+    await UserModel.insertMany(mockUser);
   });
 
   afterAll(async () => {
     await MemeModel.deleteMany({});
+    await UserModel.deleteMany({});
   });
 
   it('should return the default paginated list of memes', async () => {
-    const response = await request(app).get('/api/meme/list');
+    const response = await request(app).get('/api/meme/list').set('x-device-id', 'deviceId');
     expect(response.statusCode).toBe(200);
     expect(response.body.data.pagination.total).toBe(totalCount);
     expect(response.body.data.pagination.page).toBe(1);
@@ -42,7 +47,9 @@ describe("[GET] '/api/meme/list' ", () => {
   it('should return paginated list of memes for specific page and size', async () => {
     const size = 5;
     const page = 1;
-    const response = await request(app).get(`/api/meme/list?page=${page}&size=${size}`);
+    const response = await request(app)
+      .get(`/api/meme/list?page=${page}&size=${size}`)
+      .set('x-device-id', 'deviceId');
 
     expect(response.statusCode).toBe(200);
     expect(response.body.data.pagination.total).toBe(totalCount);
@@ -54,7 +61,9 @@ describe("[GET] '/api/meme/list' ", () => {
   it('should return an error for invalid page', async () => {
     const size = 5;
     const page = -1;
-    const response = await request(app).get(`/api/meme/list?page=${page}&size=${size}`);
+    const response = await request(app)
+      .get(`/api/meme/list?page=${page}&size=${size}`)
+      .set('x-device-id', 'deviceId');
 
     expect(response.statusCode).toBe(400);
   });
@@ -62,7 +71,9 @@ describe("[GET] '/api/meme/list' ", () => {
   it('should return an error for invalid size', async () => {
     const size = -1;
     const page = 3;
-    const response = await request(app).get(`/api/meme/list?page=${page}&size=${size}`);
+    const response = await request(app)
+      .get(`/api/meme/list?page=${page}&size=${size}`)
+      .set('x-device-id', 'deviceId');
 
     expect(response.statusCode).toBe(400);
   });

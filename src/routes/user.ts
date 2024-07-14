@@ -288,7 +288,7 @@ router.get('/', getRequestedUserInfo, UserController.getUser); // user 조회
  *                             example: false
  *                           isSaved:
  *                             type: boolean
- *                             example: false
+ *                             example: true
  *                           keywords:
  *                             type: array
  *                             items:
@@ -362,7 +362,7 @@ router.get('/', getRequestedUserInfo, UserController.getUser); // user 조회
  *                   type: null
  *                   example: null
  */
-router.get('/saved-memes', getRequestedUserInfo, UserController.getSavedMemes); // user가 저장한 meme 조회 (페이지네이션 적용)
+router.get('/saved-memes', getRequestedUserInfo, UserController.getSavedMemeList); // user가 저장한 meme 조회 (페이지네이션 적용)
 
 /**
  * @swagger
@@ -484,6 +484,6 @@ router.get('/saved-memes', getRequestedUserInfo, UserController.getSavedMemes); 
  *                   type: null
  *                   example: null
  */
-router.get('/recent-memes', getRequestedUserInfo, UserController.getLastSeenMemes); // user가 최근에 본 밈 정보 조회 (10개 제한)
+router.get('/recent-memes', getRequestedUserInfo, UserController.getLastSeenMemeList); // user가 최근에 본 밈 정보 조회 (10개 제한)
 
 export default router;

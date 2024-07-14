@@ -1,14 +1,14 @@
 import _ from 'lodash';
 import { Types } from 'mongoose';
 
+import * as KeywordService from './keyword.service';
+import * as MemeInteractionService from './memeInteraction.service';
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
-import { IKeywordDocument, KeywordModel } from '../model/keyword';
+import { IKeywordDocument } from '../model/keyword';
 import { IMemeCreatePayload, IMemeDocument, MemeModel, IMemeGetResponse } from '../model/meme';
-import { InteractionType, MemeInteractionModel } from '../model/memeInteraction';
+import { InteractionType } from '../model/memeInteraction';
 import { IUserDocument } from '../model/user';
-
-import * as KeywordService from './keyword.service';
 import { logger } from '../util/logger';
 
 async function getMeme(memeId: string): Promise<IMemeDocument | null> {
@@ -17,12 +17,7 @@ async function getMeme(memeId: string): Promise<IMemeDocument | null> {
       .and([{ isDeleted: false }])
       .lean();
 
-    if (!meme) {
-      logger.info(`Meme(${memeId}) not found.`);
-      return null;
-    }
-
-    return meme;
+    return meme || null;
   } catch (err) {
     logger.error(`Failed to get a meme(${memeId}): ${err.message}`);
     throw new CustomError(`Failed to get a meme(${memeId})`, HttpCode.INTERNAL_SERVER_ERROR);
@@ -35,12 +30,11 @@ async function getMemeWithKeywords(
 ): Promise<IMemeGetResponse> {
   try {
     const keywords = await KeywordService.getKeywordInfoByKeywordIds(meme.keywordIds);
-    const isSaved = await MemeInteractionModel.findOne({
-      deviceId: user.deviceId,
-      memeId: meme._id,
-      type: InteractionType.SAVE,
-      isDeleted: false,
-    });
+    const isSaved = await MemeInteractionService.getMemeInteractionInfo(
+      user,
+      meme,
+      InteractionType.SAVE,
+    );
 
     return {
       ..._.omit(meme, 'keywordIds'),
@@ -48,8 +42,11 @@ async function getMemeWithKeywords(
       isSaved: !_.isNil(isSaved),
     };
   } catch (err) {
-    logger.error(`Failed to get a meme(${meme._id}): ${err.message}`);
-    throw new CustomError(`Failed to get a meme(${meme._id})`, HttpCode.INTERNAL_SERVER_ERROR);
+    logger.error(`Failed to get a meme(${meme._id}) with keywords: ${err.message}`);
+    throw new CustomError(
+      `Failed to get a meme(${meme._id}) with keywords`,
+      HttpCode.INTERNAL_SERVER_ERROR,
+    );
   }
 }
 
@@ -57,30 +54,27 @@ async function getTodayMemeList(
   limit: number = 5,
   user: IUserDocument,
 ): Promise<IMemeGetResponse[]> {
-  const todayMemeList = await MemeModel.find(
-    { isDeleted: false, isTodayMeme: true },
-    { isDeleted: 0 },
-  );
+  try {
+    const todayMemeList = await MemeModel.find(
+      { isDeleted: false, isTodayMeme: true },
+      { isDeleted: 0 },
+    );
 
-  const ret = await Promise.all(
-    todayMemeList.map(async (meme) => {
-      const keywords = await KeywordService.getKeywordInfoByKeywordIds(meme.keywordIds);
-      const isSaved = await MemeInteractionModel.findOne({
-        deviceId: user.deviceId,
-        memeId: meme._id,
-        type: InteractionType.SAVE,
-        isDeleted: false,
-      });
-      return { ..._.omit(meme, 'keywordIds'), keywords, isSaved: !_.isNil(isSaved) };
-    }),
-  );
+    const memeList = await getMemeListWithKeywordsAndisSaved(user, todayMemeList);
 
-  const memeIds = todayMemeList.map((meme) => meme._id);
-  logger.info(
-    `Get all today meme list(${todayMemeList.length}) - memeIds(${memeIds}), limit(${limit})`,
-  );
+    const memeIds = todayMemeList.map((meme) => meme._id);
+    logger.info(
+      `Get all today meme list(${todayMemeList.length}) - memeIds(${memeIds}), limit(${limit})`,
+    );
 
-  return ret;
+    return memeList;
+  } catch (err) {
+    logger.error(`Failed to get today meme list: ${err.message}`);
+    throw new CustomError(
+      `Failed to get today meme list ${err.message}`,
+      HttpCode.INTERNAL_SERVER_ERROR,
+    );
+  }
 }
 
 async function getAllMemeList(
@@ -95,18 +89,7 @@ async function getAllMemeList(
     .limit(size)
     .sort({ createdAt: -1 });
 
-  const ret: IMemeGetResponse[] = await Promise.all(
-    memeList.map(async (meme) => {
-      const keywords = await KeywordService.getKeywordInfoByKeywordIds(meme.keywordIds);
-      const isSaved = await MemeInteractionModel.findOne({
-        deviceId: user.deviceId,
-        memeId: meme._id,
-        type: InteractionType.SAVE,
-        isDeleted: false,
-      });
-      return { ..._.omit(meme.toObject(), 'keywordIds'), keywords, isSaved: !_.isNil(isSaved) };
-    }),
-  );
+  const allMemeList = await getMemeListWithKeywordsAndisSaved(user, memeList);
 
   logger.info(`Get all meme list - page(${page}), size(${size}), total(${totalMemes})`);
 
@@ -114,8 +97,38 @@ async function getAllMemeList(
     total: totalMemes,
     page,
     totalPages: Math.ceil(totalMemes / size),
-    data: ret,
+    data: allMemeList,
   };
+}
+
+// MemeList에서 keywords와 isSaved 정보를 확인하여 추가 반환
+async function getMemeListWithKeywordsAndisSaved(
+  user: IUserDocument,
+  memeList: IMemeDocument[],
+): Promise<IMemeGetResponse[]> {
+  try {
+    return await Promise.all(
+      memeList.map(async (meme: IMemeDocument) => {
+        const keywords = await KeywordService.getKeywordInfoByKeywordIds(meme.keywordIds);
+        const isSaved = await MemeInteractionService.getMemeInteractionInfo(
+          user,
+          meme,
+          InteractionType.SAVE,
+        );
+        return {
+          ..._.omit(meme, 'keywordIds'),
+          keywords,
+          isSaved: !_.isNil(isSaved),
+        } as IMemeGetResponse;
+      }),
+    );
+  } catch (err) {
+    logger.error('Failed to get keywords and isSaved info from meme list', err.message);
+    throw new CustomError(
+      `Failed to get keywords and isSaved info from meme list ${err.message}`,
+      HttpCode.INTERNAL_SERVER_ERROR,
+    );
+  }
 }
 
 async function createMeme(info: IMemeCreatePayload): Promise<IMemeDocument> {
@@ -170,6 +183,7 @@ async function searchMemeByKeyword(
   page: number,
   size: number,
   keyword: IKeywordDocument,
+  user: IUserDocument,
 ): Promise<{ total: number; page: number; totalPages: number; data: IMemeGetResponse[] }> {
   try {
     const totalMemes = await MemeModel.countDocuments({
@@ -177,7 +191,7 @@ async function searchMemeByKeyword(
       isDeleted: false,
     });
 
-    const memeList = await MemeModel.find(
+    const searchedMemeList = await MemeModel.find(
       { isDeleted: false, keywordIds: { $in: keyword._id } },
       { isDeleted: 0 },
     )
@@ -186,17 +200,7 @@ async function searchMemeByKeyword(
       .sort({ reaction: -1 })
       .lean();
 
-    const ret = await Promise.all(
-      memeList.map(async (meme) => {
-        const keywords = await KeywordService.getKeywordInfoByKeywordIds(meme.keywordIds);
-        const isSaved = await MemeInteractionModel.findOne({
-          memeId: meme._id,
-          type: InteractionType.SAVE,
-          isDeleted: false,
-        });
-        return { ..._.omit(meme, 'keywordIds'), keywords, isSaved: !_.isNil(isSaved) };
-      }),
-    );
+    const memeList = await getMemeListWithKeywordsAndisSaved(user, searchedMemeList);
 
     logger.info(
       `Get all meme list with keyword(${keyword.name}) - page(${page}), size(${size}), total(${totalMemes})`,
@@ -206,7 +210,7 @@ async function searchMemeByKeyword(
       total: totalMemes,
       page,
       totalPages: Math.ceil(totalMemes / size),
-      data: ret,
+      data: memeList,
     };
   } catch (err) {
     logger.error(`Failed to search meme list with keyword(${keyword})`, err.message);
@@ -223,54 +227,30 @@ async function createMemeInteraction(
   interactionType: InteractionType,
 ): Promise<boolean> {
   try {
-    const memeInteraction = await MemeInteractionModel.findOne({
-      memeId: meme._id,
-      deviceId: user.deviceId,
+    // interaction 조회
+    const memeInteraction = await MemeInteractionService.getMemeInteractionInfo(
+      user,
+      meme,
       interactionType,
-    });
+    );
 
-    // 밈당 interaction은 1회
-    if (!_.isNull(memeInteraction)) {
+    if (_.isNull(memeInteraction)) {
+      // 신규 생성
+      await MemeInteractionService.createMemeInteraction(user, meme, interactionType);
+    } else {
       logger.info(
         `Already ${interactionType} meme - deviceId(${user.deviceId}), memeId(${meme._id}`,
       );
 
-      if (interactionType === InteractionType.SAVE && memeInteraction.isDeleted) {
-        // 'save'인 경우 isDeleted를 false로 업데이트한다.
-        await MemeInteractionModel.findOneAndUpdate(
-          { memeId: meme._id, deviceId: user.deviceId, interactionType },
-          { $set: { isDeleted: false } },
-        );
-      } else if (interactionType === InteractionType.REACTION) {
-        // 'reaction'인 경우에만 Meme의 reaction 수를 업데이트한다.
-        await MemeModel.findOneAndUpdate(
-          { memeId: meme._id, isDeleted: false },
-          { $inc: { reaction: 1 } },
-          {
-            projection: { _id: 0, createdAt: 0, updatedAt: 0 },
-            returnDocument: 'after',
-          },
-        ).lean();
-      } else {
-        // 'watch', 'share'인 경우 isDeleted 여부 로그를 남긴다.
-        logger.debug(
-          `${memeInteraction.interactionType} document exist - isDeleted(${memeInteraction.isDeleted})`,
-        );
-      }
-    } else {
-      const newMemeInteraction = await MemeInteractionModel.create({
-        memeId: meme._id,
-        deviceId: user.deviceId,
-        interactionType,
-      });
-      await newMemeInteraction.save();
+      // interactionType에 따른 동작 처리 (MemeInteracionService에서 진행)
+      await MemeInteractionService.updateMemeInteraction(user, meme, interactionType);
     }
-
     return true;
   } catch (err) {
-    logger.error(`Failed to create memeInteraction`, err.message);
+    logger.error(`Failed to create memeInteraction(${interactionType})`, err.message);
+
     throw new CustomError(
-      `Failed to create memeInteraction(${err.message})`,
+      `Failed to create memeInteraction(${interactionType}) (${err.message})`,
       HttpCode.INTERNAL_SERVER_ERROR,
     );
   }
@@ -278,29 +258,26 @@ async function createMemeInteraction(
 
 async function deleteMemeSave(user: IUserDocument, meme: IMemeDocument): Promise<boolean> {
   try {
-    const meemSaveInteraction = await MemeInteractionModel.findOne({
-      memeId: meme._id,
-      deviceId: user.deviceId,
-      interactionType: InteractionType.SAVE,
-      isDeleted: false,
-    });
+    const memeSaveInteraction = await MemeInteractionService.getMemeInteractionInfoWithCondition(
+      user,
+      meme,
+      InteractionType.SAVE,
+      { isDeleted: true },
+    );
 
-    if (_.isNull(meemSaveInteraction)) {
+    if (!_.isNull(memeSaveInteraction)) {
       logger.info(`Already delete memeSave - deviceId(${user.deviceId}), memeId(${meme._id}`);
       return false;
     }
 
-    await MemeInteractionModel.findOneAndUpdate(
-      { deviceId: user.deviceId, memeId: meme._id, interactionType: InteractionType.SAVE },
-      {
-        isDeleted: true,
-      },
-    ).lean();
-
+    await MemeInteractionService.deleteMemeInteraction(user, meme, InteractionType.SAVE);
     return true;
   } catch (err) {
-    logger.error(`Failed delete memeSave`, err.message);
-    throw new CustomError(`Failed delete memeSave(${err.message})`, HttpCode.INTERNAL_SERVER_ERROR);
+    logger.error(`Failed to delete meme save`, err.message);
+    throw new CustomError(
+      `Failed to delete meme save(${err.message})`,
+      HttpCode.INTERNAL_SERVER_ERROR,
+    );
   }
 }
 async function getTopReactionImage(keyword: IKeywordDocument): Promise<string> {
@@ -332,6 +309,7 @@ export {
   deleteMemeSave,
   getTodayMemeList,
   getAllMemeList,
+  getMemeListWithKeywordsAndisSaved,
   deleteKeywordOfMeme,
   getMemeWithKeywords,
   searchMemeByKeyword,

@@ -51,7 +51,7 @@ const getMemeWithKeywords = async (req: CustomRequest, res: Response, next: Next
     }
 
     logger.info(`Get meme with keywords - ${meme._id})`);
-    return res.json(createSuccessResponse(HttpCode.OK, 'Get Meme', meme));
+    return res.json(createSuccessResponse(HttpCode.OK, 'Get Meme', ret));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
@@ -167,6 +167,7 @@ const getTodayMemeList = async (req: CustomRequest, res: Response, next: NextFun
 };
 
 const searchMemeListByKeyword = async (req: CustomRequest, res: Response, next: NextFunction) => {
+  const user = req.requestedUser;
   const keyword = req.requestedKeyword;
 
   const page = parseInt(req.query.page as string) || 1;
@@ -180,7 +181,7 @@ const searchMemeListByKeyword = async (req: CustomRequest, res: Response, next: 
   }
 
   try {
-    const memeList = await MemeService.searchMemeByKeyword(page, size, keyword);
+    const memeList = await MemeService.searchMemeByKeyword(page, size, keyword, user);
     const data = {
       pagination: {
         total: memeList.total,

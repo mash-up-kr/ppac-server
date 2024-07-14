@@ -56,8 +56,7 @@ export const getKeywordInfoByName = async (
   }
 
   const keyword = await getKeywordByName(keywordName);
-
-  if (!keyword) {
+  if (_.isNull(keyword)) {
     return next(
       new CustomError(`Keyword with name ${keywordName} does not exist`, HttpCode.NOT_FOUND),
     );
@@ -100,7 +99,7 @@ export const getRequestedUserInfo = async (
 
   const user = await getUser(deviceId);
 
-  if (!user) {
+  if (_.isNull(user)) {
     return next(new CustomError(`user(${deviceId}) does not exist`, HttpCode.NOT_FOUND));
   }
 
