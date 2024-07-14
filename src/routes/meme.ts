@@ -446,7 +446,7 @@ router.post('/', createMeme); // meme 생성
  *       required: true
  *       schema:
  *         type: string
- *       description: 밈 ID
+ *         description: 밈 ID
  *     responses:
  *       200:
  *         description: The meme
@@ -841,7 +841,7 @@ router.delete('/:memeId', getRequestedMemeInfo, deleteMeme); // meme 삭제
  *       name: memeId
  *       schema:
  *         type: string
- *       description: 저장할 밈 id
+ *         description: 저장할 밈 id
  *     responses:
  *       201:
  *         description: Meme successfully saved
@@ -939,7 +939,7 @@ router.post('/:memeId/save', getRequestedUserInfo, getRequestedMemeInfo, createM
  *       name: memeId
  *       schema:
  *         type: string
- *       description: 저장할 밈 id
+ *         description: 저장할 밈 id
  *     responses:
  *       200:
  *         description: Meme successfully saved
@@ -1038,7 +1038,7 @@ router.delete('/:memeId/save', getRequestedUserInfo, getRequestedMemeInfo, delet
  *       name: memeId
  *       schema:
  *         type: string
- *       description: 공유할 밈 id
+ *         description: 공유할 밈 id
  *     responses:
  *       201:
  *         description: Meme successfully shared
@@ -1137,7 +1137,7 @@ router.post('/:memeId/share', getRequestedUserInfo, getRequestedMemeInfo, create
  *       required: true
  *       schema:
  *         type: string
- *       description: 밈 id
+ *         description: 밈 id
  *     - in: path
  *       name: type
  *       required: true
@@ -1247,8 +1247,8 @@ router.post('/:memeId/watch/:type', getRequestedUserInfo, getRequestedMemeInfo, 
  *       name: memeId
  *       schema:
  *         type: string
- *       required: true
- *       description: 리액션할 밈 id
+ *         required: true
+ *         description: 리액션할 밈 id
  *     responses:
  *       201:
  *         description: Created Meme Reaction
@@ -1339,25 +1339,25 @@ router.post('/:memeId/reaction', getRequestedUserInfo, getRequestedMemeInfo, cre
  *       description: 유저의 고유한 deviceId
  *       required: true
  *       type: string
- *       - in: query
- *         name: page
- *         schema:
- *           type: number
- *           example: 1
- *           description: 현재 페이지 번호 (기본값 1)
- *       - in: query
- *         name: size
- *         schema:
- *           type: number
- *           example: 10
- *           description: 한 번에 조회할 밈 개수 (기본값 10)
- *       - in: path
- *         name: name
- *         schema:
- *           type: string
- *           example: "행복"
- *           required: true
- *           description: 키워드명
+ *     - in: query
+ *       name: page
+ *       schema:
+ *         type: number
+ *         example: 1
+ *         description: 현재 페이지 번호 (기본값 1)
+ *     - in: query
+ *       name: size
+ *       schema:
+ *         type: number
+ *         example: 10
+ *         description: 한 번에 조회할 밈 개수 (기본값 10)
+ *     - in: path
+ *       name: name
+ *       schema:
+ *         type: string
+ *         example: "행복"
+ *         required: true
+ *         description: 키워드명
  *     responses:
  *       200:
  *         description: 키워드를 포함한 밈 목록
