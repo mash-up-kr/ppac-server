@@ -181,7 +181,7 @@ const searchMemeListByKeyword = async (req: CustomRequest, res: Response, next: 
   }
 
   try {
-    const memeList = await MemeService.searchMemeByKeyword(page, size, keyword);
+    const memeList = await MemeService.searchMemeByKeyword(page, size, keyword, user);
     const data = {
       pagination: {
         total: memeList.total,
