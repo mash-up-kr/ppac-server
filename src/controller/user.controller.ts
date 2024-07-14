@@ -33,18 +33,18 @@ const getUser = async (req: CustomRequest, res: Response, next: NextFunction) =>
   }
 };
 
-const getLastSeenMemes = async (req: CustomRequest, res: Response, next: NextFunction) => {
+const getLastSeenMemeList = async (req: CustomRequest, res: Response, next: NextFunction) => {
   const user = req.requestedUser;
 
   try {
-    const memeList = await UserService.getLastSeenMemes(user);
+    const memeList = await UserService.getLastSeenMemeList(user);
     return res.json(createSuccessResponse(HttpCode.OK, 'Get Last Seen Meme', memeList));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
 };
 
-const getSavedMemes = async (req: CustomRequest, res: Response, next: NextFunction) => {
+const getSavedMemeList = async (req: CustomRequest, res: Response, next: NextFunction) => {
   const user = req.requestedUser;
 
   const page = parseInt(req.query.page as string) || 1;
@@ -58,7 +58,7 @@ const getSavedMemes = async (req: CustomRequest, res: Response, next: NextFuncti
   }
 
   try {
-    const memeList = await UserService.getSavedMemes(page, size, user);
+    const memeList = await UserService.getSavedMemeList(page, size, user);
 
     const data = {
       pagination: {
@@ -76,7 +76,7 @@ const getSavedMemes = async (req: CustomRequest, res: Response, next: NextFuncti
   }
 };
 
-export { getUser, createUser, getLastSeenMemes, getSavedMemes };
+export { getUser, createUser, getLastSeenMemeList, getSavedMemeList };
 
 function getLevel(watch: number, reaction: number, share: number): number {
   let level = 1;
