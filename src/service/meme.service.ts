@@ -116,7 +116,7 @@ async function getMemeListWithKeywordsAndisSaved(
           InteractionType.SAVE,
         );
         return {
-          ..._.omit(meme, 'keywordIds'),
+          ..._.omit(meme.toObject(), 'keywordIds'),
           keywords,
           isSaved: !_.isNil(isSaved),
         } as IMemeGetResponse;
