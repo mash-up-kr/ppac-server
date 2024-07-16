@@ -74,7 +74,7 @@ async function increaseSearchCount(keywordId: Types.ObjectId): Promise<IKeywordD
       { _id: keywordId },
       { $inc: { searchCount: 1 } },
       { new: true, projection: { isDeleted: 0 } },
-    );
+    ).lean();
     if (_.isNull(updatedKeyword)) {
       throw new CustomError(`KeywordId ${keywordId} not found`, HttpCode.NOT_FOUND);
     }
