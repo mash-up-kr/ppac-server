@@ -25,7 +25,16 @@ export interface IMeme {
   isTodayMeme: boolean;
 }
 
-export interface IMemeGetResponse extends Omit<IMemeDocument, 'keywordIds'> {
+export interface IMemeGetResponse {
+  _id: Types.ObjectId;
+  title: string;
+  image: string;
+  reaction: number;
+  source: string;
+  isTodayMeme: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  isDeleted: boolean;
   keywords: IKeywordGetResponse[];
   isSaved: boolean; // 나의 파밈함 저장 여부
 }
