@@ -37,7 +37,7 @@ async function getMemeWithKeywords(
     );
 
     return {
-      ..._.omit(meme, 'keywordIds'),
+      ..._.omit(meme, 'keywordIds').toObject(),
       keywords,
       isSaved: !_.isNil(isSaved),
     };
@@ -116,7 +116,7 @@ async function getMemeListWithKeywordsAndisSaved(
           InteractionType.SAVE,
         );
         return {
-          ..._.omit(meme.toObject(), 'keywordIds'),
+          ..._.omit(meme, 'keywordIds').toObject(),
           keywords,
           isSaved: !_.isNil(isSaved),
         } as IMemeGetResponse;
