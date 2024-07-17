@@ -58,7 +58,7 @@ async function getTodayMemeList(
     const todayMemeList = await MemeModel.find(
       { isDeleted: false, isTodayMeme: true },
       { isDeleted: 0 },
-    );
+    ).lean();
 
     const memeList = await getMemeListWithKeywordsAndisSaved(user, todayMemeList);
 
@@ -87,7 +87,8 @@ async function getAllMemeList(
   const memeList = await MemeModel.find({ isDeleted: false }, { isDeleted: 0 })
     .skip((page - 1) * size)
     .limit(size)
-    .sort({ createdAt: -1 });
+    .sort({ createdAt: -1 })
+    .lean();
 
   const allMemeList = await getMemeListWithKeywordsAndisSaved(user, memeList);
 
