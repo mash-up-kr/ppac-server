@@ -153,7 +153,7 @@ async function updateMemeInteraction(
 
     case InteractionType.REACTION:
       await MemeModel.findOneAndUpdate(
-        { memeId: meme._id, isDeleted: false },
+        { _id: meme._id, isDeleted: false },
         { $inc: { reaction: 1 } },
         {
           projection: { _id: 0, createdAt: 0, updatedAt: 0 },
