@@ -18,6 +18,7 @@ import {
   getRequestedMemeInfo,
   getKeywordInfoByName,
   getRequestedUserInfo,
+  getRequestedMemeSaveInfo,
 } from '../middleware/requestedInfo';
 
 const router = express.Router();
@@ -980,7 +981,7 @@ router.post('/:memeId/save', getRequestedUserInfo, getRequestedMemeInfo, createM
  *                   type: null
  *                   example: null
  *       404:
- *         description: Meme or user not found
+ *         description: Meme / User / Meme Interaction NOT FOUND
  *         content:
  *           application/json:
  *             schema:
@@ -1019,7 +1020,13 @@ router.post('/:memeId/save', getRequestedUserInfo, getRequestedMemeInfo, createM
  *                   example: null
  *
  * */
-router.delete('/:memeId/save', getRequestedUserInfo, getRequestedMemeInfo, deleteMemeSave);
+router.delete(
+  '/:memeId/save',
+  getRequestedUserInfo,
+  getRequestedMemeInfo,
+  getRequestedMemeSaveInfo,
+  deleteMemeSave,
+); // meme 저장하기 취소 (삭제)
 
 /**
  * @swagger

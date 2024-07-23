@@ -34,6 +34,7 @@ async function getMemeWithKeywords(
       user,
       meme,
       InteractionType.SAVE,
+      true, // {isDeleted: false} 조건으로 save 상태인지 확인
     );
 
     return {
@@ -115,6 +116,7 @@ async function getMemeListWithKeywordsAndisSaved(
           user,
           meme,
           InteractionType.SAVE,
+          true, // {isDeleted: false} 조건으로 save 상태인지 확인
         );
         return {
           ..._.omit(meme, 'keywordIds'),
@@ -228,11 +230,15 @@ async function createMemeInteraction(
   interactionType: InteractionType,
 ): Promise<boolean> {
   try {
+    // 'save' interaction은 isDeleted 조건 검색 필요없음
+    const isDeletedFilter = interactionType === InteractionType.SAVE ? false : true;
+
     // interaction 조회
     const memeInteraction = await MemeInteractionService.getMemeInteractionInfo(
       user,
       meme,
       interactionType,
+      isDeletedFilter,
     );
 
     if (_.isNull(memeInteraction)) {
@@ -240,7 +246,7 @@ async function createMemeInteraction(
       await MemeInteractionService.createMemeInteraction(user, meme, interactionType);
     } else {
       logger.info(
-        `Already ${interactionType} meme - deviceId(${user.deviceId}), memeId(${meme._id}`,
+        `Already ${interactionType} meme - deviceId(${user.deviceId}), memeId(${meme._id})`,
       );
 
       // interactionType에 따른 동작 처리 (MemeInteracionService에서 진행)
@@ -259,18 +265,6 @@ async function createMemeInteraction(
 
 async function deleteMemeSave(user: IUserDocument, meme: IMemeDocument): Promise<boolean> {
   try {
-    const memeSaveInteraction = await MemeInteractionService.getMemeInteractionInfoWithCondition(
-      user,
-      meme,
-      InteractionType.SAVE,
-      { isDeleted: true },
-    );
-
-    if (!_.isNull(memeSaveInteraction)) {
-      logger.info(`Already delete memeSave - deviceId(${user.deviceId}), memeId(${meme._id}`);
-      return false;
-    }
-
     await MemeInteractionService.deleteMemeInteraction(user, meme, InteractionType.SAVE);
     return true;
   } catch (err) {
@@ -281,6 +275,7 @@ async function deleteMemeSave(user: IUserDocument, meme: IMemeDocument): Promise
     );
   }
 }
+
 async function getTopReactionImage(keyword: IKeywordDocument): Promise<string> {
   try {
     const topReactionMeme: IMemeDocument = await MemeModel.findOne({

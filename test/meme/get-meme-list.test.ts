@@ -37,7 +37,7 @@ describe("[GET] '/api/meme/list' ", () => {
     expect(response.body.data.pagination.page).toBe(1);
     expect(response.body.data.pagination.totalPages).toBe(2);
     expect(response.body.data.memeList.length).toBe(10);
-    expect(response.body.data.memeList[0]).toHaveProperty('keywordIds');
+    expect(response.body.data.memeList[0]).toHaveProperty('keywords');
     expect(response.body.data.memeList[0]).toHaveProperty('image');
     expect(response.body.data.memeList[0]).toHaveProperty('source');
     expect(response.body.data.memeList[0]).toHaveProperty('isTodayMeme');
