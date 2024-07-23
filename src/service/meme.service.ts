@@ -34,6 +34,7 @@ async function getMemeWithKeywords(
       user,
       meme,
       InteractionType.SAVE,
+      true, // {isDeleted: false} 조건으로 save 상태인지 확인
     );
 
     return {
@@ -115,6 +116,7 @@ async function getMemeListWithKeywordsAndisSaved(
           user,
           meme,
           InteractionType.SAVE,
+          true, // {isDeleted: false} 조건으로 save 상태인지 확인
         );
         return {
           ..._.omit(meme, 'keywordIds'),
