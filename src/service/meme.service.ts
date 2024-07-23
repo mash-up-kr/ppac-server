@@ -259,18 +259,6 @@ async function createMemeInteraction(
 
 async function deleteMemeSave(user: IUserDocument, meme: IMemeDocument): Promise<boolean> {
   try {
-    const memeSaveInteraction = await MemeInteractionService.getMemeInteractionInfoWithCondition(
-      user,
-      meme,
-      InteractionType.SAVE,
-      { isDeleted: true },
-    );
-
-    if (!_.isNull(memeSaveInteraction)) {
-      logger.info(`Already delete memeSave - deviceId(${user.deviceId}), memeId(${meme._id}`);
-      return false;
-    }
-
     await MemeInteractionService.deleteMemeInteraction(user, meme, InteractionType.SAVE);
     return true;
   } catch (err) {
@@ -281,6 +269,7 @@ async function deleteMemeSave(user: IUserDocument, meme: IMemeDocument): Promise
     );
   }
 }
+
 async function getTopReactionImage(keyword: IKeywordDocument): Promise<string> {
   try {
     const topReactionMeme: IMemeDocument = await MemeModel.findOne({
