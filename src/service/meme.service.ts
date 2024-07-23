@@ -230,11 +230,15 @@ async function createMemeInteraction(
   interactionType: InteractionType,
 ): Promise<boolean> {
   try {
+    // 'save' interaction은 isDeleted 조건 검색 필요없음
+    const isDeletedFilter = interactionType === InteractionType.SAVE ? false : true;
+
     // interaction 조회
     const memeInteraction = await MemeInteractionService.getMemeInteractionInfo(
       user,
       meme,
       interactionType,
+      isDeletedFilter,
     );
 
     if (_.isNull(memeInteraction)) {
@@ -242,7 +246,7 @@ async function createMemeInteraction(
       await MemeInteractionService.createMemeInteraction(user, meme, interactionType);
     } else {
       logger.info(
-        `Already ${interactionType} meme - deviceId(${user.deviceId}), memeId(${meme._id}`,
+        `Already ${interactionType} meme - deviceId(${user.deviceId}), memeId(${meme._id})`,
       );
 
       // interactionType에 따른 동작 처리 (MemeInteracionService에서 진행)
