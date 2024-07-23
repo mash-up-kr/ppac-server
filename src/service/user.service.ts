@@ -10,7 +10,6 @@ import { IMemeDocument, IMemeGetResponse, MemeModel } from '../model/meme';
 import { InteractionType, MemeInteractionModel } from '../model/memeInteraction';
 import {
   MemeRecommendWatchModel,
-  IMemeRecommendWatchUpdatePayload,
   IMemeRecommendWatchCreatePayload,
 } from '../model/memeRecommendWatch';
 import { IUser, IUserDocument, IUserInfos, UserModel } from '../model/user';
@@ -202,32 +201,32 @@ async function getSavedMemeList(
 async function createMemeRecommendWatch(user: IUserDocument, meme: IMemeDocument): Promise<number> {
   try {
     const todayWeekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
+
     const memeRecommendWatch = await MemeRecommendWatchModel.findOne({
-      memeIds: meme._id,
+      memeId: meme._id,
       startDate: todayWeekStart,
       deviceId: user.deviceId,
       isDeleted: false,
     });
 
-    if (!_.isNull(memeRecommendWatch)) {
-      logger.info(`Already watched recommend meme - deviceId(${user.deviceId})`);
-
-      const updatedMemeList = Array.from(
-        new Set([...memeRecommendWatch.memeIds, meme._id].map((id) => id.toString())),
-      ).map((id) => new Types.ObjectId(id));
-
-      const updatePayload: IMemeRecommendWatchUpdatePayload = {
-        memeIds: updatedMemeList,
+    // 해당 추천 밈을 처음 보는 경우
+    if (_.isNull(memeRecommendWatch)) {
+      // 추천 밈 본 기록 남기기
+      const createPayload: IMemeRecommendWatchCreatePayload = {
+        deviceId: user.deviceId,
+        startDate: startOfWeek(new Date(), { weekStartsOn: 1 }),
+        memeId: meme._id,
       };
 
-      await MemeRecommendWatchModel.findOneAndUpdate(
-        { _id: memeRecommendWatch._id },
-        { $set: updatePayload },
-      );
-      return updatePayload.memeIds.length;
+      // MemeRecommendWatch에 memeId 추가
+      // MemeInteraction에 memeId의 watch 타입 추가
+      await Promise.all([
+        MemeRecommendWatchModel.create(createPayload),
+        MemeService.createMemeInteraction(user, meme, InteractionType.WATCH),
+      ]);
+    } else {
+      logger.info(`Already watched recommend meme - deviceId(${user.deviceId})`);
     }
-
-    const createPayload: IMemeRecommendWatchCreatePayload = {
       deviceId: user.deviceId,
       startDate: startOfWeek(new Date(), { weekStartsOn: 1 }),
       memeIds: [meme._id],

@@ -6,12 +6,6 @@ export interface IMemeRecommendWatchCreatePayload {
   memeId: Types.ObjectId;
 }
 
-export interface IMemeRecommendWatchUpdatePayload {
-  deviceId?: string;
-  startDate?: Date;
-  memeId?: Types.ObjectId;
-}
-
 export interface IMemeRecommendWatch {
   deviceId: string;
   startDate: Date;
