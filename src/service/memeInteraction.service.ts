@@ -13,6 +13,7 @@ async function getMemeInteractionInfo(
   user: IUserDocument,
   meme: IMemeDocument,
   interactionType: InteractionType,
+  isDeletedFilter: boolean = true,
 ): Promise<IMemeInteractionDocument | null> {
   try {
     const condition = {
@@ -21,8 +22,9 @@ async function getMemeInteractionInfo(
       interactionType,
     };
 
-    // 'save' interaction은 isDeleted 조건 검색 필요없음
-    const isDeletedCondition = interactionType !== InteractionType.SAVE ? { isDeleted: false } : {};
+    // isDeletedFilter true인 경우 { isDeleted: false }로 검색
+    // isDeletedFilter false인 경우 {}로 검색 (삭제된 도큐먼트도 검색)
+    const isDeletedCondition = isDeletedFilter ? { isDeleted: false } : {};
 
     const memeInteraction = await MemeInteractionModel.findOne({
       ...condition,
