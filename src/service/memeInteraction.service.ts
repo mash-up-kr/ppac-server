@@ -145,6 +145,7 @@ async function updateMemeInteraction(
   interactionType: InteractionType,
 ): Promise<void> {
   switch (interactionType) {
+    // 'save' isDeleted false로 변경
     case InteractionType.SAVE:
       await MemeInteractionModel.findOneAndUpdate(
         { memeId: meme._id, deviceId: user.deviceId, interactionType },
@@ -153,6 +154,8 @@ async function updateMemeInteraction(
       logger.debug(`[${interactionType}] interaction - updated isDeleted to 'false'`);
       break;
 
+    // 'reaction' Meme.reaction count 올리기
+    // User의 'reaction' count는 밈당 1번
     case InteractionType.REACTION:
       await MemeModel.findOneAndUpdate(
         { _id: meme._id, isDeleted: false },
@@ -165,6 +168,7 @@ async function updateMemeInteraction(
       logger.debug(`[${interactionType}] interaction - increased Meme reaction count`);
       break;
 
+    // 'share', 'watch' 추가 동작 필요없음
     case InteractionType.SHARE:
     case InteractionType.WATCH:
       logger.debug(`${interactionType} interaction don't need to be updated. `);
