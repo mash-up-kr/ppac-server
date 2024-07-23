@@ -31,7 +31,7 @@ const MemeRecommendWatchSchema: Schema = new Schema(
   {
     timestamps: true,
     versionKey: false,
-    collection: 'MemeRecommendWatch',
+    collection: 'memeRecommendWatch',
   },
 );
 
