@@ -227,14 +227,14 @@ async function createMemeRecommendWatch(user: IUserDocument, meme: IMemeDocument
     } else {
       logger.info(`Already watched recommend meme - deviceId(${user.deviceId})`);
     }
+
+    const memeRecommendWatchCount = await MemeRecommendWatchModel.countDocuments({
+      startDate: todayWeekStart,
       deviceId: user.deviceId,
-      startDate: startOfWeek(new Date(), { weekStartsOn: 1 }),
-      memeIds: [meme._id],
-    };
+      isDeleted: false,
+    });
 
-    await MemeRecommendWatchModel.create(createPayload);
-
-    return 1;
+    return memeRecommendWatchCount;
   } catch (err) {
     logger.error(`Failed create memeRecommendWatch`, err.message);
     throw new CustomError(
