@@ -13,6 +13,7 @@ async function getMemeInteractionInfo(
   user: IUserDocument,
   meme: IMemeDocument,
   interactionType: InteractionType,
+  isDeletedFilter: boolean = true,
 ): Promise<IMemeInteractionDocument | null> {
   try {
     const condition = {
@@ -21,8 +22,9 @@ async function getMemeInteractionInfo(
       interactionType,
     };
 
-    // 'save' interaction은 isDeleted 조건 검색 필요없음
-    const isDeletedCondition = interactionType !== InteractionType.SAVE ? { isDeleted: false } : {};
+    // isDeletedFilter true인 경우 { isDeleted: false }로 검색
+    // isDeletedFilter false인 경우 {}로 검색 (삭제된 도큐먼트도 검색)
+    const isDeletedCondition = isDeletedFilter ? { isDeleted: false } : {};
 
     const memeInteraction = await MemeInteractionModel.findOne({
       ...condition,
@@ -143,6 +145,7 @@ async function updateMemeInteraction(
   interactionType: InteractionType,
 ): Promise<void> {
   switch (interactionType) {
+    // 'save' isDeleted false로 변경
     case InteractionType.SAVE:
       await MemeInteractionModel.findOneAndUpdate(
         { memeId: meme._id, deviceId: user.deviceId, interactionType },
@@ -151,9 +154,11 @@ async function updateMemeInteraction(
       logger.debug(`[${interactionType}] interaction - updated isDeleted to 'false'`);
       break;
 
+    // 'reaction' Meme.reaction count 올리기
+    // User의 'reaction' count는 밈당 1번
     case InteractionType.REACTION:
       await MemeModel.findOneAndUpdate(
-        { memeId: meme._id, isDeleted: false },
+        { _id: meme._id, isDeleted: false },
         { $inc: { reaction: 1 } },
         {
           projection: { _id: 0, createdAt: 0, updatedAt: 0 },
@@ -163,6 +168,7 @@ async function updateMemeInteraction(
       logger.debug(`[${interactionType}] interaction - increased Meme reaction count`);
       break;
 
+    // 'share', 'watch' 추가 동작 필요없음
     case InteractionType.SHARE:
     case InteractionType.WATCH:
       logger.debug(`${interactionType} interaction don't need to be updated. `);

@@ -7,10 +7,12 @@ import { HttpCode } from '../errors/HttpCode';
 import { IKeywordDocument } from '../model/keyword';
 import { IKeywordCategoryDocument } from '../model/keywordCategory';
 import { IMemeDocument } from '../model/meme';
+import { IMemeInteraction, InteractionType } from '../model/memeInteraction';
 import { IUserDocument } from '../model/user';
 import { getKeywordByName, getKeywordById } from '../service/keyword.service';
 import { getKeywordCategory } from '../service/keywordCategory.service';
 import { getMeme } from '../service/meme.service';
+import { getMemeInteractionInfo } from '../service/memeInteraction.service';
 import { getUser } from '../service/user.service';
 
 export interface CustomRequest extends Request {
@@ -18,6 +20,7 @@ export interface CustomRequest extends Request {
   requestedUser?: IUserDocument;
   requestedKeyword?: IKeywordDocument;
   requestedKeywordCategory?: IKeywordCategoryDocument;
+  requestedMemeInteraction?: IMemeInteraction;
 }
 
 export const getRequestedMemeInfo = async (
@@ -41,6 +44,33 @@ export const getRequestedMemeInfo = async (
   }
 
   req.requestedMeme = meme;
+  next();
+};
+
+// getRequestedMemeInfo, getRequestedUserInfo 미들웨어가 먼저 불려야함
+export const getRequestedMemeSaveInfo = async (
+  req: CustomRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  const memeSaveInteraction = await getMemeInteractionInfo(
+    req.requestedUser,
+    req.requestedMeme,
+    InteractionType.SAVE,
+    true,
+  );
+
+  if (_.isNull(memeSaveInteraction)) {
+    return next(
+      new CustomError(
+        `Meme(${req.requestedMeme._id}) interaction 'save' type does not exist. - deviceId(${req.requestedUser.deviceId})`,
+        HttpCode.NOT_FOUND,
+      ),
+    );
+  }
+
+  req.requestedMemeInteraction = memeSaveInteraction;
+
   next();
 };
 
