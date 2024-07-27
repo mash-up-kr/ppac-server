@@ -150,7 +150,13 @@ async function getLastSeenMemeList(user: IUserDocument): Promise<IMemeGetRespons
       `Get lastSeenMemeList - deviceId(${user.deviceId}), memeList(${getLastSeenMemeList})`,
     );
 
-    return getLastSeenMemeList;
+    const memeMap = getLastSeenMemeList.reduce((acc, meme) => {
+      acc[meme._id.toString()] = meme;
+      return acc;
+    }, {});
+
+    const sortedGetLastSeenMemeList = lastSeenMeme.map((id) => memeMap[id.toString()]);
+    return sortedGetLastSeenMemeList;
   } catch (err) {
     logger.error(`Failed get lastSeenMemeList`, err.message);
     throw new CustomError(
