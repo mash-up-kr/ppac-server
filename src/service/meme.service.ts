@@ -285,10 +285,14 @@ async function getTopReactionImage(keyword: IKeywordDocument): Promise<string> {
       reaction: -1,
     });
 
+    if (_.isNull(topReactionMeme)) {
+      throw new CustomError(`Failed get top reaction meme image`, HttpCode.NOT_FOUND);
+    }
+
     logger.info(`Get top reaction meme - keyword(${keyword.name}), meme(${topReactionMeme._id})`);
     return topReactionMeme.image;
   } catch (err) {
-    logger.error(`Failed get top reaction meme`, err.message);
+    logger.error(`Failed get top reaction meme image`, err.message);
     throw new CustomError(
       `Failed get top reaction meme(${err.message})`,
       HttpCode.INTERNAL_SERVER_ERROR,
