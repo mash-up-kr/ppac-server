@@ -61,7 +61,7 @@ async function getTodayMemeList(
       { isDeleted: 0 },
     ).lean();
 
-    const memeList = await getMemeListWithKeywordsAndisSaved(user, todayMemeList);
+    const memeList = await getMemeListWithKeywordsAndisSavedAndisReaction(user, todayMemeList);
 
     const memeIds = todayMemeList.map((meme) => meme._id);
     logger.info(
@@ -91,7 +91,7 @@ async function getAllMemeList(
     .sort({ createdAt: -1 })
     .lean();
 
-  const allMemeList = await getMemeListWithKeywordsAndisSaved(user, memeList);
+  const allMemeList = await getMemeListWithKeywordsAndisSavedAndisReaction(user, memeList);
 
   logger.info(`Get all meme list - page(${page}), size(${size}), total(${totalMemes})`);
 
@@ -104,7 +104,7 @@ async function getAllMemeList(
 }
 
 // MemeList에서 keywords와 isSaved 정보를 확인하여 추가 반환
-async function getMemeListWithKeywordsAndisSaved(
+async function getMemeListWithKeywordsAndisSavedAndisReaction(
   user: IUserDocument,
   memeList: IMemeDocument[],
 ): Promise<IMemeGetResponse[]> {
@@ -118,10 +118,17 @@ async function getMemeListWithKeywordsAndisSaved(
           InteractionType.SAVE,
           true, // {isDeleted: false} 조건으로 save 상태인지 확인
         );
+        const isReaction = await MemeInteractionService.getMemeInteractionInfo(
+          user,
+          meme,
+          InteractionType.REACTION,
+          true,
+        );
         return {
           ..._.omit(meme, 'keywordIds'),
           keywords,
           isSaved: !_.isNil(isSaved),
+          isReaction: !_.isNil(isReaction),
         } as IMemeGetResponse;
       }),
     );
@@ -203,7 +210,7 @@ async function searchMemeByKeyword(
       .sort({ reaction: -1 })
       .lean();
 
-    const memeList = await getMemeListWithKeywordsAndisSaved(user, searchedMemeList);
+    const memeList = await getMemeListWithKeywordsAndisSavedAndisReaction(user, searchedMemeList);
 
     logger.info(
       `Get all meme list with keyword(${keyword.name}) - page(${page}), size(${size}), total(${totalMemes})`,
@@ -309,7 +316,7 @@ export {
   deleteMemeSave,
   getTodayMemeList,
   getAllMemeList,
-  getMemeListWithKeywordsAndisSaved,
+  getMemeListWithKeywordsAndisSavedAndisReaction,
   deleteKeywordOfMeme,
   getMemeWithKeywords,
   searchMemeByKeyword,
