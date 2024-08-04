@@ -289,6 +289,9 @@ router.get('/', getRequestedUserInfo, UserController.getUser); // user 조회
  *                           isSaved:
  *                             type: boolean
  *                             example: true
+ *                           isReaction:
+ *                             type: boolean
+ *                             example: true
  *                           keywords:
  *                             type: array
  *                             items:
@@ -409,6 +412,9 @@ router.get('/saved-memes', getRequestedUserInfo, UserController.getSavedMemeList
  *                         type: boolean
  *                         example: false
  *                       isSaved:
+ *                         type: boolean
+ *                         example: false
+ *                       isReaction:
  *                         type: boolean
  *                         example: false
  *                       keywords:

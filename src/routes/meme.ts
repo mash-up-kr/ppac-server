@@ -104,6 +104,9 @@ const router = express.Router();
  *                           isSaved:
  *                             type: boolean
  *                             example: true
+ *                           isReaction:
+ *                             type: boolean
+ *                             example: true
  *                           keywords:
  *                             type: array
  *                             items:
@@ -242,6 +245,9 @@ router.get('/list', getRequestedUserInfo, getAllMemeList); // meme 목록 전체
  *                         format: date-time
  *                         example: "2024-06-29T19:05:55.638Z"
  *                       isSaved:
+ *                         type: boolean
+ *                         example: true
+ *                       isReaction:
  *                         type: boolean
  *                         example: true
  *                       keywords:
@@ -498,6 +504,9 @@ router.post('/', createMeme); // meme 생성
  *                       format: date-time
  *                       example: "2024-06-29T19:05:55.638Z"
  *                     isSaved:
+ *                       type: boolean
+ *                       example: true
+ *                     isReaction:
  *                       type: boolean
  *                       example: true
  *                     keywords:
@@ -1418,6 +1427,9 @@ router.post('/:memeId/reaction', getRequestedUserInfo, getRequestedMemeInfo, cre
  *                             type: boolean
  *                             example: false
  *                           isSaved:
+ *                             type: boolean
+ *                             example: true
+ *                           isReaction:
  *                             type: boolean
  *                             example: true
  *                           keywords:
