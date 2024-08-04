@@ -145,7 +145,10 @@ async function getLastSeenMemeList(user: IUserDocument): Promise<IMemeGetRespons
       { isDeleted: 0 },
     ).lean();
 
-    const getLastSeenMemeList = await MemeService.getMemeListWithKeywordsAndisSaved(user, memeList);
+    const getLastSeenMemeList = await MemeService.getMemeListWithKeywordsAndisSavedAndisReaction(
+      user,
+      memeList,
+    );
     logger.info(
       `Get lastSeenMemeList - deviceId(${user.deviceId}), memeList(${getLastSeenMemeList})`,
     );
@@ -190,7 +193,10 @@ async function getSavedMemeList(
       { isDeleted: 0 },
     ).lean();
 
-    const savedMemeList = await MemeService.getMemeListWithKeywordsAndisSaved(user, memeList);
+    const savedMemeList = await MemeService.getMemeListWithKeywordsAndisSavedAndisReaction(
+      user,
+      memeList,
+    );
     logger.info(`Get savedMemeList - deviceId(${user.deviceId}), memeList(${savedMemeList})`);
 
     return {
