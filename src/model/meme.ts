@@ -37,6 +37,7 @@ export interface IMemeGetResponse {
   isDeleted: boolean;
   keywords: IKeywordGetResponse[];
   isSaved: boolean; // 나의 파밈함 저장 여부
+  isReaction: boolean; // reaction 여부
 }
 
 export interface IMemeDocument extends Document {

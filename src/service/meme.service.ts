@@ -37,10 +37,18 @@ async function getMemeWithKeywords(
       true, // {isDeleted: false} 조건으로 save 상태인지 확인
     );
 
+    const isReaction = await MemeInteractionService.getMemeInteractionInfo(
+      user,
+      meme,
+      InteractionType.REACTION,
+      true,
+    );
+
     return {
       ..._.omit(meme, 'keywordIds'),
       keywords,
       isSaved: !_.isNil(isSaved),
+      isReaction: !_.isNil(isReaction),
     };
   } catch (err) {
     logger.error(`Failed to get a meme(${meme._id}) with keywords: ${err.message}`);
