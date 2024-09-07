@@ -26,7 +26,7 @@ async function getUser(deviceId: string): Promise<IUserDocument | null> {
     );
     return user?.toObject() || null;
   } catch (err) {
-    logger.error(`Failed to getUser - deviceId${deviceId}`);
+    logger.error(`Failed to getUser - deviceId(${deviceId})`);
     throw new CustomError(
       'Failed to getUser - deviceId${deviceId}`',
       HttpCode.INTERNAL_SERVER_ERROR,

@@ -59,6 +59,42 @@ async function getMemeWithKeywords(
   }
 }
 
+async function getTodayMashupMemeList(
+  limit: number = 10,
+  user: IUserDocument,
+): Promise<IMemeGetResponse[]> {
+  try {
+    const todayMashupMemeList = await MemeModel.find(
+      {
+        isDeleted: false,
+        keywordIds: new Types.ObjectId('66d96223df1d658430b09b18'), // Mashup Keyword
+      },
+      { isDeleted: 0 },
+    )
+      .sort({ reaction: -1 }) // reaction 내림차순
+      .limit(limit) // 10개 제한
+      .lean();
+
+    const memeList = await getMemeListWithKeywordsAndisSavedAndisReaction(
+      user,
+      todayMashupMemeList,
+    );
+
+    const memeIds = todayMashupMemeList.map((meme) => meme._id);
+    logger.info(
+      `Get all today mashup meme list(${todayMashupMemeList.length}) - memeIds(${memeIds}), limit(${limit})`,
+    );
+
+    return memeList;
+  } catch (err) {
+    logger.error(`Failed to get today meme list: ${err.message}`);
+    throw new CustomError(
+      `Failed to get today meme list ${err.message}`,
+      HttpCode.INTERNAL_SERVER_ERROR,
+    );
+  }
+}
+
 async function getTodayMemeList(
   limit: number = 5,
   user: IUserDocument,
@@ -323,6 +359,7 @@ export {
   deleteMeme,
   deleteMemeSave,
   getTodayMemeList,
+  getTodayMashupMemeList,
   getAllMemeList,
   getMemeListWithKeywordsAndisSavedAndisReaction,
   deleteKeywordOfMeme,
