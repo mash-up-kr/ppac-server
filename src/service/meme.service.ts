@@ -251,7 +251,7 @@ async function searchMemeByKeyword(
     )
       .skip((page - 1) * size)
       .limit(size)
-      .sort({ reaction: -1, _id: 1 })
+      .sort({ createdAt: -1, _id: 1 })
       .lean();
 
     const memeList = await getMemeListWithKeywordsAndisSavedAndisReaction(user, searchedMemeList);
