@@ -145,6 +145,29 @@ const getAllMemeList = async (req: CustomRequest, res: Response, next: NextFunct
   }
 };
 
+const getTodayMashupMemeList = async (req: CustomRequest, res: Response, next: NextFunction) => {
+  const user = req.requestedUser;
+  const size = parseInt(req.query.size as string) || 10;
+
+  // if (size > 5) {
+  //   return next(
+  //     new CustomError(
+  //       `Invalid 'size' parameter. Today Meme List max size is 5.`,
+  //       HttpCode.BAD_REQUEST,
+  //     ),
+  //   );
+  // }
+
+  try {
+    const todayMemeList = await MemeService.getTodayMashupMemeList(size, user);
+    return res.json(
+      createSuccessResponse(HttpCode.OK, 'Get today mashup meme list', todayMemeList),
+    );
+  } catch (err) {
+    return next(new CustomError(err.message, err.status));
+  }
+};
+
 const getTodayMemeList = async (req: CustomRequest, res: Response, next: NextFunction) => {
   const user = req.requestedUser;
   const size = parseInt(req.query.size as string) || 5;
@@ -294,6 +317,7 @@ const deleteMemeSave = async (req: CustomRequest, res: Response, next: NextFunct
 export {
   getMeme,
   getTodayMemeList,
+  getTodayMashupMemeList,
   getAllMemeList,
   createMeme,
   createMemeSave,
