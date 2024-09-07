@@ -147,7 +147,7 @@ const getAllMemeList = async (req: CustomRequest, res: Response, next: NextFunct
 
 const getTodayMashupMemeList = async (req: CustomRequest, res: Response, next: NextFunction) => {
   const user = req.requestedUser;
-  const size = parseInt(req.query.size as string) || 10;
+  const size = parseInt(req.query.size as string) || 5;
 
   // if (size > 5) {
   //   return next(

@@ -60,7 +60,7 @@ async function getMemeWithKeywords(
 }
 
 async function getTodayMashupMemeList(
-  limit: number = 10,
+  limit: number = 5,
   user: IUserDocument,
 ): Promise<IMemeGetResponse[]> {
   try {
@@ -72,7 +72,7 @@ async function getTodayMashupMemeList(
       { isDeleted: 0 },
     )
       .sort({ reaction: -1 }) // reaction 내림차순
-      .limit(limit) // 10개 제한
+      .limit(limit) // 5개 제한
       .lean();
 
     const memeList = await getMemeListWithKeywordsAndisSavedAndisReaction(
