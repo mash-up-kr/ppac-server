@@ -3,6 +3,8 @@ import { randomUUID } from 'crypto';
 import { Request, Response, NextFunction } from 'express';
 import pino from 'pino';
 
+import config from './config';
+
 const transport = pino.transport({
   targets: [
     {
@@ -20,24 +22,35 @@ const attachRequestId = (req: Request, res: Response, next: NextFunction) => {
   next();
 };
 
+const ENV = `${config.ENV}`;
+const isProduction = ENV === 'production';
+logger.info(`env: ${ENV} - ${isProduction}`);
+
 const loggerMiddleware = (req: Request, res: Response, next: NextFunction) => {
-  const start = Date.now();
+  const startTime = Date.now();
+  const { method, originalUrl, body } = req;
 
   logger.info(
-    { method: req.method, url: req.originalUrl, body: req.body },
-    `--> [${req.method}] ${req.originalUrl} Request called`,
+    isProduction ? undefined : { method, url: originalUrl, body },
+    `--> ${method} ${originalUrl}`,
   );
 
   const originalSend = res.send;
   res.send = (data) => {
-    logger[res.statusCode !== 200 ? 'error' : 'info'](
-      {
-        statusCode: res.statusCode,
-        duration: `${Date.now() - start}ms`,
-        response: JSON.parse(data),
-      },
-      `<-- [${req.method}] ${res.statusCode} ${req.originalUrl} Response received in ${Date.now() - start}ms`,
+    const duration = Date.now() - startTime;
+    const statusCode = res.statusCode;
+
+    logger[statusCode !== 200 ? 'error' : 'info'](
+      isProduction
+        ? undefined
+        : {
+            method,
+            url: originalUrl,
+            response: JSON.parse(data),
+          },
+      `<-- ${statusCode} ${method} ${originalUrl} (${duration}ms)`,
     );
+
     return originalSend.bind(res)(data);
   };
 
