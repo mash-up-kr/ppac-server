@@ -264,7 +264,7 @@ async function searchMemeBySearchTerm(
     ]);
 
     logger.info(
-      `Search Meme(term: '${searchTerm}') - page(${page}), size(${size}), total(${totalMemeCount})`,
+      `Search Meme(term: ${searchTerm}) - page(${page}), size(${size}), total(${totalMemeCount})`,
     );
 
     const memeList =

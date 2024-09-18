@@ -444,15 +444,15 @@ router.get('/recommend-memes', getRequestedUserInfo, getTodayMemeList); // 오�
  *                   type: null
  *                   example: null
  */
-router.get('/search', getRequestedUserInfo, searchMemeList);
+router.get('/search', getRequestedUserInfo, searchMemeList); // 밈 검색 (with 검색어)
 
 /**
  * @swagger
  * /api/meme/search/{name}:
  *   get:
  *     tags: [Meme]
- *     summary: 키워드가 포함된 밈 검색 (페이지네이션 적용)
- *     description: 키워드 클릭 시 해당 키워드를 포함한 밈을 조회하고 목록을 반환한다.
+ *     summary: 특정 키워드가 포함된 밈 검색 (페이지네이션 적용)
+ *     description: 키워드 클릭 시 해당 키워드를 포함한 밈을 조회하고 목록을 반환한다. 키워드가 완벽하게 일치해야한다.
  *     parameters:
  *     - name: x-device-id
  *       in: header
@@ -475,7 +475,7 @@ router.get('/search', getRequestedUserInfo, searchMemeList);
  *       name: name
  *       schema:
  *         type: string
- *         example: "행복"
+ *         example: "무한도전"
  *         required: true
  *         description: 키워드명
  *     responses:
@@ -605,7 +605,7 @@ router.get('/search', getRequestedUserInfo, searchMemeList);
  *                   type: null
  *                   example: null
  */
-router.get('/search/:name', getRequestedUserInfo, searchMemeList);
+router.get('/search/:name', getRequestedUserInfo, searchMemeList); // 밈 검색 (with 키워드)
 
 /**
  * @swagger

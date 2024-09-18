@@ -186,13 +186,13 @@ const searchMemeList = async (req: CustomRequest, res: Response, next: NextFunct
   try {
     if (searchTerm) {
       // 검색어로 검색하는 경우 (query-parameter)
-      logger.info('Search by searchTerm: %s', searchTerm);
+      logger.info(`Search by searchTerm: ${searchTerm}`);
       const result = await searchMemeListBySearchTerm(page, size, searchTerm, user);
       return res.json(createSuccessResponse(HttpCode.OK, 'Search meme list by searchTerm', result));
     } else {
       // 키워드로 검색하는 경우 (parameter)
       const keyword = req.params?.name;
-      logger.info('Search by keyword: %s', keyword);
+      logger.info(`Search by keyword: ${keyword}`);
       const requestedKeyword = await getKeywordByName(keyword);
       if (_.isNull(requestedKeyword)) {
         return next(
@@ -238,8 +238,6 @@ const searchMemeListBySearchTerm = async (
   saerchTerm: string,
   user: IUserDocument,
 ) => {
-  logger.info(`검색어: ${saerchTerm}`);
-
   try {
     const memeList = await MemeService.searchMemeBySearchTerm(page, size, saerchTerm, user);
     const data = {
