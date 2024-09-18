@@ -239,6 +239,54 @@ async function searchMemeByKeyword(
   }
 }
 
+async function searchMemeBySearchTerm(
+  page: number,
+  size: number,
+  searchTerm: string,
+  user: IUserDocument,
+): Promise<{ total: number; page: number; totalPages: number; data: IMemeGetResponse[] }> {
+  try {
+    const searchCondition = {
+      $or: [
+        { title: { $regex: searchTerm, $options: 'i' } },
+        { source: { $regex: searchTerm, $options: 'i' } },
+      ],
+      isDeleted: false,
+    };
+
+    const [totalMemeCount, searchResult] = await Promise.all([
+      MemeModel.countDocuments(searchCondition),
+      MemeModel.find(searchCondition)
+        .skip((page - 1) * size)
+        .limit(size)
+        .sort({ reaction: -1, _id: 1 })
+        .sort({ reaction: -1 }),
+    ]);
+
+    logger.info(
+      `Search Meme(term: '${searchTerm}') - page(${page}), size(${size}), total(${totalMemeCount})`,
+    );
+
+    const memeList =
+      totalMemeCount > 0
+        ? await getMemeListWithKeywordsAndisSavedAndisReaction(user, searchResult)
+        : [];
+
+    return {
+      total: totalMemeCount,
+      page,
+      totalPages: Math.ceil(totalMemeCount / size),
+      data: memeList,
+    };
+  } catch (err) {
+    logger.error(`Failed to search meme list with searchTerm(${searchTerm})`, err.message);
+    throw new CustomError(
+      `Failed to search meme list with searchTerm(${searchTerm})`,
+      HttpCode.INTERNAL_SERVER_ERROR,
+    );
+  }
+}
+
 async function createMemeInteraction(
   user: IUserDocument,
   meme: IMemeDocument,
@@ -328,5 +376,6 @@ export {
   deleteKeywordOfMeme,
   getMemeWithKeywords,
   searchMemeByKeyword,
+  searchMemeBySearchTerm,
   getTopReactionImage,
 };
