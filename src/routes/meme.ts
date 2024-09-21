@@ -1266,7 +1266,7 @@ router.post('/:memeId/watch/:type', getRequestedUserInfo, getRequestedMemeInfo, 
  *         required: true
  *         description: 리액션할 밈 id
  *     requestBody:
- *       required: false
+ *       required: true
  *       content:
  *         application/json:
  *           schema:

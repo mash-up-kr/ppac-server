@@ -243,7 +243,7 @@ async function createMemeInteraction(
   user: IUserDocument,
   meme: IMemeDocument,
   interactionType: InteractionType,
-  count: number = 0,
+  count: number = 1,
 ): Promise<boolean> {
   try {
     // 'save' interaction은 isDeleted 조건 검색 필요없음

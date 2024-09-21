@@ -143,7 +143,7 @@ async function updateMemeInteraction(
   user: IUserDocument,
   meme: IMemeDocument,
   interactionType: InteractionType,
-  count: number = 0,
+  count: number = 1,
 ): Promise<void> {
   switch (interactionType) {
     // 'save' isDeleted false로 변경
