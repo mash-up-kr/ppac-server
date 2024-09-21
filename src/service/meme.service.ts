@@ -246,10 +246,15 @@ async function searchMemeBySearchTerm(
   user: IUserDocument,
 ): Promise<{ total: number; page: number; totalPages: number; data: IMemeGetResponse[] }> {
   try {
+    // 'searchTerm'으로 키워드 우선 검색
+    const keywordIds = await KeywordService.getSearchedKeywords(searchTerm);
+
+    // 검색 범위: 제목(title) / 출처(source / 키워드명(keyword.name)
     const searchCondition = {
       $or: [
         { title: { $regex: searchTerm, $options: 'i' } },
         { source: { $regex: searchTerm, $options: 'i' } },
+        { keywordIds: { $in: keywordIds } },
       ],
       isDeleted: false,
     };
