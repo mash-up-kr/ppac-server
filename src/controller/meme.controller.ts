@@ -202,12 +202,14 @@ const searchMemeListByKeyword = async (req: CustomRequest, res: Response, next: 
 const createMemeReaction = async (req: CustomRequest, res: Response, next: NextFunction) => {
   const user = req.requestedUser;
   const meme = req.requestedMeme;
+  const { count } = req.body || 0;
 
   try {
     const result: boolean = await MemeService.createMemeInteraction(
       user,
       meme,
       InteractionType.REACTION,
+      count,
     );
     return res.json(createSuccessResponse(HttpCode.CREATED, 'Create Meme Reaction', result));
   } catch (err) {

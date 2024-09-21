@@ -243,6 +243,7 @@ async function createMemeInteraction(
   user: IUserDocument,
   meme: IMemeDocument,
   interactionType: InteractionType,
+  count: number = 0,
 ): Promise<boolean> {
   try {
     // 'save' interaction은 isDeleted 조건 검색 필요없음
@@ -265,7 +266,7 @@ async function createMemeInteraction(
       );
 
       // interactionType에 따른 동작 처리 (MemeInteracionService에서 진행)
-      await MemeInteractionService.updateMemeInteraction(user, meme, interactionType);
+      await MemeInteractionService.updateMemeInteraction(user, meme, interactionType, count);
     }
     return true;
   } catch (err) {
