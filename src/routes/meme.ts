@@ -13,6 +13,7 @@ import {
   createMemeWatch,
   searchMemeListByKeyword,
   deleteMemeSave,
+  getTitle,
 } from '../controller/meme.controller';
 import {
   getRequestedMemeInfo,
@@ -22,6 +23,8 @@ import {
 } from '../middleware/requestedInfo';
 
 const router = express.Router();
+
+router.get('/getTitle', getTitle);
 
 /**
  * @swagger
