@@ -24,7 +24,7 @@ const getMeme = async (req: Request, res: Response, next: NextFunction) => {
   }
 
   if (!mongoose.Types.ObjectId.isValid(memeId)) {
-    return next(new CustomError(`'memeId' is not a valid ObjectId`, HttpCode.BAD_REQUEST));
+    return next(new CustomError(`${memeId} is not a valid ObjectId`, HttpCode.BAD_REQUEST));
   }
 
   try {

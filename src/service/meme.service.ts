@@ -19,8 +19,10 @@ async function getMeme(memeId: string): Promise<IMemeDocument | null> {
 
     return meme || null;
   } catch (err) {
-    logger.error(`Failed to get a meme(${memeId}): ${err.message}`);
-    throw new CustomError(`Failed to get a meme(${memeId})`, HttpCode.INTERNAL_SERVER_ERROR);
+    throw new CustomError(
+      `Failed to get a meme(${memeId}): ${err.message}`,
+      HttpCode.INTERNAL_SERVER_ERROR,
+    );
   }
 }
 
@@ -51,9 +53,8 @@ async function getMemeWithKeywords(
       isReaction: !_.isNil(isReaction),
     };
   } catch (err) {
-    logger.error(`Failed to get a meme(${meme._id}) with keywords: ${err.message}`);
     throw new CustomError(
-      `Failed to get a meme(${meme._id}) with keywords`,
+      `Failed to get a meme(${meme._id}) with keywords: ${err.message}`,
       HttpCode.INTERNAL_SERVER_ERROR,
     );
   }
@@ -78,9 +79,8 @@ async function getTodayMemeList(
 
     return memeList;
   } catch (err) {
-    logger.error(`Failed to get today meme list: ${err.message}`);
     throw new CustomError(
-      `Failed to get today meme list ${err.message}`,
+      `Failed to get today meme list: ${err.message}`,
       HttpCode.INTERNAL_SERVER_ERROR,
     );
   }
@@ -141,9 +141,8 @@ async function getMemeListWithKeywordsAndisSavedAndisReaction(
       }),
     );
   } catch (err) {
-    logger.error('Failed to get keywords and isSaved info from meme list', err.message);
     throw new CustomError(
-      `Failed to get keywords and isSaved info from meme list ${err.message}`,
+      `Failed to get keywords and isSaved info from meme list: ${err.message}`,
       HttpCode.INTERNAL_SERVER_ERROR,
     );
   }
@@ -231,9 +230,8 @@ async function searchMemeByKeyword(
       data: memeList,
     };
   } catch (err) {
-    logger.error(`Failed to search meme list with keyword(${keyword})`, err.message);
     throw new CustomError(
-      `Failed to search meme list with keyword(${keyword})`,
+      `Failed to search meme list with keyword(${keyword}): ${err.message}`,
       HttpCode.INTERNAL_SERVER_ERROR,
     );
   }
@@ -269,10 +267,8 @@ async function createMemeInteraction(
     }
     return true;
   } catch (err) {
-    logger.error(`Failed to create memeInteraction(${interactionType})`, err.message);
-
     throw new CustomError(
-      `Failed to create memeInteraction(${interactionType}) (${err.message})`,
+      `Failed to create memeInteraction(${interactionType}): ${err.message}`,
       HttpCode.INTERNAL_SERVER_ERROR,
     );
   }
@@ -283,9 +279,8 @@ async function deleteMemeSave(user: IUserDocument, meme: IMemeDocument): Promise
     await MemeInteractionService.deleteMemeInteraction(user, meme, InteractionType.SAVE);
     return true;
   } catch (err) {
-    logger.error(`Failed to delete meme save`, err.message);
     throw new CustomError(
-      `Failed to delete meme save(${err.message})`,
+      `Failed to delete meme save: ${err.message}`,
       HttpCode.INTERNAL_SERVER_ERROR,
     );
   }
@@ -307,9 +302,8 @@ async function getTopReactionImage(keyword: IKeywordDocument): Promise<string> {
     logger.info(`Get top reaction meme - keyword(${keyword.name}), meme(${topReactionMeme._id})`);
     return topReactionMeme.image;
   } catch (err) {
-    logger.error(`Failed get top reaction meme image`, err.message);
     throw new CustomError(
-      `Failed get top reaction meme(${err.message})`,
+      `Failed get top reaction meme image: ${err.message}`,
       HttpCode.INTERNAL_SERVER_ERROR,
     );
   }
