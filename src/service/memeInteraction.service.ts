@@ -32,12 +32,10 @@ async function getMemeInteractionInfo(
     });
 
     return memeInteraction || null;
-  } catch (error) {
-    logger.error(`Failed to get a MemeInteraction Info(${meme._id} - ${interactionType})`, {
-      error,
-    });
+  } catch (err) {
+    logger.error(`Failed to get a MemeInteraction info(${meme._id} - ${interactionType})`);
     throw new CustomError(
-      `Failed to get a MemeInteraction Info(${meme._id} - ${interactionType})`,
+      `Failed to get a MemeInteraction info(${meme._id} - ${interactionType})`,
       HttpCode.INTERNAL_SERVER_ERROR,
     );
   }

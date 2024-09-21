@@ -41,16 +41,16 @@ async function updateKeyword(
   ).lean();
 
   if (_.isNull(updatedKeyword)) {
-    throw new CustomError(`Keyword with ID ${keywordId} not found`, HttpCode.NOT_FOUND);
+    throw new CustomError(`Keyword(${keywordId}) not found`, HttpCode.NOT_FOUND);
   }
 
-  logger.info(`Update keyword - keyword(${keywordId})`);
+  logger.info(`Update keyword - Keyword(${keywordId})`);
   return updatedKeyword;
 }
 async function deleteKeyword(keywordId: Types.ObjectId): Promise<boolean> {
   const deletedKeyword = await KeywordModel.findOneAndDelete({ _id: keywordId }).lean();
   if (_.isNull(deletedKeyword)) {
-    throw new CustomError(`Keyword with ID ${keywordId} not found`, HttpCode.NOT_FOUND);
+    throw new CustomError(`Keyword(${keywordId}) not found`, HttpCode.NOT_FOUND);
   }
   return true;
 }
@@ -76,7 +76,7 @@ async function increaseSearchCount(keywordId: Types.ObjectId): Promise<IKeywordD
       { new: true, projection: { isDeleted: 0 } },
     ).lean();
     if (_.isNull(updatedKeyword)) {
-      throw new CustomError(`KeywordId ${keywordId} not found`, HttpCode.NOT_FOUND);
+      throw new CustomError(`KeywordId(${keywordId}) not found`, HttpCode.NOT_FOUND);
     }
     return updatedKeyword;
   } catch (err) {

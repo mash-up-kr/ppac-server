@@ -35,7 +35,7 @@ export const getRequestedMemeInfo = async (
   }
 
   if (!mongoose.Types.ObjectId.isValid(memeId)) {
-    return next(new CustomError(`'memeId' is not a valid ObjectId`, HttpCode.BAD_REQUEST));
+    return next(new CustomError(`${memeId} is not a valid ObjectId`, HttpCode.BAD_REQUEST));
   }
 
   const meme: IMemeDocument = await getMeme(memeId);

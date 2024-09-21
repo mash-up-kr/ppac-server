@@ -205,8 +205,8 @@ async function getSavedMemeList(
       totalPages: Math.ceil(totalSavedMemes / size),
       data: savedMemeList,
     };
-  } catch (error) {
-    throw new CustomError(`Failed to get saved memes`, HttpCode.INTERNAL_SERVER_ERROR, error);
+  } catch (err) {
+    throw new CustomError(`Failed to get saved memes`, HttpCode.INTERNAL_SERVER_ERROR, err);
   }
 }
 
