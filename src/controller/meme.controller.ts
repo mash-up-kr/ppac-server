@@ -11,7 +11,6 @@ import * as MemeService from '../service/meme.service';
 import * as UserService from '../service/user.service';
 import { logger } from '../util/logger';
 import { createSuccessResponse } from '../util/response';
-import { Console } from 'console';
 
 enum MemeWatchType {
   SEARCH = 'search',
@@ -294,8 +293,7 @@ const deleteMemeSave = async (req: CustomRequest, res: Response, next: NextFunct
 
 const getTitle = async (req: CustomRequest, res: Response, next: NextFunction) => {
   try {
-    console.log('test');
-    const title = 'new! 따끈따끈한 등록된 밈';
+    const title = 'NEW! 따끈따끈한 밈';
 
     return res.json(createSuccessResponse(HttpCode.OK, 'Title fetched successfully', title));
   } catch (err) {
