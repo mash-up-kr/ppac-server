@@ -47,12 +47,8 @@ const getTopKeywords = async (req: Request, res: Response, next: NextFunction) =
           const topReactionImage: string = await MemeService.getTopReactionImage(keyword);
           return { ...keyword, topReactionImage } as IKeywordWithImage;
         } catch (err) {
-          logger.error(
-            `Error retrieving top reaction image for keyword: ${JSON.stringify(keyword._id)}`,
-            err.message,
-          );
           throw new CustomError(
-            `Error retrieving top reaction image for keyword: ${JSON.stringify(keyword._id)}`,
+            `Error retrieving top reaction image for keyword: ${JSON.stringify(keyword._id)}: ${err.message}`,
             HttpCode.INTERNAL_SERVER_ERROR,
           );
         }

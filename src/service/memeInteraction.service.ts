@@ -33,9 +33,8 @@ async function getMemeInteractionInfo(
 
     return memeInteraction || null;
   } catch (err) {
-    logger.error(`Failed to get a MemeInteraction info(${meme._id} - ${interactionType})`);
     throw new CustomError(
-      `Failed to get a MemeInteraction info(${meme._id} - ${interactionType})`,
+      `Failed to get a MemeInteraction info(${meme._id} - ${interactionType}): ${err.message}`,
       HttpCode.INTERNAL_SERVER_ERROR,
     );
   }
@@ -58,9 +57,8 @@ async function getMemeInteractionInfoWithCondition(
     const memeInteraction = await MemeInteractionModel.findOne(condition);
     return memeInteraction || null;
   } catch (err) {
-    logger.error(`Failed to get a MemeInteraction Info(${meme._id} - ${interactionType})`);
     throw new CustomError(
-      `Failed to get a MemeInteraction Info(${meme._id} - ${interactionType})`,
+      `Failed to get a MemeInteraction Info(${meme._id} - ${interactionType}): ${err.message}`,
       HttpCode.INTERNAL_SERVER_ERROR,
     );
   }
@@ -78,9 +76,8 @@ async function getMemeInteractionCount(
     });
     return count;
   } catch (err) {
-    logger.error(`Failed to count MemeInteraction(${interactionType})`);
     throw new CustomError(
-      `Failed to count MemeInteraction(${interactionType}) (${err.message})`,
+      `Failed to count MemeInteraction(${interactionType}): ${err.message}`,
       HttpCode.INTERNAL_SERVER_ERROR,
     );
   }
@@ -107,9 +104,8 @@ async function getMemeInteractionList(
 
     return memeInteractionList;
   } catch (err) {
-    logger.error(`Failed to count MemeInteraction(${interactionType})`);
     throw new CustomError(
-      `Failed to count MemeInteraction(${interactionType}) (${err.message})`,
+      `Failed to count MemeInteraction(${interactionType}): ${err.message}`,
       HttpCode.INTERNAL_SERVER_ERROR,
     );
   }
@@ -129,9 +125,8 @@ async function createMemeInteraction(
     await newMemeInteraction.save();
     return newMemeInteraction;
   } catch (err) {
-    logger.error(`Failed to create a MemeInteraction(${meme._id} - ${interactionType})`);
     throw new CustomError(
-      `Failed to create a MemeInteraction(${meme._id} - ${interactionType})`,
+      `Failed to create a MemeInteraction(${meme._id} - ${interactionType}): ${err.message}`,
       HttpCode.INTERNAL_SERVER_ERROR,
     );
   }
@@ -173,7 +168,6 @@ async function updateMemeInteraction(
       break;
 
     default:
-      logger.error(`Unsupported interactionType(${interactionType})`);
       throw new CustomError(
         `Unsupported interactionType(${interactionType})`,
         HttpCode.BAD_REQUEST,
@@ -196,9 +190,8 @@ async function deleteMemeInteraction(
 
     return memeInteraction;
   } catch (err) {
-    logger.error(`Failed to delete a MemeInteraction(${meme._id} - ${interactionType})`);
     throw new CustomError(
-      `Failed to delete a MemeInteraction(${meme._id} - ${interactionType})`,
+      `Failed to delete a MemeInteraction(${meme._id} - ${interactionType}): ${err.message}`,
       HttpCode.INTERNAL_SERVER_ERROR,
     );
   }
