@@ -24,7 +24,7 @@ const memeMockData = [
   },
   {
     title: '학교안가',
-    source: '',
+    source: '작자미상',
     keywordIds: [],
     image: 'example.com',
     isTodayMeme: false,
