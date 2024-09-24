@@ -1265,6 +1265,16 @@ router.post('/:memeId/watch/:type', getRequestedUserInfo, getRequestedMemeInfo, 
  *         type: string
  *         required: true
  *         description: 리액션할 밈 id
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               count:
+ *                 type: number
+ *                 example: 1
  *     responses:
  *       201:
  *         description: Created Meme Reaction

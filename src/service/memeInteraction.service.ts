@@ -136,6 +136,7 @@ async function updateMemeInteraction(
   user: IUserDocument,
   meme: IMemeDocument,
   interactionType: InteractionType,
+  count: number = 1,
 ): Promise<void> {
   switch (interactionType) {
     // 'save' isDeleted false로 변경
@@ -152,7 +153,7 @@ async function updateMemeInteraction(
     case InteractionType.REACTION:
       await MemeModel.findOneAndUpdate(
         { _id: meme._id, isDeleted: false },
-        { $inc: { reaction: 1 } },
+        { $inc: { reaction: count } },
         {
           projection: { _id: 0, createdAt: 0, updatedAt: 0 },
           returnDocument: 'after',
