@@ -59,7 +59,7 @@ const MemeSchema: Schema = new Schema(
     keywordIds: { type: [Types.ObjectId], ref: 'Keyword', required: true, default: [] },
     image: { type: String, required: true },
     reaction: { type: Number, required: true, default: 0 },
-    source: { type: String, default: '' },
+    source: { type: String, required: true, default: '' },
     isTodayMeme: { type: Boolean, requried: true, default: false },
     isDeleted: { type: Boolean, required: true, default: false },
   },
