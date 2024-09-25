@@ -26,9 +26,8 @@ async function getUser(deviceId: string): Promise<IUserDocument | null> {
     );
     return user?.toObject() || null;
   } catch (err) {
-    logger.error(`Failed to getUser - deviceId${deviceId}`);
     throw new CustomError(
-      'Failed to getUser - deviceId${deviceId}`',
+      `Failed to getUser - deviceId(${deviceId}): ${err.message}`,
       HttpCode.INTERNAL_SERVER_ERROR,
     );
   }
@@ -88,7 +87,6 @@ async function createUser(deviceId: string): Promise<IUserInfos> {
     logger.info(`Created user - deviceId(${JSON.stringify(user.toObject())})`);
     return { ...user.toObject(), watch: 0, share: 0, reaction: 0, save: 0 };
   } catch (err) {
-    logger.error(`Failed to create User`);
     throw new CustomError(`Failed to create a User`, HttpCode.INTERNAL_SERVER_ERROR);
   }
 }
@@ -126,9 +124,8 @@ async function updateLastSeenMeme(user: IUserDocument, meme: IMemeDocument): Pro
     );
     return updatedUser;
   } catch (err) {
-    logger.error(`Failed Update user lastSeenMeme`, err.message);
     throw new CustomError(
-      `Failed Update user lastSeenMeme(${err.message})`,
+      `Failed Update user lastSeenMeme: ${err.message}`,
       HttpCode.INTERNAL_SERVER_ERROR,
     );
   }
@@ -161,9 +158,8 @@ async function getLastSeenMemeList(user: IUserDocument): Promise<IMemeGetRespons
     const sortedGetLastSeenMemeList = lastSeenMeme.map((id) => memeMap[id.toString()]);
     return sortedGetLastSeenMemeList;
   } catch (err) {
-    logger.error(`Failed get lastSeenMemeList`, err.message);
     throw new CustomError(
-      `Failed get lastSeenMemeList(${err.message})`,
+      `Failed to get lastSeenMemeList: ${err.message}`,
       HttpCode.INTERNAL_SERVER_ERROR,
     );
   }
@@ -205,8 +201,8 @@ async function getSavedMemeList(
       totalPages: Math.ceil(totalSavedMemes / size),
       data: savedMemeList,
     };
-  } catch (error) {
-    throw new CustomError(`Failed to get saved memes`, HttpCode.INTERNAL_SERVER_ERROR, error);
+  } catch (err) {
+    throw new CustomError(`Failed to get saved memes`, HttpCode.INTERNAL_SERVER_ERROR, err);
   }
 }
 
@@ -248,9 +244,8 @@ async function createMemeRecommendWatch(user: IUserDocument, meme: IMemeDocument
 
     return memeRecommendWatchCount;
   } catch (err) {
-    logger.error(`Failed create memeRecommendWatch`, err.message);
     throw new CustomError(
-      `Failed create memeRecommendWatch(${err.message})`,
+      `Failed to create memeRecommendWatch(${err.message})`,
       HttpCode.INTERNAL_SERVER_ERROR,
     );
   }

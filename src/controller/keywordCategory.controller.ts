@@ -30,7 +30,7 @@ const updateKeywordCategory = async (req: CustomRequest, res: Response, next: Ne
       updateInfo,
     );
     logger.info(`Updated category with ID ${req.params.categoryName}`);
-    return res.json(createSuccessResponse(HttpCode.OK, 'Update KeywordCategor', updatedCategory));
+    return res.json(createSuccessResponse(HttpCode.OK, 'Updated KeywordCategory', updatedCategory));
   } catch (err) {
     return next(new CustomError(err.message, err.status || HttpCode.INTERNAL_SERVER_ERROR));
   }
@@ -40,7 +40,7 @@ const deleteKeywordCategory = async (req: CustomRequest, res: Response, next: Ne
   const category = req.requestedKeywordCategory;
   try {
     await KeywordCategoryService.deleteKeywordCategory(category.name);
-    return res.json(createSuccessResponse(HttpCode.OK, 'Deleted KeywordCategor', true));
+    return res.json(createSuccessResponse(HttpCode.OK, 'Deleted KeywordCategory', true));
   } catch (err) {
     return next(new CustomError(err.message, err.status || HttpCode.INTERNAL_SERVER_ERROR));
   }

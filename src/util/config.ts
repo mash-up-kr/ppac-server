@@ -19,7 +19,10 @@ const FCM_PROJECT_ID = process.env.FCM_PROJECT_ID;
 const FCM_PRIVATE_KEY = process.env.FCM_PRIVATE_KEY;
 const FCM_CLIENT_EMAIL = process.env.FCM_CLIENT_EMAIL;
 
+const ENV = process.env.NODE_ENV;
+
 export default {
+  ENV,
   DB_URL,
   PORT,
   AWS_ACCESS_KEY_ID,

@@ -12,12 +12,11 @@ import {
   createMemeSave,
   createMemeReaction,
   createMemeWatch,
-  searchMemeListByKeyword,
   deleteMemeSave,
+  searchMemeList,
 } from '../controller/meme.controller';
 import {
   getRequestedMemeInfo,
-  getKeywordInfoByName,
   getRequestedUserInfo,
   getRequestedMemeSaveInfo,
 } from '../middleware/requestedInfo';
@@ -307,7 +306,313 @@ router.get('/recommend-memes', getRequestedUserInfo, getTodayMemeList); // 오�
 
 /**
  * @swagger
- * /api/meme/:
+ * /api/meme/search?q={term}:
+ *   get:
+ *     tags: [Meme]
+ *     summary: 검색어로 밈을 검색한다. (페이지네이션 적용)
+ *     description: 사용자가 검색어를 입력하면 해당 검색어가 제목(title), 출처(source)에 포함된 밈을 조회하고 목록을 반환한다. 이때 리액션(reaction) 많은 순으로 정렬되며, 페이지네이션이 적용된다.
+ *     parameters:
+ *     - name: x-device-id
+ *       in: header
+ *       description: 유저의 고유한 deviceId
+ *       required: true
+ *       type: string
+ *     - in: query
+ *       name: q
+ *       schema:
+ *         type: string
+ *         example: "무한"
+ *         required: true
+ *         description: 검색어
+ *     - in: query
+ *       name: page
+ *       schema:
+ *         type: number
+ *         example: 1
+ *         description: 현재 페이지 번호 (기본값 1)
+ *     - in: query
+ *       name: size
+ *       schema:
+ *         type: number
+ *         example: 10
+ *         description: 한 번에 조회할 밈 개수 (기본값 10)
+ *     responses:
+ *       200:
+ *         description: 검색된 밈 목록
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 code:
+ *                   type: integer
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: Search meme by keyword
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     pagination:
+ *                       type: object
+ *                       properties:
+ *                         total:
+ *                           type: integer
+ *                           example: 15
+ *                         page:
+ *                           type: integer
+ *                           example: 1
+ *                         perPage:
+ *                           type: integer
+ *                           example: 10
+ *                         currentPage:
+ *                           type: integer
+ *                           example: 1
+ *                         totalPages:
+ *                           type: integer
+ *                           example: 2
+ *                     memeList:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           _id:
+ *                             type: string
+ *                             example: "66805b1a72ef94c9c0ba134c"
+ *                           image:
+ *                             type: string
+ *                             example: "https://ppac-meme.s3.ap-northeast-2.amazonaws.com/17207029441190.png"
+ *                           isTodayMeme:
+ *                             type: boolean
+ *                             example: false
+ *                           isSaved:
+ *                             type: boolean
+ *                             example: true
+ *                           isReaction:
+ *                             type: boolean
+ *                             example: true
+ *                           keywords:
+ *                             type: array
+ *                             items:
+ *                               type: object
+ *                               properties:
+ *                                 _id:
+ *                                   type: string
+ *                                   example: "66805b1a72ef94c9c0ba134c"
+ *                                 name:
+ *                                   type: string
+ *                                   example: "무한도전"
+ *                           title:
+ *                             type: string
+ *                             example: "무한상사 정총무"
+ *                           source:
+ *                             type: string
+ *                             example: "무한도전 102화"
+ *                           reaction:
+ *                             type: integer
+ *                             example: 99
+ *                             description: 밈 리액션 수
+ *                           watch:
+ *                             type: integer
+ *                             example: 999
+ *                             description: 밈 조회수
+ *                           createdAt:
+ *                             type: string
+ *                             format: date-time
+ *                             example: "2024-06-29T19:06:02.489Z"
+ *                           updatedAt:
+ *                             type: string
+ *                             format: date-time
+ *                             example: "2024-06-29T19:06:02.489Z"
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: error
+ *                 code:
+ *                   type: integer
+ *                   example: 500
+ *                 message:
+ *                   type: string
+ *                   example: Internal server error
+ *                 data:
+ *                   type: null
+ *                   example: null
+ */
+router.get('/search', getRequestedUserInfo, searchMemeList); // 밈 검색 (with 검색어)
+
+/**
+ * @swagger
+ * /api/meme/search/{name}:
+ *   get:
+ *     tags: [Meme]
+ *     summary: 특정 키워드가 포함된 밈 검색 (페이지네이션 적용)
+ *     description: 키워드 클릭 시 해당 키워드를 포함한 밈을 조회하고 목록을 반환한다. 키워드가 완벽하게 일치해야한다.
+ *     parameters:
+ *     - name: x-device-id
+ *       in: header
+ *       description: 유저의 고유한 deviceId
+ *       required: true
+ *       type: string
+ *     - in: query
+ *       name: page
+ *       schema:
+ *         type: number
+ *         example: 1
+ *         description: 현재 페이지 번호 (기본값 1)
+ *     - in: query
+ *       name: size
+ *       schema:
+ *         type: number
+ *         example: 10
+ *         description: 한 번에 조회할 밈 개수 (기본값 10)
+ *     - in: path
+ *       name: name
+ *       schema:
+ *         type: string
+ *         example: "무한도전"
+ *         required: true
+ *         description: 키워드명
+ *     responses:
+ *       200:
+ *         description: 키워드를 포함한 밈 목록
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 code:
+ *                   type: integer
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: Search meme by keyword
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     pagination:
+ *                       type: object
+ *                       properties:
+ *                         total:
+ *                           type: integer
+ *                           example: 2
+ *                         page:
+ *                           type: integer
+ *                           example: 1
+ *                         perPage:
+ *                           type: integer
+ *                           example: 10
+ *                         currentPage:
+ *                           type: integer
+ *                           example: 1
+ *                         totalPages:
+ *                           type: integer
+ *                           example: 1
+ *                     memeList:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           _id:
+ *                             type: string
+ *                             example: "66805b1a72ef94c9c0ba134c"
+ *                           image:
+ *                             type: string
+ *                             example: "https://ppac-meme.s3.ap-northeast-2.amazonaws.com/17207029441190.png"
+ *                           isTodayMeme:
+ *                             type: boolean
+ *                             example: false
+ *                           isSaved:
+ *                             type: boolean
+ *                             example: true
+ *                           isReaction:
+ *                             type: boolean
+ *                             example: true
+ *                           keywords:
+ *                             type: array
+ *                             items:
+ *                               type: object
+ *                               properties:
+ *                                 _id:
+ *                                   type: string
+ *                                   example: "66805b1a72ef94c9c0ba134c"
+ *                                 name:
+ *                                   type: string
+ *                                   example: "행복"
+ *                           title:
+ *                             type: string
+ *                             example: "무한상사 정총무"
+ *                           source:
+ *                             type: string
+ *                             example: "무한도전 102화"
+ *                           reaction:
+ *                             type: integer
+ *                             example: 99
+ *                             description: 밈 리액션 수
+ *                           watch:
+ *                             type: integer
+ *                             example: 999
+ *                             description: 밈 조회수
+ *                           createdAt:
+ *                             type: string
+ *                             format: date-time
+ *                             example: "2024-06-29T19:06:02.489Z"
+ *                           updatedAt:
+ *                             type: string
+ *                             format: date-time
+ *                             example: "2024-06-29T19:06:02.489Z"
+ *       400:
+ *         description: Invalid keyword name
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: error
+ *                 code:
+ *                   type: integer
+ *                   example: 400
+ *                 message:
+ *                   type: string
+ *                   example: Keyword with name '행복' does not exist
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: error
+ *                 code:
+ *                   type: integer
+ *                   example: 500
+ *                 message:
+ *                   type: string
+ *                   example: Internal server error
+ *                 data:
+ *                   type: null
+ *                   example: null
+ */
+router.get('/search/:name', getRequestedUserInfo, searchMemeList); // 밈 검색 (with 키워드)
+
+/**
+ * @swagger
+ * /api/meme:
  *   post:
  *     summary: "밈 등록"
  *     tags: [Meme]
@@ -1234,6 +1539,16 @@ router.post('/:memeId/watch/:type', getRequestedUserInfo, getRequestedMemeInfo, 
  *         type: string
  *         required: true
  *         description: 리액션할 밈 id
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               count:
+ *                 type: number
+ *                 example: 1
  *     responses:
  *       201:
  *         description: Created Meme Reaction
@@ -1310,166 +1625,5 @@ router.post('/:memeId/watch/:type', getRequestedUserInfo, getRequestedMemeInfo, 
  *                   example: null
  */
 router.post('/:memeId/reaction', getRequestedUserInfo, getRequestedMemeInfo, createMemeReaction); // meme 리액션 남기기
-
-/**
- * @swagger
- * /api/meme/search/{name}:
- *   get:
- *     tags: [Meme]
- *     summary: 키워드가 포함된 밈 검색 (페이지네이션 적용)
- *     description: 키워드 클릭 시 해당 키워드를 포함한 밈을 조회하고 목록을 반환한다.
- *     parameters:
- *     - name: x-device-id
- *       in: header
- *       description: 유저의 고유한 deviceId
- *       required: true
- *       type: string
- *     - in: query
- *       name: page
- *       schema:
- *         type: number
- *         example: 1
- *         description: 현재 페이지 번호 (기본값 1)
- *     - in: query
- *       name: size
- *       schema:
- *         type: number
- *         example: 10
- *         description: 한 번에 조회할 밈 개수 (기본값 10)
- *     - in: path
- *       name: name
- *       schema:
- *         type: string
- *         example: "행복"
- *         required: true
- *         description: 키워드명
- *     responses:
- *       200:
- *         description: 키워드를 포함한 밈 목록
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: success
- *                 code:
- *                   type: integer
- *                   example: 200
- *                 message:
- *                   type: string
- *                   example: Search meme by keyword
- *                 data:
- *                   type: object
- *                   properties:
- *                     pagination:
- *                       type: object
- *                       properties:
- *                         total:
- *                           type: integer
- *                           example: 2
- *                         page:
- *                           type: integer
- *                           example: 1
- *                         perPage:
- *                           type: integer
- *                           example: 10
- *                         currentPage:
- *                           type: integer
- *                           example: 1
- *                         totalPages:
- *                           type: integer
- *                           example: 1
- *                     memeList:
- *                       type: array
- *                       items:
- *                         type: object
- *                         properties:
- *                           _id:
- *                             type: string
- *                             example: "66805b1a72ef94c9c0ba134c"
- *                           image:
- *                             type: string
- *                             example: "https://ppac-meme.s3.ap-northeast-2.amazonaws.com/17207029441190.png"
- *                           isTodayMeme:
- *                             type: boolean
- *                             example: false
- *                           isSaved:
- *                             type: boolean
- *                             example: true
- *                           isReaction:
- *                             type: boolean
- *                             example: true
- *                           keywords:
- *                             type: array
- *                             items:
- *                               type: object
- *                               properties:
- *                                 _id:
- *                                   type: string
- *                                   example: "66805b1a72ef94c9c0ba134c"
- *                                 name:
- *                                   type: string
- *                                   example: "행복"
- *                           title:
- *                             type: string
- *                             example: "무한상사 정총무"
- *                           source:
- *                             type: string
- *                             example: "무한도전 102화"
- *                           reaction:
- *                             type: integer
- *                             example: 99
- *                             description: 밈 리액션 수
- *                           watch:
- *                             type: integer
- *                             example: 999
- *                             description: 밈 조회수
- *                           createdAt:
- *                             type: string
- *                             format: date-time
- *                             example: "2024-06-29T19:06:02.489Z"
- *                           updatedAt:
- *                             type: string
- *                             format: date-time
- *                             example: "2024-06-29T19:06:02.489Z"
- *       400:
- *         description: Invalid keyword name
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: error
- *                 code:
- *                   type: integer
- *                   example: 400
- *                 message:
- *                   type: string
- *                   example: Keyword with name '행복' does not exist
- *       500:
- *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: error
- *                 code:
- *                   type: integer
- *                   example: 500
- *                 message:
- *                   type: string
- *                   example: Internal server error
- *                 data:
- *                   type: null
- *                   example: null
- */
-router.get('/search/:name', getRequestedUserInfo, getKeywordInfoByName, searchMemeListByKeyword); // 키워드에 해당하는 밈 검색하기 (페이지네이션)
 
 export default router;

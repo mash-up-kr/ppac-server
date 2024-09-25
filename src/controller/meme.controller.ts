@@ -5,8 +5,11 @@ import mongoose, { Types } from 'mongoose';
 import CustomError from '../errors/CustomError';
 import { HttpCode } from '../errors/HttpCode';
 import { CustomRequest } from '../middleware/requestedInfo';
+import { IKeywordDocument } from '../model/keyword';
 import { IMemeCreatePayload, IMemeUpdatePayload } from '../model/meme';
 import { InteractionType } from '../model/memeInteraction';
+import { IUserDocument } from '../model/user';
+import { getKeywordByName } from '../service/keyword.service';
 import * as MemeService from '../service/meme.service';
 import * as UserService from '../service/user.service';
 import { logger } from '../util/logger';
@@ -24,7 +27,7 @@ const getMeme = async (req: Request, res: Response, next: NextFunction) => {
   }
 
   if (!mongoose.Types.ObjectId.isValid(memeId)) {
-    return next(new CustomError(`'memeId' is not a valid ObjectId`, HttpCode.BAD_REQUEST));
+    return next(new CustomError(`${memeId} is not a valid ObjectId`, HttpCode.BAD_REQUEST));
   }
 
   try {
@@ -173,9 +176,8 @@ const getTodayMemeList = async (req: CustomRequest, res: Response, next: NextFun
   }
 };
 
-const searchMemeListByKeyword = async (req: CustomRequest, res: Response, next: NextFunction) => {
+const searchMemeList = async (req: CustomRequest, res: Response, next: NextFunction) => {
   const user = req.requestedUser;
-  const keyword = req.requestedKeyword;
 
   const page = parseInt(req.query.page as string) || 1;
   if (page < 1) {
@@ -187,6 +189,37 @@ const searchMemeListByKeyword = async (req: CustomRequest, res: Response, next: 
     return next(new CustomError(`Invalid 'size' parameter`, HttpCode.BAD_REQUEST));
   }
 
+  const searchTerm = (req.query.q as string) || '';
+  try {
+    if (searchTerm) {
+      // 검색어로 검색하는 경우 (query-parameter)
+      logger.info(`Search by searchTerm: ${searchTerm}`);
+      const result = await searchMemeListBySearchTerm(page, size, searchTerm, user);
+      return res.json(createSuccessResponse(HttpCode.OK, 'Search meme list by searchTerm', result));
+    } else {
+      // 키워드로 검색하는 경우 (parameter)
+      const keyword = req.params?.name;
+      logger.info(`Search by keyword: ${keyword}`);
+      const requestedKeyword = await getKeywordByName(keyword);
+      if (_.isNull(requestedKeyword)) {
+        return next(
+          new CustomError(`Keyword name '${keyword}' does not exist`, HttpCode.NOT_FOUND),
+        );
+      }
+      const result = await searchMemeListByKeyword(page, size, requestedKeyword, user);
+      return res.json(createSuccessResponse(HttpCode.OK, 'Search meme list by keyword', result));
+    }
+  } catch (err) {
+    return next(new CustomError(err.message, err.status));
+  }
+};
+
+const searchMemeListByKeyword = async (
+  page: number,
+  size: number,
+  keyword: IKeywordDocument,
+  user: IUserDocument,
+) => {
   try {
     const memeList = await MemeService.searchMemeByKeyword(page, size, keyword, user);
     const data = {
@@ -200,21 +233,48 @@ const searchMemeListByKeyword = async (req: CustomRequest, res: Response, next: 
       memeList: memeList.data,
     };
 
-    return res.json(createSuccessResponse(HttpCode.OK, 'Search meme list by keyword', data));
+    return data;
   } catch (err) {
-    return next(new CustomError(err.message, err.status));
+    throw new CustomError(err.message, err.status);
+  }
+};
+
+const searchMemeListBySearchTerm = async (
+  page: number,
+  size: number,
+  saerchTerm: string,
+  user: IUserDocument,
+) => {
+  try {
+    const memeList = await MemeService.searchMemeBySearchTerm(page, size, saerchTerm, user);
+    const data = {
+      pagination: {
+        total: memeList.total,
+        page: memeList.page,
+        perPage: size,
+        currentPage: memeList.page,
+        totalPages: memeList.totalPages,
+      },
+      memeList: memeList.data,
+    };
+
+    return data;
+  } catch (err) {
+    throw new CustomError(err.message, err.status);
   }
 };
 
 const createMemeReaction = async (req: CustomRequest, res: Response, next: NextFunction) => {
   const user = req.requestedUser;
   const meme = req.requestedMeme;
+  const { count = 1 } = req.body;
 
   try {
     const result: boolean = await MemeService.createMemeInteraction(
       user,
       meme,
       InteractionType.REACTION,
+      count,
     );
     return res.json(createSuccessResponse(HttpCode.CREATED, 'Create Meme Reaction', result));
   } catch (err) {
@@ -311,5 +371,7 @@ export {
   deleteMemeSave,
   updateMeme,
   getMemeWithKeywords,
+  searchMemeList,
   searchMemeListByKeyword,
+  searchMemeListBySearchTerm,
 };
