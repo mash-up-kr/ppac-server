@@ -492,4 +492,6 @@ router.get('/saved-memes', getRequestedUserInfo, UserController.getSavedMemeList
  */
 router.get('/recent-memes', getRequestedUserInfo, UserController.getLastSeenMemeList); // user가 최근에 본 밈 정보 조회 (10개 제한)
 
+router.get('/registered-memes', getRequestedUserInfo, UserController.getRegisteredMemeList); // 내가 등록한 밈
+
 export default router;

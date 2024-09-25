@@ -76,7 +76,18 @@ const getSavedMemeList = async (req: CustomRequest, res: Response, next: NextFun
   }
 };
 
-export { getUser, createUser, getLastSeenMemeList, getSavedMemeList };
+const getRegisteredMemeList = async (req: CustomRequest, res: Response, next: NextFunction) => {
+  const user = req.requestedUser;
+
+  try {
+    const memeList = await UserService.getRegisteredMemeList(user);
+    return res.json(createSuccessResponse(HttpCode.OK, 'Get Registered Meme', memeList));
+  } catch (err) {
+    return next(new CustomError(err.message, err.status));
+  }
+};
+
+export { getUser, createUser, getLastSeenMemeList, getSavedMemeList, getRegisteredMemeList };
 
 function getLevel(watch: number, reaction: number, share: number): number {
   let level = 1;
