@@ -78,8 +78,8 @@ const createMeme = async (req: CustomRequest, res: Response, next: NextFunction)
 
   const imageUrl = await MemeService.uploadMeme(req.file);
 
-  // todo : device ID 추가하기
   const createPayload: IMemeCreatePayload = {
+    deviceId: user.deviceId,
     title: req.body.title,
     image: imageUrl,
     source: req.body.source,
