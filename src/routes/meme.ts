@@ -307,9 +307,9 @@ router.get('/recommend-memes', getRequestedUserInfo, getTodayMemeList); // 오�
 
 /**
  * @swagger
- * /meme/upload:
+ * /api/meme/:
  *   post:
- *     summary: Upload a meme image
+ *     summary: "밈 등록"
  *     tags: [Meme]
  *     parameters:
  *       - in: header
@@ -317,7 +317,7 @@ router.get('/recommend-memes', getRequestedUserInfo, getTodayMemeList); // 오�
  *         required: true
  *         schema:
  *           type: string
- *         description: Unique identifier for the device making the request
+ *         description: "유저의 고유한 deviceId"
  *     requestBody:
  *       required: true
  *       content:
@@ -327,22 +327,22 @@ router.get('/recommend-memes', getRequestedUserInfo, getTodayMemeList); // 오�
  *             properties:
  *               title:
  *                 type: string
- *                 description: The title of the meme
+ *                 description: "밈 제목"
  *               image:
- *                 type: string
- *                 format: binary
- *                 description: The image file to upload
+ *                 type: file
+ *                 description: "밈 이미지 파일"
  *               source:
  *                 type: string
- *                 description: The source URL of the meme
+ *                 description: "밈 출처"
  *               keywordIds:
  *                 type: array
  *                 items:
  *                   type: string
- *                 description: List of keyword IDs associated with the meme
+ *                   description: "키워드의 ObjectId 배열"
+ *                 description: "등록할 키워드의 ObjectId 목록"
  *     responses:
  *       201:
- *         description: Meme uploaded successfully
+ *         description: "Meme uploaded successfully"
  *         content:
  *           application/json:
  *             schema:
@@ -350,33 +350,36 @@ router.get('/recommend-memes', getRequestedUserInfo, getTodayMemeList); // 오�
  *               properties:
  *                 status:
  *                   type: string
- *                   example: success
+ *                   example: "success"
  *                 code:
  *                   type: integer
  *                   example: 201
  *                 message:
  *                   type: string
- *                   example: Create Meme
+ *                   example: "Create Meme"
  *                 data:
  *                   type: object
  *                   properties:
+ *                     deviceId:
+ *                       type: string
+ *                       example: "deviceId"
  *                     title:
  *                       type: string
- *                       example: 폰보는 루피
+ *                       example: "폰보는 루피"
  *                     keywordIds:
  *                       type: array
  *                       items:
  *                         type: string
- *                         example: 667ff3d1239eeaf78630a283
+ *                         example: "667ff3d1239eeaf78630a283"
  *                     image:
  *                       type: string
- *                       example: https://ppac-meme.s3.ap-northeast-2.amazonaws.com/1727269791268
+ *                       example: "https://ppac-meme.s3.ap-northeast-2.amazonaws.com/1727269791268"
  *                     reaction:
  *                       type: integer
  *                       example: 0
  *                     source:
  *                       type: string
- *                       example: google
+ *                       example: "google"
  *                     isTodayMeme:
  *                       type: boolean
  *                       example: false
@@ -385,19 +388,19 @@ router.get('/recommend-memes', getRequestedUserInfo, getTodayMemeList); // 오�
  *                       example: false
  *                     _id:
  *                       type: string
- *                       example: 66f40b9f775ec854840d0519
+ *                       example: "66f40b9f775ec854840d0519"
  *                     createdAt:
  *                       type: string
  *                       format: date-time
- *                       example: 2024-09-25T13:09:51.472Z
+ *                       example: "2024-09-25T13:09:51.472Z"
  *                     updatedAt:
  *                       type: string
  *                       format: date-time
- *                       example: 2024-09-25T13:09:51.472Z
+ *                       example: "2024-09-25T13:09:51.472Z"
  *       400:
- *         description: Bad request (missing fields)
+ *         description: "Bad request (missing fields)"
  *       500:
- *         description: Internal server error
+ *         description: "Internal server error"
  */
 router.post('/', getRequestedUserInfo, upload.single('image'), createMeme);
 
