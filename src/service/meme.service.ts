@@ -10,6 +10,7 @@ import { IMemeCreatePayload, IMemeDocument, MemeModel, IMemeGetResponse } from '
 import { InteractionType } from '../model/memeInteraction';
 import { IUserDocument } from '../model/user';
 import { logger } from '../util/logger';
+import { uploadToS3 } from '../util/s3Config';
 
 async function getMeme(memeId: string): Promise<IMemeDocument | null> {
   try {
@@ -314,6 +315,18 @@ async function getTopReactionImage(keyword: IKeywordDocument): Promise<string> {
     );
   }
 }
+async function uploadMeme(file: Express.Multer.File): Promise<string> {
+  try {
+    const fileKey = `${Date.now()}`;
+    const memeUrl = await uploadToS3(fileKey, file.buffer, file.mimetype);
+
+    logger.info(`Get memeUrl${memeUrl})`);
+    return memeUrl;
+  } catch (err) {
+    logger.error(`Failed to upload meme`, err.message);
+    throw new CustomError(`Failed to upload meme(${err.message})`, HttpCode.INTERNAL_SERVER_ERROR);
+  }
+}
 
 export {
   getMeme,
@@ -329,4 +342,5 @@ export {
   getMemeWithKeywords,
   searchMemeByKeyword,
   getTopReactionImage,
+  uploadMeme,
 };

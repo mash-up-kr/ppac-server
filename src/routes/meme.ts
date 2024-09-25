@@ -1,4 +1,5 @@
 import express from 'express';
+import multer from 'multer';
 
 import {
   deleteMeme,
@@ -13,6 +14,7 @@ import {
   createMemeWatch,
   searchMemeListByKeyword,
   deleteMemeSave,
+  uploadMeme,
 } from '../controller/meme.controller';
 import {
   getRequestedMemeInfo,
@@ -22,6 +24,10 @@ import {
 } from '../middleware/requestedInfo';
 
 const router = express.Router();
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+
+router.post('/upload', getRequestedUserInfo, upload.single('image'), uploadMeme);
 
 /**
  * @swagger

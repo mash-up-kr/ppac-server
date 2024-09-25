@@ -291,6 +291,43 @@ const deleteMemeSave = async (req: CustomRequest, res: Response, next: NextFunct
   }
 };
 
+const uploadMeme = async (req: CustomRequest, res: Response, next: NextFunction) => {
+  const user = req.requestedUser;
+
+  if (!_.has(req.body, 'title')) {
+    return next(new CustomError(`'title' field should be provided`, HttpCode.BAD_REQUEST));
+  }
+
+  if (!req.file) {
+    return next(new CustomError(`'image' field should be provided`, HttpCode.BAD_REQUEST));
+  }
+
+  if (!_.has(req.body, 'source')) {
+    return next(new CustomError(`'source' field should be provided`, HttpCode.BAD_REQUEST));
+  }
+
+  if (!_.has(req.body, 'keywordIds')) {
+    return next(new CustomError(`'keywordIds' field should be provided`, HttpCode.BAD_REQUEST));
+  }
+
+  const imageUrl = await MemeService.uploadMeme(req.file);
+
+  // todo : device ID 추가하기
+  const createPayload: IMemeCreatePayload = {
+    title: req.body.title,
+    image: imageUrl,
+    source: req.body.source,
+    keywordIds: req.body.keywordIds.map((id: string) => new Types.ObjectId(id)),
+  };
+
+  try {
+    const meme = await MemeService.createMeme(createPayload);
+    return res.json(createSuccessResponse(HttpCode.CREATED, 'Create Meme', meme));
+  } catch (err) {
+    return next(new CustomError(err.message, err.status));
+  }
+};
+
 export {
   getMeme,
   getTodayMemeList,
@@ -305,4 +342,5 @@ export {
   updateMeme,
   getMemeWithKeywords,
   searchMemeListByKeyword,
+  uploadMeme,
 };
