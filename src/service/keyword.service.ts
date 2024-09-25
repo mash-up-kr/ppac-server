@@ -183,6 +183,24 @@ async function getRecommendedKeywords(): Promise<
   }
 }
 
+async function getSearchedKeywords(term: string): Promise<Types.ObjectId[]> {
+  try {
+    const searchedKeywords = await KeywordModel.find({
+      name: { $regex: term, $options: 'i' },
+    });
+
+    const keywordIds: Types.ObjectId[] = searchedKeywords.map((keyword) => keyword._id);
+    logger.info(`Successfully searched keywords with term ${term}`);
+    return keywordIds;
+  } catch (err) {
+    logger.error(`Failed to search keywords with term '${term}' - ${err.message}`);
+    throw new CustomError(
+      `Failed to search keywords with term '${term}'`,
+      HttpCode.INTERNAL_SERVER_ERROR,
+    );
+  }
+}
+
 export {
   createKeyword,
   updateKeyword,
@@ -193,4 +211,5 @@ export {
   getKeywordById,
   getRecommendedKeywords,
   getKeywordInfoByKeywordIds,
+  getSearchedKeywords,
 };
