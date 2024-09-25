@@ -22,8 +22,10 @@ async function createKeywordCategory(
     logger.info(`Created new keyword category: ${JSON.stringify(newCategoryObj)}`);
     return newCategoryObj;
   } catch (err) {
-    logger.error(`Failed to create category ${info.name}: ${err.message}`);
-    throw new CustomError('Failed to create category', HttpCode.INTERNAL_SERVER_ERROR);
+    throw new CustomError(
+      `Failed to create category ${info.name}: ${err.message}`,
+      HttpCode.INTERNAL_SERVER_ERROR,
+    );
   }
 }
 
@@ -55,6 +57,7 @@ async function deleteKeywordCategory(categoryName: string): Promise<boolean> {
   if (_.isNull(deletedCategory)) {
     throw new CustomError(`Category with Name ${categoryName} not found`, HttpCode.NOT_FOUND);
   }
+
   return true;
 }
 
