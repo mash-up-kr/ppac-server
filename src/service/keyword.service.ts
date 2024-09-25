@@ -25,8 +25,10 @@ async function createKeyword(info: IKeywordCreatePayload): Promise<IKeywordDocum
 
     return newKeywordObj;
   } catch (err) {
-    logger.error(`Failed to create keyword ${info.name}: ${err.message}`);
-    throw new CustomError('Failed to create keyword', HttpCode.INTERNAL_SERVER_ERROR);
+    throw new CustomError(
+      `Failed to create keyword ${info.name}: ${err.message}`,
+      HttpCode.INTERNAL_SERVER_ERROR,
+    );
   }
 }
 
@@ -41,16 +43,17 @@ async function updateKeyword(
   ).lean();
 
   if (_.isNull(updatedKeyword)) {
-    throw new CustomError(`Keyword with ID ${keywordId} not found`, HttpCode.NOT_FOUND);
+    throw new CustomError(`Keyword(${keywordId}) not found`, HttpCode.NOT_FOUND);
   }
 
-  logger.info(`Update keyword - keyword(${keywordId})`);
+  logger.info(`Update keyword - Keyword(${keywordId})`);
   return updatedKeyword;
 }
+
 async function deleteKeyword(keywordId: Types.ObjectId): Promise<boolean> {
   const deletedKeyword = await KeywordModel.findOneAndDelete({ _id: keywordId }).lean();
   if (_.isNull(deletedKeyword)) {
-    throw new CustomError(`Keyword with ID ${keywordId} not found`, HttpCode.NOT_FOUND);
+    throw new CustomError(`Keyword(${keywordId}) not found`, HttpCode.NOT_FOUND);
   }
   return true;
 }
@@ -63,8 +66,10 @@ async function getTopKeywords(limit: number = 6): Promise<IKeywordDocument[]> {
       .lean();
     return topKeywords;
   } catch (err) {
-    logger.error(`Failed to get top keywords: ${err.message}`);
-    throw new CustomError('Failed to get top keywords', HttpCode.INTERNAL_SERVER_ERROR);
+    throw new CustomError(
+      `Failed to get top keywords: ${err.message}`,
+      HttpCode.INTERNAL_SERVER_ERROR,
+    );
   }
 }
 
@@ -76,12 +81,14 @@ async function increaseSearchCount(keywordId: Types.ObjectId): Promise<IKeywordD
       { new: true, projection: { isDeleted: 0 } },
     ).lean();
     if (_.isNull(updatedKeyword)) {
-      throw new CustomError(`KeywordId ${keywordId} not found`, HttpCode.NOT_FOUND);
+      throw new CustomError(`KeywordId(${keywordId}) not found`, HttpCode.NOT_FOUND);
     }
     return updatedKeyword;
   } catch (err) {
-    logger.error(`Failed to increase searchCount for keywordId ${keywordId}: ${err.message}`);
-    throw new CustomError('Failed to increase searchCount', HttpCode.INTERNAL_SERVER_ERROR);
+    throw new CustomError(
+      `Failed to increase searchCount for keywordId ${keywordId}: ${err.message}`,
+      HttpCode.INTERNAL_SERVER_ERROR,
+    );
   }
 }
 
@@ -90,9 +97,8 @@ async function getKeywordByName(keywordName: string): Promise<IKeywordDocument |
     const keyword = await KeywordModel.findOne({ name: keywordName, isDeleted: false }).lean();
     return keyword || null;
   } catch (err) {
-    logger.error(`Failed to get a Keyword Info By Name(${keywordName})`);
     throw new CustomError(
-      `Failed to get a Keyword Info By Name(${keywordName}) (${err.message})`,
+      `Failed to get a Keyword Info By Name(${keywordName}): ${err.message}`,
       HttpCode.INTERNAL_SERVER_ERROR,
     );
   }
@@ -103,9 +109,8 @@ async function getKeywordById(keywordId: Types.ObjectId): Promise<IKeywordDocume
     const keyword = await KeywordModel.findOne({ _id: keywordId, isDeleted: false }).lean();
     return keyword || null;
   } catch (err) {
-    logger.info(`Failed to get a Keyword Info By id (${keywordId})`);
     throw new CustomError(
-      `Failed to get a Keyword Info By id(${keywordId}) (${err.message})`,
+      `Failed to get a Keyword Info By id(${keywordId}): ${err.message}`,
       HttpCode.INTERNAL_SERVER_ERROR,
     );
   }
@@ -124,9 +129,8 @@ async function getKeywordInfoByKeywordIds(
     ).lean();
     return keyword;
   } catch (err) {
-    logger.error(`Failed to get a Keyword Info By keywordIds(${JSON.stringify(keywordIds)})`);
     throw new CustomError(
-      `Failed to get a Keyword Info By keywordIds(${JSON.stringify(keywordIds)})`,
+      `Failed to get a Keyword Info By keywordIds(${JSON.stringify(keywordIds)}): ${err.message}`,
       HttpCode.INTERNAL_SERVER_ERROR,
     );
   }
@@ -172,8 +176,28 @@ async function getRecommendedKeywords(): Promise<
     logger.info('Successfully retrieved recommended keywords');
     return result;
   } catch (err) {
-    logger.error(`Failed to get recommended keywords: ${err.message}`);
-    throw new CustomError('Failed to get recommended keywords', HttpCode.INTERNAL_SERVER_ERROR);
+    throw new CustomError(
+      `Failed to get recommended keywords: ${err.message}`,
+      HttpCode.INTERNAL_SERVER_ERROR,
+    );
+  }
+}
+
+async function getSearchedKeywords(term: string): Promise<Types.ObjectId[]> {
+  try {
+    const searchedKeywords = await KeywordModel.find({
+      name: { $regex: term, $options: 'i' },
+    });
+
+    const keywordIds: Types.ObjectId[] = searchedKeywords.map((keyword) => keyword._id);
+    logger.info(`Successfully searched keywords with term ${term}`);
+    return keywordIds;
+  } catch (err) {
+    logger.error(`Failed to search keywords with term '${term}' - ${err.message}`);
+    throw new CustomError(
+      `Failed to search keywords with term '${term}'`,
+      HttpCode.INTERNAL_SERVER_ERROR,
+    );
   }
 }
 
@@ -187,4 +211,5 @@ export {
   getKeywordById,
   getRecommendedKeywords,
   getKeywordInfoByKeywordIds,
+  getSearchedKeywords,
 };
