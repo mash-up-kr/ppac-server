@@ -63,6 +63,12 @@ const getMemeWithKeywords = async (req: CustomRequest, res: Response, next: Next
 const createMeme = async (req: CustomRequest, res: Response, next: NextFunction) => {
   const user = req.requestedUser;
 
+  const image = req.file;
+
+  if (_.isUndefined(image)) {
+    return next(new CustomError(`'file' should be provided.`, HttpCode.BAD_REQUEST));
+  }
+
   if (!_.has(req.body, 'title')) {
     return next(new CustomError(`'title' field should be provided`, HttpCode.BAD_REQUEST));
   }
@@ -79,12 +85,10 @@ const createMeme = async (req: CustomRequest, res: Response, next: NextFunction)
     return next(new CustomError(`'keywordIds' field should be provided`, HttpCode.BAD_REQUEST));
   }
 
-  const imageUrl = await MemeService.uploadMeme(req.file);
-
   const createPayload: IMemeCreatePayload = {
     deviceId: user.deviceId,
     title: req.body.title,
-    image: imageUrl,
+    image: image.location,
     source: req.body.source,
     keywordIds: req.body.keywordIds.map((id: string) => new Types.ObjectId(id)),
   };
