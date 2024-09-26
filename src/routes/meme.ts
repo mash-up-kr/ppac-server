@@ -1,5 +1,4 @@
 import express from 'express';
-import multer from 'multer';
 
 import {
   deleteMeme,
@@ -20,11 +19,9 @@ import {
   getRequestedUserInfo,
   getRequestedMemeSaveInfo,
 } from '../middleware/requestedInfo';
+import { compressAndUploadImageToS3, upload } from '../util/image';
 
 const router = express.Router();
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
-
 /**
  * @swagger
  * /api/meme/list:
@@ -643,8 +640,9 @@ router.get('/search/:name', getRequestedUserInfo, searchMemeList); // 밈 검색
  *                 type: array
  *                 items:
  *                   type: string
- *                   description: "키워드의 ObjectId 배열"
- *                 description: "등록할 키워드의 ObjectId 목록"
+ *                   description: "키워드의 ObjectId"
+ *                 example: ["667fa549239eeaf786f9aa75", "667fa3c824fc9c25eaf3b911"]
+ *                 description: "등록할 키워드의 ObjectId 배열"
  *     responses:
  *       201:
  *         description: "Meme uploaded successfully"
@@ -707,7 +705,13 @@ router.get('/search/:name', getRequestedUserInfo, searchMemeList); // 밈 검색
  *       500:
  *         description: "Internal server error"
  */
-router.post('/', getRequestedUserInfo, upload.single('image'), createMeme);
+router.post(
+  '/',
+  getRequestedUserInfo,
+  upload.single('image'),
+  compressAndUploadImageToS3,
+  createMeme,
+);
 
 /**
  * @swagger
