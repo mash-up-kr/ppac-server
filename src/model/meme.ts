@@ -11,7 +11,6 @@ export interface IMemeCreatePayload {
 }
 
 export interface IMemeUpdatePayload {
-  deviceId?: string;
   title?: string;
   keywordIds?: Types.ObjectId[];
   source?: string;
@@ -19,7 +18,7 @@ export interface IMemeUpdatePayload {
 }
 
 export interface IMeme {
-  deviceId?: string;
+  deviceId: string;
   title: string;
   keywordIds: Types.ObjectId[];
   image: string;
@@ -30,7 +29,7 @@ export interface IMeme {
 
 export interface IMemeGetResponse {
   _id: Types.ObjectId;
-  deviceId?: string;
+  deviceId: string;
   title: string;
   image: string;
   reaction: number;
@@ -46,7 +45,7 @@ export interface IMemeGetResponse {
 
 export interface IMemeDocument extends Document {
   _id: Types.ObjectId;
-  deviceId?: string;
+  deviceId: string;
   title: string;
   keywordIds: Types.ObjectId[];
   image: string;
@@ -60,7 +59,7 @@ export interface IMemeDocument extends Document {
 
 const MemeSchema: Schema = new Schema(
   {
-    deviceId: { type: String, default: '' },
+    deviceId: { type: String, required: true },
     title: { type: String, required: true },
     keywordIds: { type: [Types.ObjectId], ref: 'Keyword', required: true, default: [] },
     image: { type: String, required: true },
