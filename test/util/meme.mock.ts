@@ -3,6 +3,7 @@ import { Types } from 'mongoose';
 import { IMeme } from '../../src/model/meme';
 
 const memeMockData = {
+  deviceId: 'deviceId',
   title: 'emotion',
   keywordIds: [],
   image: 'example.com',

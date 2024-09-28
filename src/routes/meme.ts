@@ -19,9 +19,9 @@ import {
   getRequestedUserInfo,
   getRequestedMemeSaveInfo,
 } from '../middleware/requestedInfo';
+import { compressAndUploadImageToS3, upload } from '../util/image';
 
 const router = express.Router();
-
 /**
  * @swagger
  * /api/meme/list:
@@ -611,37 +611,41 @@ router.get('/search/:name', getRequestedUserInfo, searchMemeList); // 밈 검색
  * @swagger
  * /api/meme:
  *   post:
+ *     summary: "밈 등록"
  *     tags: [Meme]
- *     summary: 밈 생성 (백오피스)
- *     description: 밈을 생성한다. (백오피스)
+ *     parameters:
+ *       - in: header
+ *         name: x-device-id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: "유저의 고유한 deviceId"
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             properties:
  *               title:
  *                 type: string
- *                 example: "무한도전 정총무"
- *                 description: 밈 제목
+ *                 description: "밈 제목"
  *               image:
- *                 type: string
- *                 example: "https://ppac-meme.s3.ap-northeast-2.amazonaws.com/17207029441190.png"
- *                 description: 밈 이미지 주소
+ *                 type: file
+ *                 description: "밈 이미지 파일"
  *               source:
  *                 type: string
- *                 example: "무한도전 102화"
- *                 description: 밈 출처
+ *                 description: "밈 출처"
  *               keywordIds:
  *                 type: array
  *                 items:
  *                   type: string
- *                   example: "667fee6dc58681a42d57dc37"
- *                   description: 밈의 키워드 id 목록
+ *                   description: "키워드의 ObjectId"
+ *                 example: ["667fa549239eeaf786f9aa75", "667fa3c824fc9c25eaf3b911"]
+ *                 description: "등록할 키워드의 ObjectId 배열"
  *     responses:
  *       201:
- *         description: 생성된 밈 정보
+ *         description: "Meme uploaded successfully"
  *         content:
  *           application/json:
  *             schema:
@@ -649,96 +653,65 @@ router.get('/search/:name', getRequestedUserInfo, searchMemeList); // 밈 검색
  *               properties:
  *                 status:
  *                   type: string
- *                   example: success
+ *                   example: "success"
  *                 code:
  *                   type: integer
  *                   example: 201
  *                 message:
  *                   type: string
- *                   example: Create Meme
+ *                   example: "Create Meme"
  *                 data:
  *                   type: object
  *                   properties:
- *                     _id:
+ *                     deviceId:
  *                       type: string
- *                       example: "6686af56f7c49ec21e3ef1c1"
- *                       description: 밈 id
+ *                       example: "deviceId"
  *                     title:
  *                       type: string
- *                       example: "무한도전 정총무"
- *                       description: 밈 제목
- *                     image:
- *                       type: string
- *                       example: "https://ppac-meme.s3.ap-northeast-2.amazonaws.com/17207029441190.png"
- *                       description: 밈 이미지 주소
- *                     source:
- *                       type: string
- *                       example: "무한도전 102화"
- *                       description: 밈 출처
+ *                       example: "폰보는 루피"
  *                     keywordIds:
  *                       type: array
  *                       items:
  *                         type: string
- *                         example: "667fee6dc58681a42d57dc37"
- *                         description: 밈의 키워드 id 목록
+ *                         example: "667ff3d1239eeaf78630a283"
+ *                     image:
+ *                       type: string
+ *                       example: "https://ppac-meme.s3.ap-northeast-2.amazonaws.com/1727269791268"
  *                     reaction:
  *                       type: integer
  *                       example: 0
- *                       description: ㅋㅋㅋ 리액션 수 (생성 시 기본값 0)
+ *                     source:
+ *                       type: string
+ *                       example: "google"
  *                     isTodayMeme:
  *                       type: boolean
  *                       example: false
- *                       description: 추천 밈 여부
+ *                     isDeleted:
+ *                       type: boolean
+ *                       example: false
+ *                     _id:
+ *                       type: string
+ *                       example: "66f40b9f775ec854840d0519"
  *                     createdAt:
  *                       type: string
  *                       format: date-time
- *                       example: "2024-07-04T14:19:02.918Z"
- *                       description: 생성 시각
+ *                       example: "2024-09-25T13:09:51.472Z"
  *                     updatedAt:
  *                       type: string
  *                       format: date-time
- *                       example: "2024-07-04T14:19:02.918Z"
- *                       description: 업데이트 시각
+ *                       example: "2024-09-25T13:09:51.472Z"
  *       400:
- *         description: 잘못된 요청 - requestBody 형식 확인 필요
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: error
- *                 code:
- *                   type: integer
- *                   example: 400
- *                 message:
- *                   type: string
- *                   example: title field should be provided
- *                 data:
- *                   type: null
- *                   example: null
+ *         description: "Bad request (missing fields)"
  *       500:
- *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: error
- *                 code:
- *                   type: integer
- *                   example: 500
- *                 message:
- *                   type: string
- *                   example: Internal server error
- *                 data:
- *                   type: null
- *                   example: null
+ *         description: "Internal server error"
  */
-router.post('/', createMeme); // meme 생성
+router.post(
+  '/',
+  getRequestedUserInfo,
+  upload.single('image'),
+  compressAndUploadImageToS3,
+  createMeme,
+);
 
 /**
  * @swagger

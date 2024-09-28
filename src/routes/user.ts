@@ -492,4 +492,124 @@ router.get('/saved-memes', getRequestedUserInfo, UserController.getSavedMemeList
  */
 router.get('/recent-memes', getRequestedUserInfo, UserController.getLastSeenMemeList); // user가 최근에 본 밈 정보 조회 (10개 제한)
 
+/**
+ * @swagger
+ * /api/user/registered-memes:
+ *   get:
+ *     tags: [User]
+ *     summary: 사용자가 등록한 밈 정보 조회
+ *     description: 사용자가 등록한 밈 정보 조회
+ *     parameters:
+ *       - name: x-device-id
+ *         in: header
+ *         description: 유저의 고유한 deviceId
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: 등록한 밈 목록
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: "success"
+ *                 code:
+ *                   type: integer
+ *                   example: 200
+ *                 message:
+ *                   type: string
+ *                   example: "Get Registered Meme"
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                         example: "66f412741cdc0e3efad1c24e"
+ *                       deviceId:
+ *                         type: string
+ *                         example: "test1"
+ *                       title:
+ *                         type: string
+ *                         example: "폰보는 루피"
+ *                       image:
+ *                         type: string
+ *                         example: "https://ppac-meme.s3.ap-northeast-2.amazonaws.com/1727271540074"
+ *                       reaction:
+ *                         type: integer
+ *                         example: 0
+ *                       source:
+ *                         type: string
+ *                         example: "google"
+ *                       isTodayMeme:
+ *                         type: boolean
+ *                         example: false
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2024-09-25T13:39:00.179Z"
+ *                       updatedAt:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2024-09-25T13:39:00.179Z"
+ *                       keywords:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                           properties:
+ *                             _id:
+ *                               type: string
+ *                               example: "667ff3d1239eeaf78630a283"
+ *                             name:
+ *                               type: string
+ *                               example: "행복"
+ *                       isSaved:
+ *                         type: boolean
+ *                         example: true
+ *                       isReaction:
+ *                         type: boolean
+ *                         example: false
+ *       400:
+ *         description: 잘못된 요청
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: "error"
+ *                 code:
+ *                   type: integer
+ *                   example: 400
+ *                 message:
+ *                   type: string
+ *                   example: "'x-device-id' header should be provided"
+ *                 data:
+ *                   type: null
+ *       500:
+ *         description: 서버 내부 오류
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: "error"
+ *                 code:
+ *                   type: integer
+ *                   example: 500
+ *                 message:
+ *                   type: string
+ *                   example: "Failed get registered meme list"
+ *                 data:
+ *                   type: null
+ */
+router.get('/registered-memes', getRequestedUserInfo, UserController.getRegisteredMemeList); // 내가 등록한 밈
+
 export default router;
