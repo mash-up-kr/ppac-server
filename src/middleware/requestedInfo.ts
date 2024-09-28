@@ -21,6 +21,7 @@ export interface CustomRequest extends Request {
   requestedKeyword?: IKeywordDocument;
   requestedKeywordCategory?: IKeywordCategoryDocument;
   requestedMemeInteraction?: IMemeInteraction;
+  file?: any;
 }
 
 export const getRequestedMemeInfo = async (
