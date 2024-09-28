@@ -254,21 +254,20 @@ async function createMemeRecommendWatch(user: IUserDocument, meme: IMemeDocument
 async function getRegisteredMemeList(user: IUserDocument): Promise<IMemeGetResponse[]> {
   try {
     const deviceId = user.deviceId;
-    const memeList = await MemeModel.find({ deviceId, isDeleted: false }, { isDeleted: 0 })
+    const myMemeList = await MemeModel.find({ deviceId, isDeleted: false }, { isDeleted: 0 })
       .sort({ createdAt: -1 })
       .lean();
 
-    const getRegisteredMemeList = await MemeService.getMemeListWithKeywordsAndisSavedAndisReaction(
+    const myMemeListInfo = await MemeService.getMemeListWithKeywordsAndisSavedAndisReaction(
       user,
-      memeList,
+      myMemeList,
     );
     logger.info(
       `Get registeredMemeList - deviceId(${user.deviceId}), memeList(${getRegisteredMemeList})`,
     );
 
-    return getRegisteredMemeList;
+    return myMemeListInfo;
   } catch (err) {
-    logger.error(`Failed get registered meme list`, err.message);
     throw new CustomError(
       `Failed get registered meme list(${err.message})`,
       HttpCode.INTERNAL_SERVER_ERROR,
