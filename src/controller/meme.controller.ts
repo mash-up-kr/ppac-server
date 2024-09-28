@@ -262,6 +262,8 @@ const createMemeReaction = async (req: CustomRequest, res: Response, next: NextF
   const meme = req.requestedMeme;
   const { count = 1 } = req.body;
 
+  let reactionCount = meme.reaction;
+
   try {
     const result: boolean = await MemeService.createMemeInteraction(
       user,
@@ -269,7 +271,10 @@ const createMemeReaction = async (req: CustomRequest, res: Response, next: NextF
       InteractionType.REACTION,
       count,
     );
-    return res.json(createSuccessResponse(HttpCode.CREATED, 'Create Meme Reaction', result));
+    reactionCount = reactionCount + count;
+    return res.json(
+      createSuccessResponse(HttpCode.CREATED, 'Create Meme Reaction', { count: reactionCount }),
+    );
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }

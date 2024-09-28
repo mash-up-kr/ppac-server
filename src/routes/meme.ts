@@ -1598,8 +1598,11 @@ router.post('/:memeId/watch/:type', getRequestedUserInfo, getRequestedMemeInfo, 
  *                   type: string
  *                   example: Create Meme Reaction
  *                 data:
- *                   type: boolean
- *                   example: true
+ *                   type: object
+ *                   properties:
+ *                     count:
+ *                       type: number
+ *                       example: 1
  *       400:
  *         description: Invalid request body or missing required fields
  *         content:
