@@ -251,25 +251,39 @@ async function createMemeRecommendWatch(user: IUserDocument, meme: IMemeDocument
   }
 }
 
-async function getRegisteredMemeList(user: IUserDocument): Promise<IMemeGetResponse[]> {
+async function getRegisteredMemeList(
+  page: number,
+  size: number,
+  user: IUserDocument,
+): Promise<{ total: number; page: number; totalPages: number; data: IMemeGetResponse[] }> {
   try {
     const deviceId = user.deviceId;
+    const totalRegisteredMemes = await MemeModel.countDocuments({ deviceId, isDeleted: false });
+
     const myMemeList = await MemeModel.find({ deviceId, isDeleted: false }, { isDeleted: 0 })
       .sort({ createdAt: -1 })
+      .skip((page - 1) * size)
+      .limit(size)
       .lean();
 
     const myMemeListInfo = await MemeService.getMemeListWithKeywordsAndisSavedAndisReaction(
       user,
       myMemeList,
     );
+
     logger.info(
-      `Get registeredMemeList - deviceId(${user.deviceId}), memeList(${getRegisteredMemeList})`,
+      `Get registeredMemeList - deviceId(${user.deviceId}), memeList count(${myMemeListInfo.length})`,
     );
 
-    return myMemeListInfo;
+    return {
+      total: totalRegisteredMemes,
+      page,
+      totalPages: Math.ceil(totalRegisteredMemes / size),
+      data: myMemeListInfo,
+    };
   } catch (err) {
     throw new CustomError(
-      `Failed get registered meme list(${err.message})`,
+      `Failed to get registered meme list(${err.message})`,
       HttpCode.INTERNAL_SERVER_ERROR,
     );
   }
