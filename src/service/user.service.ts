@@ -272,7 +272,7 @@ async function getRegisteredMemeList(
     );
 
     logger.info(
-      `Get registeredMemeList - deviceId(${user.deviceId}), memeList(${myMemeListInfo.length})`,
+      `Get registeredMemeList - deviceId(${user.deviceId}), memeList count(${myMemeListInfo.length})`,
     );
 
     return {
