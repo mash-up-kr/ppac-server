@@ -14,6 +14,7 @@ const memeMockData = [
     image: 'example.com',
     isTodayMeme: false,
     reaction: 0,
+    watch: 0,
   },
   {
     deviceId: 'sample_deviceId',
@@ -23,6 +24,7 @@ const memeMockData = [
     image: 'example.com',
     isTodayMeme: false,
     reaction: 10,
+    watch: 0,
   },
   {
     deviceId: 'sample_deviceId',
@@ -32,6 +34,7 @@ const memeMockData = [
     image: 'example.com',
     isTodayMeme: false,
     reaction: 0,
+    watch: 0,
   },
   {
     deviceId: 'sample_deviceId',
@@ -41,6 +44,7 @@ const memeMockData = [
     image: 'example.com',
     isTodayMeme: false,
     reaction: 22,
+    watch: 0,
   },
   {
     deviceId: 'sample_deviceId',
@@ -50,6 +54,7 @@ const memeMockData = [
     image: 'example.com',
     isTodayMeme: false,
     reaction: 22,
+    watch: 0,
   },
 ];
 
