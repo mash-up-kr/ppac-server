@@ -95,6 +95,7 @@ const createMeme = async (req: CustomRequest, res: Response, next: NextFunction)
     image: image.location,
     source: req.body.source,
     keywordIds: req.body.keywordIds.map((id: string) => new Types.ObjectId(id)),
+    watch: 0,
   };
 
   try {
