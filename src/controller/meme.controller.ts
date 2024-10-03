@@ -85,7 +85,7 @@ const createMeme = async (req: CustomRequest, res: Response, next: NextFunction)
     return next(new CustomError(`'keywordIds' field should be provided`, HttpCode.BAD_REQUEST));
   }
 
-  if (typeof req.body.keywordIds !== 'object') {
+  if (!Array.isArray(req.body.keywordIds)) {
     return next(new CustomError(`'keywordIds' should be an array`, HttpCode.BAD_REQUEST));
   }
 
@@ -278,6 +278,8 @@ const createMemeReaction = async (req: CustomRequest, res: Response, next: NextF
   const meme = req.requestedMeme;
   const { count = 1 } = req.body;
 
+  let reactionCount = meme.reaction;
+
   try {
     const result: boolean = await MemeService.createMemeInteraction(
       user,
@@ -285,7 +287,10 @@ const createMemeReaction = async (req: CustomRequest, res: Response, next: NextF
       InteractionType.REACTION,
       count,
     );
-    return res.json(createSuccessResponse(HttpCode.CREATED, 'Create Meme Reaction', result));
+    reactionCount = reactionCount + count;
+    return res.json(
+      createSuccessResponse(HttpCode.CREATED, 'Create Meme Reaction', { count: reactionCount }),
+    );
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
