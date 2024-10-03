@@ -50,6 +50,7 @@ describe("[POST] '/api/meme' ", () => {
       keywordIds: [keywordIds[0]],
       image: 'https://bucket.s3.com',
       source: 'youtube',
+      watch: 0,
     };
 
     const response = await request(app)
