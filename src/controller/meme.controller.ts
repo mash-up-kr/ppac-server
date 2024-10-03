@@ -85,12 +85,17 @@ const createMeme = async (req: CustomRequest, res: Response, next: NextFunction)
     return next(new CustomError(`'keywordIds' field should be provided`, HttpCode.BAD_REQUEST));
   }
 
+  if (typeof req.body.keywordIds !== 'object') {
+    return next(new CustomError(`'keywordIds' should be an array`, HttpCode.BAD_REQUEST));
+  }
+
   const createPayload: IMemeCreatePayload = {
     deviceId: user.deviceId,
     title: req.body.title,
     image: image.location,
     source: req.body.source,
     keywordIds: req.body.keywordIds.map((id: string) => new Types.ObjectId(id)),
+    watch: 0,
   };
 
   try {
