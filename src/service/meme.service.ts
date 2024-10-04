@@ -60,27 +60,27 @@ async function getMemeWithKeywords(
   }
 }
 
-async function getTodayMemeList(
-  limit: number = 5,
+async function getLatestCreatedMeme(
+  limit: number = 20,
   user: IUserDocument,
 ): Promise<IMemeGetResponse[]> {
   try {
-    const todayMemeList = await MemeModel.find(
-      { isDeleted: false, isTodayMeme: true },
-      { isDeleted: 0 },
-    ).lean();
+    const latestMemeList = await MemeModel.find({ isDeleted: false }, { isDeleted: 0 })
+      .limit(limit)
+      .sort({_id: -1})
+      .lean();
 
-    const memeList = await getMemeListWithKeywordsAndisSavedAndisReaction(user, todayMemeList);
+    const memeList = await getMemeListWithKeywordsAndisSavedAndisReaction(user, latestMemeList);
 
-    const memeIds = todayMemeList.map((meme) => meme._id);
+    const memeIds = latestMemeList.map((meme) => meme._id);
     logger.info(
-      `Get all today meme list(${todayMemeList.length}) - memeIds(${memeIds}), limit(${limit})`,
+      `Get all latest meme list(${latestMemeList.length}) - memeIds(${memeIds}), limit(${limit})`,
     );
 
     return memeList;
   } catch (err) {
     throw new CustomError(
-      `Failed to get today meme list: ${err.message}`,
+      `Failed to get latest meme list: ${err.message}`,
       HttpCode.INTERNAL_SERVER_ERROR,
     );
   }
@@ -370,7 +370,6 @@ export {
   updateMeme,
   deleteMeme,
   deleteMemeSave,
-  getTodayMemeList,
   getAllMemeList,
   getMemeListWithKeywordsAndisSavedAndisReaction,
   deleteKeywordOfMeme,
@@ -378,4 +377,5 @@ export {
   searchMemeByKeyword,
   searchMemeBySearchTerm,
   getTopReactionImage,
+  getLatestCreatedMeme
 };

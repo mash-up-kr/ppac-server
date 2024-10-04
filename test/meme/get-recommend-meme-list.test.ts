@@ -1,4 +1,5 @@
 import request from 'supertest';
+import { Types } from 'mongoose';
 
 import app from '../../src/app';
 import { KeywordModel } from '../../src/model/keyword';
@@ -8,11 +9,12 @@ import { createMockData as createKeywordMockData } from '../util/keyword.mock';
 import { createMockData } from '../util/meme.mock';
 import { mockUser } from '../util/user.mock';
 
-const totalCount = 10;
+const totalCount = 40;
 let keywordIds = [];
 
 describe("[GET] '/api/meme/recommend-memes' ", () => {
   beforeEach(async () => {
+    const ObjectIdList = Array.from({ length: totalCount }, () => new Types.ObjectId());
     const keywordMockDatas = createKeywordMockData(5);
     const createdKeywords = await KeywordModel.insertMany(keywordMockDatas);
     keywordIds = createdKeywords.map((k) => k._id);
@@ -25,15 +27,15 @@ describe("[GET] '/api/meme/recommend-memes' ", () => {
     await UserModel.deleteMany({});
   });
 
-  it('should return list of recommend-memes - default size: 5', async () => {
-    const mockDatas = createMockData(totalCount, 5, keywordIds);
+  it('should return list of recommend-memes - default size: 20', async () => {
+    const mockDatas = createMockData(totalCount, 40, keywordIds);
     await MemeModel.insertMany(mockDatas);
 
     const response = await request(app)
       .get('/api/meme/recommend-memes')
       .set('x-device-id', 'deviceId');
     expect(response.statusCode).toBe(200);
-    expect(response.body.data.length).toBe(5);
+    expect(response.body.data.length).toBe(20);
   });
 
   it('should return list of recommend-memes - customize size', async () => {
@@ -49,8 +51,8 @@ describe("[GET] '/api/meme/recommend-memes' ", () => {
     expect(response.body.data.length).toBe(customizedTodayMemeCount);
   });
 
-  it('should not return list of recommend-memes - customize size: bigger than limit(5)', async () => {
-    const customizedTodayMemeCount = 10;
+  it('should not return list of recommend-memes - customize size: bigger than limit(20)', async () => {
+    const customizedTodayMemeCount = 30;
     const mockDatas = createMockData(totalCount, customizedTodayMemeCount, keywordIds);
     await MemeModel.insertMany(mockDatas);
 
