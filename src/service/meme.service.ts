@@ -61,11 +61,11 @@ async function getMemeWithKeywords(
 }
 
 async function getLatestCreatedMeme(
-  limit: number = 5,
+  limit: number = 20,
   user: IUserDocument,
 ): Promise<IMemeGetResponse[]> {
   try {
-    const latestMemeList = await MemeModel.find({ isDeleted: false }, { isDeleted: false })
+    const latestMemeList = await MemeModel.find({ isDeleted: false }, { isDeleted: 0 })
       .limit(limit)
       .sort({_id: -1})
       .lean();

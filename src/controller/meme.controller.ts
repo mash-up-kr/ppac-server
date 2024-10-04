@@ -164,14 +164,14 @@ const getAllMemeList = async (req: CustomRequest, res: Response, next: NextFunct
   }
 };
 
-const getLatestMeme = async (req: CustomRequest, res: Response, next: NextFunction) => {
+const getLatestMemeList = async (req: CustomRequest, res: Response, next: NextFunction) => {
   const user = req.requestedUser;
   const size = parseInt(req.query.size as string) || 20;
 
   if (size > 20) {
     return next(
       new CustomError(
-        `Invalid 'size' parameter. Today Meme List max size is 5.`,
+        `Invalid 'size' parameter. Today Meme List max size is 20.`,
         HttpCode.BAD_REQUEST,
       ),
     );
@@ -374,7 +374,7 @@ const deleteMemeSave = async (req: CustomRequest, res: Response, next: NextFunct
 
 export {
   getMeme,
-  getLatestMeme,
+  getLatestMemeList,
   getAllMemeList,
   createMeme,
   createMemeSave,

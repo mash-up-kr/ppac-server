@@ -5,7 +5,7 @@ import {
   getMemeWithKeywords,
   updateMeme,
   createMeme,
-  getLatestMeme,
+  getLatestMemeList,
   getAllMemeList,
   createMemeShare,
   createMemeSave,
@@ -299,7 +299,7 @@ router.get('/list', getRequestedUserInfo, getAllMemeList); // meme 목록 전체
  *                   type: null
  *                   example: null
  */
-router.get('/recommend-memes', getRequestedUserInfo, getLatestMeme); // 오늘의 추천 밈 (5개)
+router.get('/recommend-memes', getRequestedUserInfo, getLatestMemeList); // 오늘의 추천 밈 (5개)
 
 /**
  * @swagger

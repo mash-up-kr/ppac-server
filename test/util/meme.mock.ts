@@ -20,6 +20,7 @@ const createMockData = (
 ): IMeme[] => {
   const result: IMeme[] = [];
 
+  console.log(size);
   for (let i = 0; i < size; i++) {
     const mockData = { ...memeMockData };
 
