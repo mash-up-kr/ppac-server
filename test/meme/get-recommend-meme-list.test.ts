@@ -26,14 +26,14 @@ describe("[GET] '/api/meme/recommend-memes' ", () => {
   });
 
   it('should return list of recommend-memes - default size: 5', async () => {
-    const mockDatas = createMockData(totalCount, 10, keywordIds);
+    const mockDatas = createMockData(totalCount, 20, keywordIds);
     await MemeModel.insertMany(mockDatas);
 
     const response = await request(app)
       .get('/api/meme/recommend-memes')
       .set('x-device-id', 'deviceId');
     expect(response.statusCode).toBe(200);
-    expect(response.body.data.length).toBe(10);
+    expect(response.body.data.length).toBe(20);
   });
 
   it('should return list of recommend-memes - customize size', async () => {
