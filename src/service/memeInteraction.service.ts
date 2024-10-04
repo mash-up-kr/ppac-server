@@ -149,7 +149,6 @@ async function updateMemeInteraction(
       break;
 
     // 'reaction' Meme.reaction count 올리기
-    // User의 'reaction' count는 밈당 1번
     case InteractionType.REACTION:
       await MemeModel.findOneAndUpdate(
         { _id: meme._id, isDeleted: false },
