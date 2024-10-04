@@ -67,7 +67,7 @@ async function getLatestCreatedMeme(
   try {
     const latestMemeList = await MemeModel.find({ isDeleted: false }, { isDeleted: 0 })
       .limit(limit)
-      .sort({_id: -1})
+      .sort({ _id: -1 })
       .lean();
 
     const memeList = await getMemeListWithKeywordsAndisSavedAndisReaction(user, latestMemeList);
@@ -311,14 +311,14 @@ async function createMemeInteraction(
     if (_.isNull(memeInteraction)) {
       // 신규 생성
       await MemeInteractionService.createMemeInteraction(user, meme, interactionType);
-    } else {
-      logger.info(
-        `Already ${interactionType} meme - deviceId(${user.deviceId}), memeId(${meme._id})`,
-      );
-
-      // interactionType에 따른 동작 처리 (MemeInteracionService에서 진행)
-      await MemeInteractionService.updateMemeInteraction(user, meme, interactionType, count);
     }
+    logger.info(
+      `Already ${interactionType} meme - deviceId(${user.deviceId}), memeId(${meme._id})`,
+    );
+
+    // interactionType에 따른 동작 처리 (MemeInteracionService에서 진행)
+    await MemeInteractionService.updateMemeInteraction(user, meme, interactionType, count);
+
     return true;
   } catch (err) {
     throw new CustomError(
