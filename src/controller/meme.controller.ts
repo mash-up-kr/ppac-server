@@ -164,11 +164,11 @@ const getAllMemeList = async (req: CustomRequest, res: Response, next: NextFunct
   }
 };
 
-const getTodayMemeList = async (req: CustomRequest, res: Response, next: NextFunction) => {
+const getLatestMeme = async (req: CustomRequest, res: Response, next: NextFunction) => {
   const user = req.requestedUser;
-  const size = parseInt(req.query.size as string) || 5;
+  const size = parseInt(req.query.size as string) || 20;
 
-  if (size > 5) {
+  if (size > 20) {
     return next(
       new CustomError(
         `Invalid 'size' parameter. Today Meme List max size is 5.`,
@@ -178,8 +178,8 @@ const getTodayMemeList = async (req: CustomRequest, res: Response, next: NextFun
   }
 
   try {
-    const todayMemeList = await MemeService.getTodayMemeList(size, user);
-    return res.json(createSuccessResponse(HttpCode.OK, 'Get today meme list', todayMemeList));
+    const latestMemeList = await MemeService.getLatestCreatedMeme(size, user);
+    return res.json(createSuccessResponse(HttpCode.OK, 'Get today meme list', latestMemeList));
   } catch (err) {
     return next(new CustomError(err.message, err.status));
   }
@@ -374,7 +374,7 @@ const deleteMemeSave = async (req: CustomRequest, res: Response, next: NextFunct
 
 export {
   getMeme,
-  getTodayMemeList,
+  getLatestMeme,
   getAllMemeList,
   createMeme,
   createMemeSave,
